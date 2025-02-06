@@ -1,17 +1,15 @@
 import React from 'react'
 
-const loginPage = () => {
-  return (
-    <div class="bg-gray-700 h-screen">
-      <div>
-        <nav>
-          <div class ="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <img src="" alt="" />
-          </div>
-        </nav>
-      </div>
-      </div>
-  )
-}
+const LoginPage = () => { 
+    return ( 
+        <div className="bg-green-700 h-screen w-full flex items-center justify-center">
+            <nav>
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <img src="" alt="" />
+                </div>
+            </nav>
+        </div>
+    );
+};
 
-export default loginPage
+export default LoginPage;
