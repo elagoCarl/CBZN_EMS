@@ -78,6 +78,10 @@ app.use((req, res, next) => {
   next();
 });
 
+const departmentRouter = require('./API/routers/department_rtr')
+
+app.use('/department', departmentRouter)
+
 
 
 //MIDDLEWARE FOR THE ROUTERS
