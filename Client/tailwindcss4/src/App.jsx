@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import './App.css'
-import './index.css'
+import LoginPage from './Components/loginPage.jsx';
 
 
 function App() {
@@ -9,7 +8,7 @@ function App() {
   return (
     <>
       <div>
-        <loginPage />
+        <LoginPage />
       </div>
     </>
   )
