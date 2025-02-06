@@ -11,7 +11,9 @@ const app = express();
 
 
 //IMPORT ALL ROUTERS NEEDED
+
 const schedule_rtr = require('./API/routers/schedule_rtr');
+const user_rtr = require('./API/routers/user_rtr');
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -83,6 +85,7 @@ app.use((req, res, next) => {
 
 //MIDDLEWARE FOR THE ROUTERS
 app.use('/schedule', schedule_rtr);
+app.use('/users', user_rtr);
 
 
 //ERROR MIDDLEWARES
