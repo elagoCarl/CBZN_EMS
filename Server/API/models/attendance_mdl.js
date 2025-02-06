@@ -7,10 +7,10 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: { msg: "Status is required." }
             }
         },
-        date: {
-            type: DataTypes.DATE,
-            allowNull: false
-        }
+        // date: {
+        //     type: DataTypes.DATE,
+        //     allowNull: false
+        // }
     }, {
         timestamps: true
     });
