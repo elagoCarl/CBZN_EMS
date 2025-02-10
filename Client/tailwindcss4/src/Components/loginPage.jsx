@@ -2,7 +2,7 @@ import React from 'react';
 import logo from './img/CBZN-Logo.png';
 import bg from './img/mainbg.png';
 import three from './img/three-lines.png';
-import rectangle from './Img/Rectanglebehind.png';
+import rectangle from './img/Rectanglebehind.png';
 import icon from './Img/Icone.png';
 
 const LoginPage = () => {

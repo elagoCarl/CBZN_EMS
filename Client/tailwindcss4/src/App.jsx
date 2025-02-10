@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from './Components/loginPage.jsx';
+// import LoginPage from './Components/loginPage.jsx';
+import EmployeeAttendance from './Components/employeeAttendance.jsx';
 
 
 function App() {
@@ -8,7 +9,7 @@ function App() {
   return (
     <>
       <div>
-        <LoginPage />
+        <EmployeeAttendance />
       </div>
     </>
   )
