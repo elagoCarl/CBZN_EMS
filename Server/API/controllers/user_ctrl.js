@@ -322,10 +322,58 @@ const loginUser = async (req, res, next) => {
 
 
 
+const logoutUser = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(400).json({
+                successful: false,
+                message: "No refresh token provided."
+            });
+        }
+
+        // Decode the token without verifying its signature
+        const decodedToken = jwt.decode(refreshToken);
+
+        if (!decodedToken || !decodedToken.id) {
+            return res.status(400).json({
+                successful: false,
+                message: "Invalid token."
+            });
+        }
+
+        const userId = decodedToken.id; // assuming the token contains an 'id' field
+
+        console.log(`User ID from refresh token: ${userId}`);
+
+        // Remove refreshToken data from the database using Sequelize
+        await Session.destroy({ where: { userId: userId } });
+
+        // Clear the JWT cookie by setting its maxAge to 1 millisecond
+        res.cookie('jwt', '', { maxAge: 1 });
+        res.cookie('refreshToken', '', { maxAge: 1 });
+
+        // Send success response
+        res.status(200).json({
+            successful: true,
+            message: "Successfully logged out."
+        });
+    } catch (error) {
+        // Handle any errors that may occur during the deletion process
+        console.error("Error logging out:", error);
+        res.status(500).json({
+            successful: false,
+            message: "Internal server error"
+        });
+    }
+};
+
 
 module.exports = {
     addUser,
     getUserById,
     updateUserById,
-    loginUser
+    loginUser,
+    logoutUser
 }
