@@ -1,18 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
-// import AttendancePage from './Components/attendancePage.jsx';
-import AddUser from './Components/addUser.jsx';
+import EmployeeHome from './Components/employHome.jsx';
+import ProfSettings from './Components/editUser.jsx';
 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/loginPage" element={<LoginPage />} />
-        {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
-        <Route path="/addUser" element={<AddUser />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/employeeHome" element={<EmployeeHome />} />
+        <Route path="/profileSettings" element={<ProfSettings />} />
+        </Routes>
+      </Router>
+    </>
   )
 }
 

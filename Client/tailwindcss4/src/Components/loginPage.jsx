@@ -1,7 +1,7 @@
 import React from 'react';
+import three from './img/three-lines.png';
 import logo from './img/CBZN-Logo.png';
 import bg from './img/mainbg.png';
-import three from './img/three-lines.png';
 import rectangle from './Img/Rectanglebehind.png';
 import icon from './Img/Icone.png';
 
