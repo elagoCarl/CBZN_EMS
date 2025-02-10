@@ -48,7 +48,7 @@ const EmployeeHome = () => {
 
     return (
         <div
-            className="bg-fixed bg-cover bg-no-repeat bg-center min-h-screen w-screen flex flex-col overflow-x-hidden"
+            className="bg-fixed bg-cover bg-no-repeat bg-center min-h-screen w-screen flex flex-col overflow-x-hidden opacity-100"
             style={{ backgroundImage: `url(${employbg})` }}
         >
             {/* Navbar */}
@@ -67,11 +67,11 @@ const EmployeeHome = () => {
             </nav>
 
             {/* Main Content */}
-            <div className="flex flex-1 items-center px-8 w-full md:flex flex-col xs:flex-col sm:flex-row">
+            <div className="flex flex-1 items-center px-8 w-full md:flex flex-col xs:flex-col sm:flex-row backdrop-blur-xs">
                 {/* Left Section */}
-                <div className="flex flex-auto flex-col items-center justify-center">
+                <div className="flex flex-auto flex-col items-center justify-center p-6 m-4 px-12 rounded-4xl max-w-9xl">
                     {/* Date and Time */}
-                    <div className="xl:text-8xl md:text-6xl sm:text-6xl xs:text-3xl font-bold mb-4 text-white">
+                    <div className="xl:text-8xl md:text-6xl sm:text-6xl font-bold mb-4 text-white">
                         {formatDate(currentTime)}
                     </div>
                     <div className="px-4 py-2 mb-8 sm:text-4xl md:text-5xl lg:text-6xl">
