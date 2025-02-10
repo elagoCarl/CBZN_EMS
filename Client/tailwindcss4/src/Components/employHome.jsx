@@ -1,4 +1,3 @@
-import React from 'react'
 import three from './img/three-lines.png';
 import logo from './img/CBZN-Logo.png';
 
