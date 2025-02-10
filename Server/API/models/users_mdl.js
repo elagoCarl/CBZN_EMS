@@ -93,18 +93,19 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-    User.login = async function (email, password) {
-        const user = await User.findOne({ where: { email } });
+    User.login = async function (username, password) {
+        const user = await User.findOne({ where: { username } });
         if (user) {
+            console.log("User found:", user.username);
             const auth = await bcrypt.compare(password, user.password);
+            console.log("Password comparison result:", auth);
             if (auth) {
                 return user;
             }
             throw new Error('Invalid Password');
         }
-        throw new Error('Email does not exist');
+        throw new Error('Username does not exist');
     };
 
     return User;
 };
- 
