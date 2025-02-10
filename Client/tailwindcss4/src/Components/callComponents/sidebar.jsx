@@ -13,7 +13,7 @@ const Sidebar = () => {
     return (
         <div className="fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between">
             <div className="mb-8 text-center">
-                <h2 className="text-2xl font-medium text-white">NAVIGATION</h2>
+                <h2 className="text-md xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-medium text-white">NAVIGATION</h2>
             </div>
 
             <nav>
@@ -22,7 +22,7 @@ const Sidebar = () => {
                         <li key={item.label} className="flex justify-center">
                             <a
                                 href={item.href}
-                                className={`relative py-3 text-center text-2xl font-medium transition-colors`}>
+                                className={`relative py-3 text-center text-md xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-medium transition-colors`}>
                                 <span className="relative text-white hover:text-green-500 duration-300">
                                     {item.label}
                                     {item.label === 'REPORTS' && (
@@ -36,7 +36,7 @@ const Sidebar = () => {
             </nav>
 
             <div>
-                <button className="flex items-center justify-center w-full text-white hover:text-green-500 hover:border-green-500 border border-transparent transition-colors py-3 text-2xl font-medium hover:outline hover:outline-green-500">
+                <button className="flex items-center justify-center w-full text-white hover:text-green-500 hover:border-green-500 border border-transparent transition-colors py-3 text-sm xl:text-2xl lg:text-xl md:text-lg sm:text-md font-medium hover:outline hover:outline-green-500 rounded-md bg-gray-950">
                     <svg
                         className="w-6 h-6 mr-2"
                         viewBox="0 0 24 24"
