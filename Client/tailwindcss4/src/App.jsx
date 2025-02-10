@@ -5,6 +5,7 @@ import EmployHome from './Components/employHome.jsx';
 import AddUser from './Components/addUser.jsx';
 import AddUser from './Components/addUser.jsx';
 import AddUser from './Components/addUser.jsx';
+import AddUser from './Components/addUser.jsx';
 
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
         <AddUser />
       </Router>
       <div>
-        {/* {/* <LoginPage /> */}
+        {/* {/* {/* <LoginPage /> */}
+        <AddUser /> */}
         <AddUser /> */}
         <AddUser />
       </div>
