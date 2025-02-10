@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import EmployeeHome from './Components/employHome.jsx';
-import ProfSettings from './Components/profileSettings.jsx';
+import ProfSettings from './Components/editUser.jsx';
 
 
 function App() {
