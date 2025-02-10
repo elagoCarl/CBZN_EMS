@@ -26,7 +26,7 @@ const LoginPage = () => {
       </nav>
        {/* Login Form Container */}
       <div className="flex items-center justify-center h-[calc(100vh-88px)]">
-        <div className="bg-black/80 p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+        <div className="bg-black/80 p-28 px-10 rounded-lg shadow-lg w-full max-w-md mx-4">
           <h2 className="text-2xl font-bold text-white text-center mb-6">
             LOGIN TO YOUR ACCOUNT
           </h2>
@@ -48,7 +48,7 @@ const LoginPage = () => {
               <img 
                 src={icon} 
                 alt="Show Password" 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-5 h-5"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-5 h-5 hover:bg-gray-600 rounded-3xl duration-300"
               />
             </div>
             <div className='flex flex-col space-y-4'>
