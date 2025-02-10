@@ -1,6 +1,5 @@
 import backgroundImage from './Img/addUserBG.png';
-import logo from 'CBZN-Logo-02-Horizontal-ColoredWhite.png';
-import three from './Img/three-dots.png';
+import Navbar from './callComponents/topMenu';
 
 const AddUserForm = () => {
     return (
@@ -9,21 +8,10 @@ const AddUserForm = () => {
             style={{ backgroundImage: `url(${backgroundImage})` }}
         >
             {/* Navbar */}
-            <nav className="flex items-center justify-between bg-black p-8">
-                {/* Logo */}
-                <div className="flex items-center flex-shrink-0 ml-8">
-                    <img className="w-full" src={logo} alt="CBZN Logo" />
-                </div>
+            <Navbar />
 
-                {/* Menu Button */}
-                <div className="flex items-center">
-                    <div className="p-2 rounded-lg transition-colors hover:bg-gray-800 mr-8">
-                        <img className="w-12 h-12" src={three} alt="Menu" />
-                    </div>
-                </div>
-            </nav>
-
-            <div className="bg-white bg-opacity-90 shadow-2xl w-full max-w-2xl flex flex-col items-center p-8">
+            {/* Main Content */}
+            <div className="bg-white bg-opacity-90 shadow-2xl w-full max-w-2xl flex flex-col items-center p-8 mt-20">
                 <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">Add User</h1>
                 <form className="space-y-6 w-full">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
