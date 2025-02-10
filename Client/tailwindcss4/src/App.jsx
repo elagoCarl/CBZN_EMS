@@ -12,6 +12,9 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/employeeHome" element={<EmployeeHome />} />
         <Route path="/profileSettings" element={<ProfSettings />} />
+        {/* <Route path="/addUser" element={<AddUser />} /> */}
+        {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
+
         </Routes>
       </Router>
     </>
