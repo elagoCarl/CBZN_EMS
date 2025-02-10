@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const Schedule = sequelize.define('Schedule', {
-        day: {
+        week: {
             type: DataTypes.JSON,
             allowNull: false,
         },
@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {timestamps: true});
 
     Schedule.associate = (models) => {
-        Schedule.belongsTo(models.User, {
-        })
+        Schedule.belongsTo(models.User, {})
     }
    return Schedule;
 };
