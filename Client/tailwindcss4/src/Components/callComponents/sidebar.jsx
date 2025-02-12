@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Sidebar = () => {
     const menuItems = [
@@ -11,24 +10,23 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between">
+        <div className="fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between shadow-lg">
             <div className="mb-8 text-center">
-                <h2 className="text-md xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-medium text-white">NAVIGATION</h2>
+                <h2 className="text-lg xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-semibold text-white tracking-wide">NAVIGATION</h2>
             </div>
 
             <nav>
-                <ul className="flex flex-col h-1/2 gap-4">
+                <ul className="flex flex-col gap-4">
                     {menuItems.map((item) => (
                         <li key={item.label} className="flex justify-center">
                             <a
                                 href={item.href}
-                                className={`relative py-3 text-center text-md xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-medium transition-colors`}>
-                                <span className="relative text-white hover:text-green-500 duration-300">
-                                    {item.label}
-                                    {item.label === 'REPORTS' && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500 -mb-1"></div>
-                                    )}
-                                </span>
+                                className="relative py-3 text-center text-lg font-medium text-white transition duration-300 hover:text-green-500"
+                            >
+                                {item.label}
+                                {item.label === 'REPORTS' && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></div>
+                                )}
                             </a>
                         </li>
                     ))}
@@ -36,7 +34,7 @@ const Sidebar = () => {
             </nav>
 
             <div>
-                <button className="flex items-center justify-center w-full text-white hover:text-green-500 hover:border-green-500 border border-transparent transition-colors py-3 text-sm xl:text-2xl lg:text-xl md:text-lg sm:text-md font-medium hover:outline hover:outline-green-500 rounded-md bg-gray-950">
+                <button className="flex items-center justify-center w-full py-3 text-lg font-medium text-white transition duration-300 border border-transparent rounded-md bg-gray-950 hover:text-green-500 hover:border-green-500">
                     <svg
                         className="w-6 h-6 mr-2"
                         viewBox="0 0 24 24"
