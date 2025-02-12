@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
-import logo from '../img/CBZN-Logo.png'; // Adjust the path if needed
+import logo from '../img/CBZN-Logo.png';
 
 const TopMenu = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

@@ -1,4 +1,3 @@
-import React from 'react';
 import logo from './img/CBZN-Logo.png';
 import bg from './img/editbg.png';
 import three from './img/three-lines.png'

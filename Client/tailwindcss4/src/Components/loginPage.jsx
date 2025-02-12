@@ -1,11 +1,6 @@
-import React from 'react';
-import three from './img/three-lines.png';
-import logo from './img/CBZN-Logo.png';
 import bg from './img/mainbg.png';
-import rectangle from './Img/Rectanglebehind.png';
 import icon from './Img/Icone.png';
-import bg from './Img/mainbg.png';
-
+import logo from '../Components/Img/CBZN-Logo.png';
 
 const LoginPage = () => {
   return (
@@ -14,7 +9,10 @@ const LoginPage = () => {
       style={{ backgroundImage: `url(${bg})` }}
     >
       {/* Top Menu */}
-      <TopMenu />
+      <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50">
+              {/* Logo */}
+              <img src={logo} alt="Logo" className="h-10 w-auto" />
+            </div>
 
       {/* Rest of the Login Page */}
       <div className="flex items-center justify-center h-[calc(100vh-88px)]">
