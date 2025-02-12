@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 // const cookieParser = require('cookie-parser');
 require('dotenv').config()
 
