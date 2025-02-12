@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
 
+
 // const nodemailer = require('nodemailer');
 const { USER,
     APP_PASSWORD,
@@ -13,7 +14,7 @@ const { USER,
     REFRESH_TOKEN_SECRET } = process.env
 
 
-    //nodemailer
+//nodemailer
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: "smtp.gmail.com",
@@ -95,14 +96,14 @@ const generateAccessToken = async (req, res, next) => {
 const addUser = async (req, res, next) => {
     try {
         const {
-            companyId, first_name, surname, middle_initial,
-            email, contact_number, address, job_title
+            employeeId, first_name, surname, middle_name,
+            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
         } = req.body;
 
         const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([companyId, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -130,21 +131,19 @@ const addUser = async (req, res, next) => {
 
         // Create and save the new user
         const newUser = await User.create({
-            companyId,
+            employeeId,
             first_name,
             surname,
-            middle_initial,
+            middle_name,
             email,
             contact_number,
             address,
             job_title,
+            birthdate,
+            departmentId,
             password: DefaultPassword,
-            isAdmin: false
+            isAdmin
         });
-
-        console.log("NEW USER ID AND EMAIL!!");
-        console.log(newUser.id);
-        console.log(newUser.email);
 
         return res.status(201).json({
             successful: true,
@@ -162,14 +161,13 @@ const addUser = async (req, res, next) => {
 
 const updateUserById = async (req, res, next) => {
     try {
-        const { id } = req.params; // Get user ID from the request params
         const {
-            companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title
+            employeeId, first_name, surname, middle_name,
+            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
         } = req.body;
 
         // Check if the user exists
-        const user = await User.findByPk(id);
+        const user = await User.findByPk(req.params.id);
         if (!user) {
             return res.status(404).json({
                 successful: false,
@@ -178,7 +176,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -202,26 +200,19 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
-        // Check if the username is already in use by another user
-        const existingUsername = await User.findOne({ where: { username, id: { [Op.ne]: id } } });
-        if (existingUsername) {
-            return res.status(406).json({
-                successful: false,
-                message: "Username is already in use by another user."
-            });
-        }
-
         // Update user data
         await user.update({
-            companyId,
-            username,
+            employeeId,
             first_name,
             surname,
-            middle_initial,
+            middle_name,
             email,
             contact_number,
             address,
-            job_title
+            job_title,
+            birthdate,
+            departmentId,
+            isAdmin
         });
 
         return res.status(200).json({
@@ -237,10 +228,6 @@ const updateUserById = async (req, res, next) => {
         });
     }
 };
-
-
-
-
 
 const getUserById = async (req, res, next) => {
     try {
@@ -323,8 +310,6 @@ const loginUser = async (req, res, next) => {
     }
 };
 
-
-
 const logoutUser = async (req, res, next) => {
     try {
         const refreshToken = req.cookies.refreshToken;
@@ -372,9 +357,6 @@ const logoutUser = async (req, res, next) => {
     }
 };
 
-
-
-
 const forgotPass = async (req, res) => {
     try {
         const { email } = req.body; // Use lowercase 'email' to match the frontend
@@ -396,7 +378,7 @@ const forgotPass = async (req, res) => {
                 message: "The email address you provided does not exist in our system. Please check and try again."
             });
         }
-        
+
 
         // Generate a random temporary password
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
@@ -444,6 +426,24 @@ const forgotPass = async (req, res) => {
     }
 };
 
+// CREATE GET ALL USER
+const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await User.findAll();
+        res.status(200).send({
+            successful: true,
+            message: "Retrieved all users.",
+            data: users
+        });
+    } catch (err) {
+        res.status(500).send({
+            successful: false,
+            message: err.message
+        });
+    }
+}
+
+
 
 module.exports = {
     addUser,
@@ -451,5 +451,6 @@ module.exports = {
     updateUserById,
     loginUser,
     logoutUser,
-    forgotPass
+    forgotPass,
+    getAllUsers
 }
