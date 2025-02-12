@@ -1,39 +1,63 @@
+import { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import bg from './img/mainbg.png';
 import icon from './Img/Icone.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 
 const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(''); // Clear previous errors
+
+    try {
+      const response = await axios.post('http://localhost:8080/users/loginUser', { email, password }, { withCredentials: true });
+
+      if (response.data.successful) {
+        navigate('/employeeHome'); // Redirect on successful login
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    }
+  };
+
   return (
     <div
       className="bg-cover bg-no-repeat bg-center min-h-screen w-screen"
       style={{ backgroundImage: `url(${bg})` }}
     >
-      {/* Top Menu */}
       <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50">
-              {/* Logo */}
-              <img src={logo} alt="Logo" className="h-10 w-auto" />
-            </div>
+        <img src={logo} alt="Logo" className="h-10 w-auto" />
+      </div>
 
-      {/* Rest of the Login Page */}
       <div className="flex items-center justify-center h-[calc(100vh-88px)]">
-        <div className="bg-black/80 p-28 px-10 rounded-lg shadow-lg w-full max-w-md mx-4">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">
-            LOGIN TO YOUR ACCOUNT
-          </h2>
-
-          <form className="space-y-4">
+        <div className="bg-black/80 p-10 rounded-lg shadow-lg w-full max-w-md mx-4">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">LOGIN TO YOUR ACCOUNT</h2>
+          {error && <p className="text-red-500 text-center">{error}</p>}
+          <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <input
                 type="text"
-                placeholder="USER ID"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 rounded bg-white/10 border border-gray-600 text-white focus:outline-none focus:border-green-500"
+                required
               />
             </div>
             <div className="relative w-full">
               <input
                 type="password"
                 placeholder="PASSWORD"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded bg-white/10 border border-gray-600 text-white focus:outline-none focus:border-green-500 pr-10"
+                required
               />
               <img
                 src={icon}
@@ -42,13 +66,12 @@ const LoginPage = () => {
               />
             </div>
             <div className='flex flex-col space-y-4'>
-              <div className='font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full'>
-                <button>Login</button>
-              </div>
-
-              <div className='font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full'>
-                <button>Forgot Password?</button>
-              </div>
+              <button type="submit" className='font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full'>
+                Login
+              </button>
+              <button className='font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full'>
+                Forgot Password?
+              </button>
             </div>
           </form>
         </div>
@@ -56,4 +79,5 @@ const LoginPage = () => {
     </div>
   );
 };
+
 export default LoginPage;

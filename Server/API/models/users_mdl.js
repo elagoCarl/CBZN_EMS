@@ -6,14 +6,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        username: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-            validate: {
-                notEmpty: { msg: "Username is required." }
-            }
-        },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -57,10 +49,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        status: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
     }, {
         timestamps: true,
         hooks: {
@@ -90,10 +78,10 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
-    User.login = async function (username, password) {
-        const user = await User.findOne({ where: { username } });
+    User.login = async function (email, password) {
+        const user = await User.findOne({ where: { email } });
         if (user) {
-            console.log("User found:", user.username);
+            console.log("User found:", user.email);
             const auth = await bcrypt.compare(password, user.password);
             console.log("Password comparison result:", auth);
             if (auth) {
@@ -101,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
             }
             throw new Error('Invalid Password');
         }
-        throw new Error('Username does not exist');
+        throw new Error('Email does not exist');
     };
 
     return User;

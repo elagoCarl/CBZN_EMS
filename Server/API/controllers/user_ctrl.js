@@ -171,8 +171,9 @@ const addUser = async (req, res, next) => {
 const updateUserById = async (req, res, next) => {
     try {
         const { id } = req.params; // Get user ID from the request params
-        const { companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title, birthdate, department_id
+        const {
+            companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, status
         } = req.body;
 
         // Check if the user exists
@@ -285,10 +286,10 @@ const getUserById = async (req, res, next) => {
 
 
 const loginUser = async (req, res, next) => {
-    const { username, password } = req.body;
-    console.log("username:", username);
+    const { email, password } = req.body;
+    console.log("email:", email);
 
-    if (!util.checkMandatoryFields([username, password])) {
+    if (!util.checkMandatoryFields([email, password])) {
         // STATUS IS 400 SINCE THIS IS A CLIENT FAULT
         return res.status(400).json({
             successful: false,
@@ -298,7 +299,7 @@ const loginUser = async (req, res, next) => {
 
     try {
         // Use the login method from the User model to find and authenticate the user
-        const user = await User.login(username, password);
+        const user = await User.login(email, password);
 
         if (!user) {
             res.status(401).json({
