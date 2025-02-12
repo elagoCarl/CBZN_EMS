@@ -1,6 +1,6 @@
-const { User, Session } = require('../models'); // Ensure model name matches exported model
+const { User, Session, Department } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
@@ -82,13 +82,14 @@ const addUser = async (req, res, next) => {
     try {
         const {
             companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title
+            email, contact_number, address, job_title, birthdate, DepartmentId
         } = req.body;
 
-        const DefaultPassword = "UserPass123"; // Default password
+        const DefaultPassword = "UserPass123"; // Default password      
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
+        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, birthdate, DepartmentId])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -121,6 +122,16 @@ const addUser = async (req, res, next) => {
             });
         }
 
+        // Check if department exists
+        const existingDepartment = await Department.findByPk(DepartmentId   );
+        if (!existingDepartment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Department not found."
+            });
+        }
+
+        
 
         // Create and save the new user
         const newUser = await User.create({
@@ -129,12 +140,14 @@ const addUser = async (req, res, next) => {
             first_name,
             surname,
             middle_initial,
+            birthdate,
             email,
             contact_number,
             address,
             job_title,
             password: DefaultPassword,
-            isAdmin: false
+            isAdmin: false,
+            DepartmentId: DepartmentId
         });
 
         console.log("NEW USER ID AND EMAIL!!");
@@ -160,7 +173,7 @@ const updateUserById = async (req, res, next) => {
         const { id } = req.params; // Get user ID from the request params
         const {
             companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title
+            email, contact_number, address, job_title, status
         } = req.body;
 
         // Check if the user exists
@@ -173,7 +186,8 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
+        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, birthdate, department_id])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -206,6 +220,14 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
+        // Check if the department exists
+        const existingDepartment = await Department.findByPk(DepartmentId);
+        if (!existingDepartment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Department not found."
+            });
+        }
         // Update user data
         await user.update({
             companyId,
@@ -213,10 +235,12 @@ const updateUserById = async (req, res, next) => {
             first_name,
             surname,
             middle_initial,
+            birthdate,
             email,
             contact_number,
             address,
-            job_title
+            job_title,
+            department_id
         });
 
         return res.status(200).json({
@@ -232,9 +256,6 @@ const updateUserById = async (req, res, next) => {
         });
     }
 };
-
-
-
 
 
 const getUserById = async (req, res, next) => {
@@ -366,7 +387,6 @@ const logoutUser = async (req, res, next) => {
         });
     }
 };
-
 
 module.exports = {
     addUser,
