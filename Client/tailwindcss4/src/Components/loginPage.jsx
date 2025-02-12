@@ -69,7 +69,12 @@ const LoginPage = () => {
               <button type="submit" className='font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full'>
                 Login
               </button>
-              <button className='font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full'>
+              {/* Forgot Password Button - Now Navigates to /forgotPass */}
+              <button
+                type="button"
+                className='font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full'
+                onClick={() => navigate('/forgotPass')}
+              >
                 Forgot Password?
               </button>
             </div>
