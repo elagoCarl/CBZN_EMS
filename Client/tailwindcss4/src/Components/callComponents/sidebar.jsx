@@ -1,18 +1,44 @@
+import { useRef, useEffect } from "react";
+import PropTypes from "prop-types";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+    const sidebarRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                toggleSidebar(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen, toggleSidebar]);
+
     const menuItems = [
-        { label: 'HOME', href: '#' },
-        { label: 'DASHBOARD', href: '#' },
-        { label: 'DEPARTMENTS', href: '#' },
-        { label: 'CAREERS', href: '#' },
-        { label: 'REPORTS', href: '#' },
-        { label: 'USERS', href: '#' }
+        { label: "HOME", href: "#" },
+        { label: "DASHBOARD", href: "#" },
+        { label: "DEPARTMENTS", href: "#" },
+        { label: "CAREERS", href: "#" },
+        { label: "REPORTS", href: "#" },
+        { label: "USERS", href: "#" },
     ];
 
     return (
-        <div className="fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between shadow-lg">
+        <div
+            ref={sidebarRef}
+            className={`fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between shadow-lg transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
+                }`}
+        >
             <div className="mb-8 text-center">
-                <h2 className="text-lg xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-semibold text-white tracking-wide">NAVIGATION</h2>
+                <h2 className="text-lg xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-semibold text-white tracking-wide">
+                    NAVIGATION
+                </h2>
             </div>
 
             <nav>
@@ -24,7 +50,7 @@ const Sidebar = () => {
                                 className="relative py-3 text-center text-lg font-medium text-white transition duration-300 hover:text-green-500"
                             >
                                 {item.label}
-                                {item.label === 'REPORTS' && (
+                                {item.label === "REPORTS" && (
                                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></div>
                                 )}
                             </a>
@@ -34,7 +60,10 @@ const Sidebar = () => {
             </nav>
 
             <div>
-                <button className="flex items-center justify-center w-full py-3 text-lg font-medium text-white transition duration-300 border border-transparent rounded-md bg-gray-950 hover:text-green-500 hover:border-green-500">
+                <button
+                    className="flex items-center justify-center w-full py-3 text-lg font-medium text-white transition duration-300 border border-transparent rounded-md bg-gray-950 hover:text-green-500 hover:border-green-500"
+                    onClick={() => toggleSidebar(false)}
+                >
                     <svg
                         className="w-6 h-6 mr-2"
                         viewBox="0 0 24 24"
@@ -53,6 +82,11 @@ const Sidebar = () => {
             </div>
         </div>
     );
+};
+
+Sidebar.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    toggleSidebar: PropTypes.func.isRequired,
 };
 
 export default Sidebar;
