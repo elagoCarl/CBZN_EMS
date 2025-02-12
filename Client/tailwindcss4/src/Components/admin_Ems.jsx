@@ -23,9 +23,9 @@ const admin_Ems = () => {
 
       {/* Main Content - Dark Themed */}
       <div className="flex flex-1 flex-col justify-center items-center p-4">
-        <div className="w-full md:max-w-6xl sm:max-w-3xl">
+        <div className="w-full xl:max-w-7xl md:max-w-6xl sm:max-w-3xl mt-[-5rem]">
           <div className="overflow-x-auto shadow-md rounded-2xl">
-            <table className="w-full text-sm text-left text-gray-300">
+            <table className="w-full text-xl text-center text-gray-300">
               <thead className="text-md uppercase bg-black/80 text-gray-300 border-b border-gray-700">
                 <tr>
                   <th scope="col" className="px-6 py-4 text-green-500">
