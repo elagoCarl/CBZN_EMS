@@ -40,10 +40,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: false,
             validate: {
-                isDate: { msg: "Valid Date is required." },
-                notEmpty: { msg: "Birthdate is required." }
         },
-    },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -67,7 +64,11 @@ module.exports = (sequelize, DataTypes) => {
         isAdmin: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
-        }
+        },
+        status: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     }, {
         timestamps: true,
         hooks: {
