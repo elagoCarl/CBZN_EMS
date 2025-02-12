@@ -97,13 +97,13 @@ const addUser = async (req, res, next) => {
     try {
         const {
             employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
+            email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin
         } = req.body;
 
         const DefaultPassword = "UserPass123"; // Default password      
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,    DepartmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -127,17 +127,8 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if the username already exists
-        const existingUsername = await User.findOne({ where: { username } });
-        if (existingUsername) {
-            return res.status(406).json({
-                successful: false,
-                message: "Username already exists. Please choose a different username."
-            });
-        }
-
         // Check if department exists
-        const existingDepartment = await Department.findByPk(DepartmentId   );
+        const existingDepartment = await Department.findByPk(   DepartmentId   );
         if (!existingDepartment) {
             return res.status(404).json({
                 successful: false,
@@ -158,7 +149,7 @@ const addUser = async (req, res, next) => {
             address,
             job_title,
             birthdate,
-            departmentId,
+               DepartmentId,
             password: DefaultPassword,
             isAdmin
         });
@@ -181,7 +172,7 @@ const updateUserById = async (req, res, next) => {
     try {
         const {
             employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
+            email, contact_number, address, job_title, birthdate, DepartmentId, isAdmin
         } = req.body;
 
         // Check if the user exists
@@ -194,7 +185,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -210,7 +201,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Check if the email is already in use by another user
-        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: id } } });
+        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: req.params.id } } });
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -219,7 +210,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Check if the department exists
-        const existingDepartment = await Department.findByPk(DepartmentId);
+        const existingDepartment = await Department.findByPk(  DepartmentId);
         if (!existingDepartment) {
             return res.status(404).json({
                 successful: false,
@@ -465,8 +456,6 @@ const getAllUsers = async (req, res, next) => {
         });
     }
 }
-
-
 
 module.exports = {
     addUser,
