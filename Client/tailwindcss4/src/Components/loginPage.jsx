@@ -53,7 +53,7 @@ const LoginPage = () => {
             <div className="relative w-full">
               <input
                 type="password"
-                placeholder="PASSWORD"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded bg-white/10 border border-gray-600 text-white focus:outline-none focus:border-green-500 pr-10"

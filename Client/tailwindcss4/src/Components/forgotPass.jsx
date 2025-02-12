@@ -21,7 +21,7 @@ const ResetPass = () => {
             <div className="flex items-center justify-center h-[calc(100vh-88px)]">
                 <div className="bg-black/80 p-28 px-10 rounded-lg shadow-lg w-full max-w-md mx-4">
                     <h2 className="text-sm sm:text-base lg:text-xl font-bold text-white text-center mb-6">
-                        RESET YOUR PASSWORD
+                        Reset Password
                     </h2>
 
                     <form className="space-y-4">
