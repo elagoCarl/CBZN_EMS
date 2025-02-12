@@ -37,7 +37,7 @@ const admin_Ems = () => {
                     Department
                   </th>
                   <th scope="col" className="px-6 py-4 text-gray-300">
-                    Time In
+                    Job Title
                   </th>
                   <th scope="col" className="px-6 py-4 text-gray-300">
                   </th>
@@ -54,9 +54,9 @@ const admin_Ems = () => {
                   <td className="px-6 py-4 text-gray-300">
                     Development
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
-                    09:00 AM
-                  </td>
+                  <th scope="col" className="px-6 py-4 text-gray-300">
+                    Web Developer
+                  </th>
                   <td className="px-6 py-4">
                     <a href="#" className="font-medium text-green-500 hover:text-green-700 hover:underline duration-300">Edit</a>
                   </td>
@@ -74,9 +74,9 @@ const admin_Ems = () => {
                   <td className="px-6 py-4 text-gray-300">
                     Development
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
-                    09:00 AM
-                  </td>
+                  <th scope="col" className="px-6 py-4 text-gray-300">
+                    Carl Elago
+                  </th>
                   <td className="px-6 py-4">
                     <a href="#" className="font-medium text-green-500 hover:text-green-700 hover:underline duration-300">Edit</a>
                   </td>
@@ -94,9 +94,9 @@ const admin_Ems = () => {
                   <td className="px-6 py-4 text-gray-300">
                     Development
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
-                    09:00 AM
-                  </td>
+                  <th scope="col" className="px-6 py-4 text-gray-300">
+                    Power Forward
+                  </th>
                   <td className="px-6 py-4">
                     <a href="#" className="font-medium text-green-500 hover:text-green-700 hover:underline duration-300">Edit</a>
                   </td>
@@ -114,9 +114,9 @@ const admin_Ems = () => {
                   <td className="px-6 py-4 text-gray-300">
                     Development
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
-                    09:00 AM
-                  </td>
+                  <th scope="col" className="px-6 py-4 text-gray-300">
+                    Department Analyst
+                  </th>
                   <td className="px-6 py-4">
                     <a href="#" className="font-medium text-green-500 hover:text-green-700 hover:underline duration-300">Edit</a>
                   </td>
@@ -134,9 +134,9 @@ const admin_Ems = () => {
                   <td className="px-6 py-4 text-gray-300">
                     Development
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
-                    09:00 AM
-                  </td>
+                  <th scope="col" className="px-6 py-4 text-gray-300">
+                    Executive Manager
+                  </th>
                   <td className="px-6 py-4">
                     <a href="#" className="font-medium text-green-500 hover:text-green-700 hover:underline duration-300">Edit</a>
                   </td>

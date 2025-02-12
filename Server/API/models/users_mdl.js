@@ -9,13 +9,6 @@ module.exports = (sequelize, DataTypes) => {
         password: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                notEmpty: { msg: "Password is required." },
-                len: {
-                    args: [8],
-                    msg: "Minimum password length should be 8 characters."
-                }
-            }
         },
         surname: {
             type: DataTypes.STRING,
