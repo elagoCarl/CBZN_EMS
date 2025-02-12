@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import EditUser from './Components/callComponents/editUser.jsx';
+import EmployeeAttendance from './Components/employeeAttendance.jsx';
 import EmployeeHome from './Components/employHome.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
 
@@ -15,7 +16,8 @@ function App() {
           <Route path="/addUser" element={<AddUser />} />
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           <Route path="/editUser" element={<EditUser />} />
-        </Routes>
+          <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
+      </Routes>
       </Router>
     </>
   )

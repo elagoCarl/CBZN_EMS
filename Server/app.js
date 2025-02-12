@@ -16,6 +16,7 @@ const schedule_rtr = require('./API/routers/schedule_rtr');
 const user_rtr = require('./API/routers/user_rtr');
 const archive_rtr = require('./API/routers/archive_rtr'); 
 const attendance_rtr = require('./API/routers/attendance_rtr');
+const department_rtr = require('./API/routers/department_rtr')
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -83,10 +84,6 @@ app.use((req, res, next) => {
   next();
 });
 
-const departmentRouter = require('./API/routers/department_rtr')
-
-app.use('/department', departmentRouter)
-
 
 
 //MIDDLEWARE FOR THE ROUTERS
@@ -94,6 +91,7 @@ app.use('/schedule', schedule_rtr);
 app.use('/users', user_rtr);
 app.use('/archive', archive_rtr);
 app.use('/attendance', attendance_rtr);
+app.use('/department', department_rtr)
 
 
 //ERROR MIDDLEWARES
