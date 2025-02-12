@@ -4,12 +4,26 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
+const nodemailer = require('nodemailer');
+
 // const nodemailer = require('nodemailer');
 const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET } = process.env
 
+
+    //nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // Use `true` for port 465, `false` for all other ports
+    auth: {
+        user: USER,
+        pass: APP_PASSWORD,
+    },
+});
 
 // Create access token
 const maxAge = 60; // 1 minute in seconds
@@ -81,14 +95,14 @@ const generateAccessToken = async (req, res, next) => {
 const addUser = async (req, res, next) => {
     try {
         const {
-            companyId, username, first_name, surname, middle_initial,
+            companyId, first_name, surname, middle_initial,
             email, contact_number, address, job_title
         } = req.body;
 
         const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
+        if (!util.checkMandatoryFields([companyId, first_name, surname, middle_initial, email, contact_number, address, job_title])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -112,20 +126,11 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if the username already exists
-        const existingUsername = await User.findOne({ where: { username } });
-        if (existingUsername) {
-            return res.status(406).json({
-                successful: false,
-                message: "Username already exists. Please choose a different username."
-            });
-        }
 
 
         // Create and save the new user
         const newUser = await User.create({
             companyId,
-            username,
             first_name,
             surname,
             middle_initial,
@@ -368,10 +373,83 @@ const logoutUser = async (req, res, next) => {
 };
 
 
+
+
+const forgotPass = async (req, res) => {
+    try {
+        const { email } = req.body; // Use lowercase 'email' to match the frontend
+        console.log("Received payload: ", req.body);
+
+        if (!email) {
+            return res.status(400).json({
+                status: 'Failed',
+                message: "Email address is not provided."
+            });
+        }
+
+        // Find account by email using Sequelize
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({
+                successful: false,
+                message: "The email address you provided does not exist in our system. Please check and try again."
+            });
+        }
+        
+
+        // Generate a random temporary password
+        const randomNumber = Math.floor(100000 + Math.random() * 900000);
+        const tempPassword = `CBZN!${randomNumber}!uSeR`;
+
+        // Hash the generated temporary password
+        const salt = await bcrypt.genSalt();
+        const hashedTempPassword = await bcrypt.hash(tempPassword, salt);
+
+        // Mail options from nodemailer documentation
+        const mailOptions = {
+            from: {
+                name: 'CBZN',
+                address: process.env.USER
+            },
+            to: email,
+            subject: 'Forgot Password in CBZN Account.',
+            text: 'Temporary Password:',
+            html: `<p>Your temporary password is <b>${tempPassword}</b>. Use this to log in.</p>`
+        };
+
+        // Update password with hashed password in Sequelize
+        await User.update(
+            { password: hashedTempPassword },
+            { where: { email } }
+        );
+
+        // Send email with temporary password
+        await transporter.sendMail(mailOptions);
+
+        res.status(201).json({
+            status: 'Pending',
+            successful: true,
+            message: 'Temporary password sent.',
+            data: {
+                email
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({
+            status: 'Failed',
+            message: error.message
+        });
+    }
+};
+
+
 module.exports = {
     addUser,
     getUserById,
     updateUserById,
     loginUser,
-    logoutUser
+    logoutUser,
+    forgotPass
 }

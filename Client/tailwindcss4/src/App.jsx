@@ -3,6 +3,9 @@ import LoginPage from './Components/loginPage.jsx';
 import EmployeeHome from './Components/employHome.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
 import AdminEms from './Components/admin_Ems.jsx'
+import ForgotPass from './Components/forgotPass.jsx';
+
+
 
 function App() {
   return (
@@ -16,6 +19,7 @@ function App() {
           <Route path="/adminEms" element={<AdminEms />} />
           <Route path="/editUser" element={<EditUser />} />
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
+          <Route path="/forgotPass" element={<ForgotPass />} />
       </Routes>
       </Router>
     </>
