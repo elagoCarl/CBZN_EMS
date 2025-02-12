@@ -4,8 +4,8 @@ import logo from '../Components/Img/CBZN-Logo.png';
 
 const LoginPage = () => {
   return (
-    <div 
-      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen" 
+    <div
+      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen"
       style={{ backgroundImage: `url(${bg})` }}
     >
       {/* Top Menu */}
@@ -35,9 +35,9 @@ const LoginPage = () => {
                 placeholder="PASSWORD"
                 className="w-full px-4 py-2 rounded bg-white/10 border border-gray-600 text-white focus:outline-none focus:border-green-500 pr-10"
               />
-              <img 
-                src={icon} 
-                alt="Show Password" 
+              <img
+                src={icon}
+                alt="Show Password"
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-5 h-5 hover:bg-gray-600 rounded-3xl duration-300"
               />
             </div>
