@@ -45,9 +45,9 @@ const ViewEmployee = () => {
                             <td className="h-12">Web Development</td>
 
                         </tr>
-                        <tr className=" text-center" style={{ backgroundColor: "D2FFC8", color: "black" }}>
+                        <tr className=" text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
                             <td className="h-12">00002</td>
-                            <td className="h-12">Gigi Hadid</td>
+                            <td className="w-50 h-12">Gigi Hadid</td>
                             <td className="h-12">Web Development</td>
                             <td className="h-12">Web Development</td>
 
@@ -55,15 +55,15 @@ const ViewEmployee = () => {
 
                         <tr className="text-center">
                             <td className="h-12">00003</td>
-                            <td className="h-12">Solana</td>
+                            <td className="h-12">Solana Boop</td>
                             <td className="h-12">Broadcasting</td>
                             <td className="h-12">Web Development</td>
 
                         </tr>
 
-                        <tr className="opacity-85 text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
+                        <tr className="text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
                             <td className="h-12">00003</td>
-                            <td className="h-12">Solana</td>
+                            <td className="h-12">Analos Low</td>
                             <td className="h-12">Broadcasting</td>
                             <td className="h-12">Web Development</td>
 
