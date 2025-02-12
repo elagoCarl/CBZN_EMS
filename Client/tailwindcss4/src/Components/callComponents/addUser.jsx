@@ -4,7 +4,7 @@ const AddUser = () => {
   return (
     <div className="min-h-screen w-screen flex flex-col">
       <div className="flex-1 flex items-center justify-center px-4">
-        <div className="bg-black/90 bg-opacity-90 shadow-2xl w-full max-w-4xl flex flex-col items-center p-8 justify-center rounded-lg mt-4">
+        <div className="bg-black/90 bg-opacity-90 shadow-2xl w-full max-w-4xl flex flex-col items-center p-8 justify-center rounded-lg my-5">
           <h1 className="text-3xl font-bold text-center text-white mb-6">Add User</h1>
 
           <form className="space-y-6 w-full">
