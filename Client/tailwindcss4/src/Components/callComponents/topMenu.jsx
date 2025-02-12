@@ -1,37 +1,29 @@
-import { useState } from 'react';
-import Sidebar from './Sidebar';
-import logo from '../img/CBZN-Logo.png';
+import { useState } from "react";
+import Sidebar from "./Sidebar";
+import logo from "../img/CBZN-Logo.png";
+import { useNavigate } from "react-router-dom";
 
 const TopMenu = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Function to close sidebar when clicking outside
-  const handleOverlayClick = (e) => {
-    if (e.target.id === 'sidebar-overlay') {
-      setIsSidebarOpen(false);
-    }
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
   };
+  const navigate = useNavigate();
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
   return (
     <>
-      <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50">
-        {/* Logo */}
-        <img src={logo} alt="Logo" className="h-10 w-auto" />
-
-        {/* Hamburger Icon */}
-        <button onClick={() => setIsSidebarOpen(true)} className="text-white focus:outline-none text-2xl">
+      <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50 shadow-md">
+        <img src={logo} alt="Logo" className="h-10 w-auto cursor-pointer" onClick={handleLogoClick} />
+        <button onClick={toggleSidebar} className="text-white text-2xl focus:outline-none">
           ☰
         </button>
       </div>
 
-      {/* Overlay with Sidebar */}
-      <div
-        id="sidebar-overlay"
-        className={`fixed inset-0 bg-black/50 transition-all duration-300 ${isSidebarOpen ? 'visible' : 'invisible'}`}
-        onClick={handleOverlayClick}
-      >
-        <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-      </div>
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
     </>
   );
 };
