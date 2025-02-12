@@ -1,9 +1,6 @@
-import React from 'react';
-import logo from './img/CBZN-Logo.png';
 import bg from './img/mainbg.png';
-import three from './img/three-lines.png';
-import rectangle from './img/Rectanglebehind.png';
 import icon from './Img/Icone.png';
+import logo from '../Components/Img/CBZN-Logo.png';
 
 const LoginPage = () => {
   return (
@@ -11,21 +8,13 @@ const LoginPage = () => {
       className="bg-cover bg-no-repeat bg-center min-h-screen w-screen"
       style={{ backgroundImage: `url(${bg})` }}
     >
-      <nav className="flex items-center justify-between bg-black p-8">
-        {/* Logo */}
-        <div className="flex items-center flex-shrink-0 ml-8">
-          <img className="w-full" src={logo} alt="CBZN Logo" />
-        </div>
+      {/* Top Menu */}
+      <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50">
+              {/* Logo */}
+              <img src={logo} alt="Logo" className="h-10 w-auto" />
+            </div>
 
-        {/* Menu Button */}
-        <div className="flex items-center">
-          <div className="p-2 rounded-lg transition-colors hover:bg-gray-800 mr-8">
-            <img className="w-12 h-12" src={three} alt="Menu" />
-          </div>
-        </div>
-      </nav>
-
-      {/* Login Form Container */}
+      {/* Rest of the Login Page */}
       <div className="flex items-center justify-center h-[calc(100vh-88px)]">
         <div className="bg-black/80 p-28 px-10 rounded-lg shadow-lg w-full max-w-md mx-4">
           <h2 className="text-2xl font-bold text-white text-center mb-6">
