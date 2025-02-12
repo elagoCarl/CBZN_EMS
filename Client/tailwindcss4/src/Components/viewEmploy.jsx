@@ -57,12 +57,12 @@ const ViewEmployee = () => {
                             <td className="w-50 h-12">00003</td>
                             <td className="w-50 h-12">Solana Boop</td>
                             <td className="w-50 h-12">Broadcasting</td>
-                            <td className="w-50 w-50 h-12">Web Development</td>
+                            <td className="w-50 h-12">Web Development</td>
 
                         </tr>
 
                         <tr className="text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
-                            <td className="w-50 w-50 h-12">00003</td>
+                            <td className="w-50 h-12">00003</td>
                             <td className="w-50 h-12">Analos Low</td>
                             <td className="w-50 h-12">Broadcasting</td>
                             <td className="w-50 h-12">Web Development</td>
