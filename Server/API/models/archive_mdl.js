@@ -12,11 +12,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING
         },
 
-        // DO NOT REMOVE BIRTHDATE AND DEPARTMENT_ID. CHECK ERD FOR USERS AND ARCHIVE.
-        // birthdate: {
-        //     type: DataTypes.DATE,
-        //     allowNull: false
-        // },  
+        birthdate: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                isDate: { msg: "Valid Date is required." },
+                notEmpty: { msg: "Birthdate is required." }
+            }
+        },  
+
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -32,29 +36,15 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        isActive: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        // department_id: {
-        //     type: DataTypes.STRING,
-        //     allowNull: false
-        // },
-    }, {
-        timestamps: true,
-        hooks: {
-            beforeCreate: async (user) => {
-                const salt = await bcrypt.genSalt();
-                user.password = await bcrypt.hash(user.password, salt);
-            },
-            beforeUpdate: async (user) => {
-                if (user.changed('password')) {
-                    const salt = await bcrypt.genSalt();
-                    user.password = await bcrypt.hash(user.password, salt);
-                }
-            }
+        department_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         }
-    });
+    }, {
+        timestamps: true
+    }
 
-    return Archive;
+    );
+    
+    return Archive;
 }
