@@ -7,6 +7,7 @@ import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import EmployeeAttendance from './Components/employeeAttendance.jsx';
+import EmployeeSideAttendance from './Components/employeeSideAttendance.jsx';
 
 
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
+          <Route path="/employeeSideAttendance" element={<EmployeeSideAttendance />} />
       </Routes>
       </Router>
     </>
