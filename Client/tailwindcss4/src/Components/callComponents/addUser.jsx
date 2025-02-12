@@ -11,11 +11,11 @@ const AddUser = () => {
             {/* Company Info Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Company ID</label>
+                <label className="block text-sm font-semibold text-white mb-2">Employee ID</label>
                 <input
                   type="text"
                   className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Company ID"
+                  placeholder="Enter Employee ID"
                 />
               </div>
               <div>
