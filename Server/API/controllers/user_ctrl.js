@@ -34,8 +34,6 @@ const createAccessToken = (id) => {
     });
 };
 
-
-
 // Create refresh token
 const createRefreshToken = (id) => {
     return jwt.sign({ id }, REFRESH_TOKEN_SECRET, {
@@ -161,10 +159,7 @@ const addUser = async (req, res, next) => {
 
 const updateUserById = async (req, res, next) => {
     try {
-        const {
-            employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
-        } = req.body;
+        const { employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);
@@ -254,7 +249,6 @@ const getUserById = async (req, res, next) => {
         });
     }
 };
-
 
 const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
@@ -431,15 +425,25 @@ const forgotPass = async (req, res) => {
     }
 };
 
-// CREATE GET ALL USER
 const getAllUsers = async (req, res, next) => {
     try {
         const users = await User.findAll();
+
+        if (!users || users.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No user found.",
+                count: 0,
+                data: [],
+            });
+        }
+
         res.status(200).send({
             successful: true,
             message: "Retrieved all users.",
             data: users
         });
+
     } catch (err) {
         res.status(500).send({
             successful: false,
