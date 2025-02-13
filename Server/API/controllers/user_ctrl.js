@@ -292,12 +292,12 @@ const loginUser = async (req, res, next) => {
 
         return res.status(201).json({
             successful: true,
-                message: "Successfully logged in.",
-                userEmail: user.email,
-                userPassword: user.password,
-                user: user.id,
-                accessToken: accessToken,
-                refreshToken: refreshToken
+            message: "Successfully logged in.",
+            userEmail: user.email,
+            userPassword: user.password,
+            user: user.id,
+            accessToken: accessToken,
+            refreshToken: refreshToken
         });
 
     } catch (err) {
