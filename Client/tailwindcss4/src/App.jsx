@@ -5,6 +5,7 @@ import EmployeeAttendance from './Components/employeeAttendance.jsx';
 import EmployeeHome from './Components/employHome.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
 import AdminEms from './Components/admin_Ems.jsx'
+import AdminDash from './Components/adminDashboard.jsx'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/editUser" element={<EditUser />} />
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
         <Route path="/adminEMS" element={<AdminEms />} />
+        <Route path="/adminDashBoard" element={<AdminDash />} />
       </Routes>
       </Router>
     </>
