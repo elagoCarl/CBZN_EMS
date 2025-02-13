@@ -6,6 +6,7 @@ import ViewEmployee from "./Components/viewEmploy.jsx";
 
 import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
+import EditUser from './Components/callComponents/editUser.jsx';
 
 
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/viewEmploy" element={<ViewEmployee />} />
           <Route path="/adminEMS" element={<AdminEms />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
+          <Route path="/editUser" element={<EditUser/>} />
       </Routes>
       </Router>
     </>
