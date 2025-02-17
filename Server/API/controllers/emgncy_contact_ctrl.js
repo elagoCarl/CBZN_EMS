@@ -1,5 +1,6 @@
 const { User, EmgncyContact } = require('../models')
-const util = require('../../utils')
+const util = require('../../utils');
+const { get } = require('../routers/emgncy_contact_rtr');
 
 const addEmgncyContact = async (req, res, next) => {
     try {
@@ -49,8 +50,49 @@ const addEmgncyContact = async (req, res, next) => {
 };
 
 
+const getEmgncyContactById = async (req, res, next) => {
+    try {
+        const userId  = req.params.id; // Get userId from URL parameters
+
+        // Validate if userId is provided
+        if (!userId) {
+            return res.status(400).json({
+                successful: false,
+                message: "UserId is required."
+            });
+        }
+
+        // Find the emergency contact based on the UserId
+        const emgncyContact = await EmgncyContact.findOne({
+            where: { UserId: userId }
+        });
+
+        // If no emergency contact is found
+        if (!emgncyContact) {
+            return res.status(404).json({
+                successful: false,
+                message: 'Emergency contact not found.'
+            });
+        }
+
+        // Return the found emergency contact
+        return res.status(200).json({
+            successful: true,
+            emgncyContact
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            successful: false,
+            message: error.message || "An unexpected error occurred."
+        });
+    }
+};
+
+
 
 
 module.exports = {
     addEmgncyContact,
+    getEmgncyContactById
 }
