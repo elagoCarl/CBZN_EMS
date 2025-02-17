@@ -100,7 +100,7 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
-        User.hasMany(models.EmgncyContact, {
+        User.hasOne(models.UserInfo, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
