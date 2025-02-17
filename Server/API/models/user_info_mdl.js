@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false 
         },
         city_add: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false
         },
         provincial_add: {

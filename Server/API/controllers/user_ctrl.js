@@ -168,10 +168,7 @@ const addUser = async (req, res, next) => {
 
 const updateUserById = async (req, res, next) => {
     try {
-        const {
-            employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
-        } = req.body;
+        const { employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);

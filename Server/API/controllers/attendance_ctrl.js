@@ -34,8 +34,6 @@ const addAttendance = async (req, res) => {
             });
         }
 
-
-
         // Create Attendance
         const newAttendance = await Attendance.create({
             UserId

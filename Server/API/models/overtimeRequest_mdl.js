@@ -24,15 +24,13 @@ module.exports = (sequelize, DataTypes) => {
 
     OvertimeRequest.associate = (models) => {
         OvertimeRequest.belongsTo(models.User, {
-            foreignKey: 'user_id',
-            as: 'user_id'
-        });
-    }
+            foreignKey: 'reviewer_id'
+        }),
 
-    OvertimeRequest.associate = (models) => {
         OvertimeRequest.belongsTo(models.User, {
-            foreignKey: 'reviewer_id',
-            as: 'reviewer_id'
+            foreignKey: 'user_id',
+
         });
     }
+    return OvertimeRequest;
 }
