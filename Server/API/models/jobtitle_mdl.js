@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Department = sequelize.define('Department', {
+    const JobTitle = sequelize.define('JobTitle', {
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -11,16 +11,23 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         }
-    }, {
+    }, 
+    {
         timestamps: true
     });
 
-    Department.associate = (models) => {
-        Department.hasMany(models.User, {
+    JobTitle.associate = (models) => {
+        JobTitle.belongsTo(models.User, {
+            foreignKey: 'user_id',
+        });
+    }
+
+    JobTitle.associate = (models) => {
+        JobTitle.hasMany(models.User, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
     };
 
-    return Department;
+    return JobTitle;
 };

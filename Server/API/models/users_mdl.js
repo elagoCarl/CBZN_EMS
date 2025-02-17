@@ -76,6 +76,10 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
+        User.hasMany(models.JobTitle, {
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
     };
 
     User.login = async function (email, password) {

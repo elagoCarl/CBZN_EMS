@@ -17,6 +17,7 @@ const user_rtr = require('./API/routers/user_rtr');
 const archive_rtr = require('./API/routers/archive_rtr'); 
 const attendance_rtr = require('./API/routers/attendance_rtr');
 const department_rtr = require('./API/routers/department_rtr')
+const jobtitle_rtr = require ('./API/routers/jobtitle_rtr')
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -92,6 +93,7 @@ app.use('/users', user_rtr);
 app.use('/archive', archive_rtr);
 app.use('/attendance', attendance_rtr);
 app.use('/department', department_rtr)
+app.use('/jobtitle', jobtitle_rtr);
 
 
 //ERROR MIDDLEWARES
