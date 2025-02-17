@@ -5,9 +5,8 @@ import EmployeeHome from './Components/employHome.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
 import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
-import AdminAttendance from './Components/adminAttendance.jsx';
-import EmployeeAttendance from './Components/employeeAttendance.jsx';
-import EmployeeSideAttendance from './Components/employeeSideAttendance.jsx';
+import AdminDashboard from "./Components/adminDashboard.jsx"; 
+import EmployeeDashboard from "./Components/employeeDashboard.jsx";
 
 
 
@@ -21,11 +20,9 @@ function App() {
           <Route path="/addUser" element={<AddUser />} />
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           <Route path="/adminEms" element={<AdminEms />} />
-          <Route path="/editUser" element={<EditUser />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
-          <Route path="/adminAttendance" element={<AdminAttendance />} />
-          <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
-          <Route path="/employeeSideAttendance" element={<EmployeeSideAttendance />} />
+          <Route path="/adminDashboard" element={<AdminDashboard />} />
+          <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
       </Routes>
       </Router>
     </>

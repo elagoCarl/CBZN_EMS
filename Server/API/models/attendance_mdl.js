@@ -1,16 +1,25 @@
 module.exports = (sequelize, DataTypes) => {
     const Attendance = sequelize.define('Attendance', {
-        status: {
+        day: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: { msg: "Status is required." }
             }
         },
-        // date: {
-        //     type: DataTypes.DATE,
-        //     allowNull: false
-        // }
+        isRestDay: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+        time_in: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        time_out: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
     }, {
         timestamps: true
     });
