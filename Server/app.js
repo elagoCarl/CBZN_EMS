@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 // const cookieParser = require('cookie-parser');
 require('dotenv').config()
 
@@ -14,7 +16,6 @@ const app = express();
 
 const schedule_rtr = require('./API/routers/schedule_rtr');
 const user_rtr = require('./API/routers/user_rtr');
-const archive_rtr = require('./API/routers/archive_rtr'); 
 const attendance_rtr = require('./API/routers/attendance_rtr');
 const department_rtr = require('./API/routers/department_rtr')
 
@@ -89,7 +90,6 @@ app.use((req, res, next) => {
 //MIDDLEWARE FOR THE ROUTERS
 app.use('/schedule', schedule_rtr);
 app.use('/users', user_rtr);
-app.use('/archive', archive_rtr);
 app.use('/attendance', attendance_rtr);
 app.use('/department', department_rtr)
 
