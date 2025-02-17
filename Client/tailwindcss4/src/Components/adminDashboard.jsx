@@ -8,6 +8,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [returnHome, setReturnHome] = useState(false);
 
   // Handle window resize
   useEffect(() => {
@@ -98,13 +99,13 @@ const AdminDashboard = () => {
         </div>
 
         <div className="flex flex-col h-screen justify-center items-center space-y-4">
-          <nav className="w-full space-y-4 text-center font-semibold text-base">
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Home</div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Attendance</div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Manage Users</div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Reports</div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Settings</div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Help</div>
+          <nav className="w-full space-y-4 text-center font-semibold md:text-xl sm:text-base">
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Home</div>
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Attendance</div>
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Manage Users</div>
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Reports</div>
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Settings</div>
+            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Help</div>
           </nav>
         </div>
 
@@ -181,7 +182,7 @@ const AdminDashboard = () => {
                       <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.department}</td>
                       <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.title}</td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4">
-                        <button className="bg-green-600 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
+                        <button className="bg-green-600 hover:bg-green-800 duration-300 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
                           Edit
                         </button>
                       </td>
@@ -212,10 +213,10 @@ const AdminDashboard = () => {
 
         {/* Responsive Time Buttons */}
         <div className="flex justify-end mt-2 gap-2">
-          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
+          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700 duration-300">
             TIME-IN
           </button>
-          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40">
+          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40 duration-300">
             TIME-OUT
           </button>
         </div>
