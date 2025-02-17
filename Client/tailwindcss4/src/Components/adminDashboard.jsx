@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 
@@ -8,7 +8,8 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [returnHome, setReturnHome] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const profileRef = useRef(null);  //dropdowns
 
   // Handle window resize
   useEffect(() => {
@@ -16,6 +17,20 @@ const AdminDashboard = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+    // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileOpen]);
 
   // Determine number of users per page based on screen size
   const usersPerPage = windowWidth < 768 ? 5 : 11;
@@ -109,14 +124,33 @@ const AdminDashboard = () => {
           </nav>
         </div>
 
-        <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
-          <div className="w-6 h-6 bg-gray-600 rounded-full" />
-          <div>
-            <div className="text-white text-xs font-medium">ADMIN</div>
-            <div className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</div>
+                {/* Profile Section with Clickable Dropdown */}
+        <div className="mt-auto relative" ref={profileRef}>
+          <div
+            className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <div className="w-6 h-6 bg-gray-600 rounded-full" />
+            <div>
+              <div className="text-white text-xs font-medium">ADMIN</div>
+              <div className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</div>
+            </div>
           </div>
+
+          {/* Pop-up Menu */}
+          {isProfileOpen && (
+            <div
+              className="absolute right-6 bottom-full mb-2 w-40 bg-[#2b2b2b] text-white p-2 rounded-lg shadow-md duration-300"
+              onClick={() => setIsProfileOpen(false)} // Close on click
+            >
+              <button className="w-full text-left px-3 py-2 hover:bg-red-600 rounded duration-300">
+                Log Out
+              </button>
+            </div>
+          )}
+        </div>    
         </div>
-      </div>
+
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
