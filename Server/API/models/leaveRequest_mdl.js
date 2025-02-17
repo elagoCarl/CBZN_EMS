@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const LeaveRequest = sequelize.define('LeaveRequest', {
-        type: {
+        leave_type: {
             type: DataTypes.ENUM('vacation', 'sick', 'emergency', 'other'),
             allowNull: false,
             validate: {
@@ -21,17 +21,17 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: { msg: "End date is required." }
             }
         },
-        status: {
-            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
-            allowNull: false,
-            defaultValue: 'pending'
-        },
         reason: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: { msg: "Reason is required." }
             }
+        },
+        status: {
+            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+            allowNull: false,
+            defaultValue: 'pending'
         },
         review_date: {
             type: DataTypes.DATEONLY,
@@ -45,13 +45,13 @@ module.exports = (sequelize, DataTypes) => {
         // Employee submitting the request
         LeaveRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
-            as: 'user'  // Alias for clarity
+            as: 'user'
         });
 
         // Admin approving/rejecting the request
         LeaveRequest.belongsTo(models.User, {
             foreignKey: 'reviewer_id',
-            as: 'reviewer'  // Alias for clarity
+            as: 'reviewer'
         });
     };
 
