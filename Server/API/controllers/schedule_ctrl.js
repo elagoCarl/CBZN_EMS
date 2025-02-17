@@ -6,6 +6,10 @@ const addSchedule = async (req, res) => {
     try{
         const { title, schedule, isActive } = req.body;
 
+        if(!util.checkMandatoryFields({ title, schedule, isActive })){
+            return res.status(400).json({ error: 'A mandatory field is missing.' });
+        };
+
         const newSchedule = await Schedule.create({ title, schedule, isActive });
         return res.status(201).json({
             successful: true,
@@ -62,6 +66,10 @@ const updateSchedule = async (req, res) => {
         const {id} = req.params;
         const { title, schedule, isActive } = req.body;
 
+        if(!util.checkMandatoryFields({ title, schedule, isActive })){
+            return res.status(400).json({ error: 'A mandatory field is missing.' });
+        };
+        
         const updatedSchedule = await Schedule.update({ 
             title,
             schedule,
