@@ -57,13 +57,50 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.associate = (models) => {
-        User.belongsTo(models.Schedule, {
+        // A User has many leave requests (as an employee requesting leave)
+        User.hasMany(models.LeaveRequest, {
+            foreignKey: 'user_id',
+            as: 'leaveRequests',  // Alias for clarity
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
         });
-        User.hasOne(models.Attendance, {
+
+        // A User (admin) can review many leave requests
+        User.hasMany(models.LeaveRequest, {
+            foreignKey: 'reviewer_id',
+            as: 'reviewedLeaves',
+            onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
+            onUpdate: 'CASCADE'
+        });
+
+        // A User has many time adjustments (as an employee requesting time adjustments)
+        User.hasMany(models.TimeAdjustment, {
+            foreignKey: 'user_id',
+            as: 'timeAdjustments',  // Alias for clarity
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+
+        // A User (admin) can review many leave requests
+        User.hasMany(models.TimeAdjustment, {
+            foreignKey: 'reviewer_id',
+            as: 'adjustedTime',
+            onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
+            onUpdate: 'CASCADE'
+        });
+        
+
+        // Other existing associations
+        User.belongsTo(models.Schedule);
+        User.hasMany(models.Attendance, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
         User.hasOne(models.EmgncyContact, {
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+        User.hasMany(models.EmgncyContact, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
