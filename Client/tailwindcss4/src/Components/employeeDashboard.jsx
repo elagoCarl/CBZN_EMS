@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 
@@ -13,6 +13,8 @@ const EmployeeDashboard = () => {
 
   // State for tracking window width (used for responsive design)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
   
   // Function to update the current page for pagination
   const paginate = (pageNumber) => {
@@ -20,7 +22,7 @@ const EmployeeDashboard = () => {
   };
   
   // Adjust the number of records per page based on screen size
-  const recordsPerPage = windowWidth < 768 ? 5 : 12;
+  const recordsPerPage = windowWidth < 768 ? 12 : 12;
 
   // Effect to update window width on resize
   useEffect(() => {
@@ -36,6 +38,20 @@ const EmployeeDashboard = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (profileRef.current && !profileRef.current.contains(event.target)) {
+          setIsProfileOpen(false);
+        }
+      };
+  
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [isProfileOpen]);
+  
 
   // Function to format time for display (12-hour format with AM/PM)
   const formatTime = (date) => {
@@ -106,20 +122,37 @@ const EmployeeDashboard = () => {
           <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Reports</div>
         </nav>
 
-        {/* Footer userSettings*/}
-        <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
-          <div className="w-3 h-3 bg-gray-600 rounded-full"/>
-          <div>
-            <div className="text-white text-xs font-medium">EMPLOYEE</div>
-            <div className="text-gray-400 text-xs">Employee@CBZN@GMAIL.COM</div>
+        {/* Profile Section with Clickable Dropdown */}
+        <div className="mt-auto relative" ref={profileRef}>
+          <div
+            className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <div className="w-6 h-6 bg-gray-600 rounded-full" />
+            <div>
+              <div className="text-white text-xs font-medium">EMPLOYEE</div>
+              <div className="text-gray-400 text-xs">Employee@CBZN@GMAIL.COM</div>
+            </div>
           </div>
-        </div>
+
+          {/* Pop-up Menu */}
+          {isProfileOpen && (
+            <div
+              className="absolute right-6 bottom-full mb-2 w-40 bg-[#2b2b2b] text-white p-2 rounded-lg shadow-md duration-300"
+              onClick={() => setIsProfileOpen(false)} // Close on click
+            >
+              <button className="w-full text-left px-3 py-2 hover:bg-red-600 rounded duration-300">
+                Log Out
+              </button>
+            </div>
+          )}
+        </div>  
       </div>
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 mt-40">
-          <h1 className="text-xl md:text-2xl text-white md:mb-0">
+          <h1 className="text-xl md:text-2xl text-white sm:mb-auto md:mb-[-4rem] xl:mb-[-6rem] duration-300 transition-shadow">
             Hello, <span className="text-green-500">Employee</span>
           </h1>
           <div className="text-lg md:text-[clamp(1.5rem,4vw,4rem)]">

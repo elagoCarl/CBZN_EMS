@@ -109,7 +109,7 @@ const AdminDashboard = () => {
         {/* Your existing sidebar content */}
         <div className="mb-8">
           <div className="w-full text-white p-4 flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-8 w-auto" />
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
           </div>
         </div>
 
@@ -156,7 +156,7 @@ const AdminDashboard = () => {
       <div className="flex-1 p-4 md:p-6 flex flex-col">
         {/* Centered Header for mobile */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-xl md:text-2xl text-white mb-4 md:mb-0">
+          <h1 className="ext-xl md:text-2xl text-white sm:mb-auto md:mb-[-7rem] xl:mb-[-10rem] duration-300 transition-shadow">
             Hello, <span className="text-green-500">Admin</span>
           </h1>
           <div className="flex flex-col items-center">
