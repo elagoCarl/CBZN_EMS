@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
     });
 
-    User.associate = (models) => {
-        User.belongsTo(models.User, {
+    emgncy_contact.associate = (models) => {
+        emgncy_contact.belongsTo(models.User, {
         });
     };
     return emgncy_contact;

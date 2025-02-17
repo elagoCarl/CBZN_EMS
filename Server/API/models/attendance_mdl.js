@@ -13,11 +13,11 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false
         },
         time_in: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true
         },
         time_out: {
-            type: DataTypes.DATETIME,
+            type: DataTypes.DATE,
             allowNull: true
         },
     }, {

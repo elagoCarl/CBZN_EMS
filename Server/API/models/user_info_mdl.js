@@ -45,10 +45,10 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         timestamps: true,
     });
-    User.associate = (models) => {
-        User.belongsTo(models.Schedule, {
+    UserInfo.associate = (models) => {
+        UserInfo.belongsTo(models.Schedule, {
         });
-        User.hasOne(models.Attendance, {
+        UserInfo.hasOne(models.Attendance, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });

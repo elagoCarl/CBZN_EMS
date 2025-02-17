@@ -1,4 +1,4 @@
-modeule.exports = function (sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
     const TimeAdjustment = sequelize.define('TimeAdjustment', {
         date: {
             type: DataTypes.DATEONLY,
@@ -50,5 +50,5 @@ modeule.exports = function (sequelize, DataTypes) {
             as: 'reviewer'
         })
     }
+    return TimeAdjustment;
 }
-return TimeAdjustment;
