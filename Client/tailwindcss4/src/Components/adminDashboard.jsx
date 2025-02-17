@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
+import axios from 'axios';
 
 const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -8,8 +9,9 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [isProfileOpen, setIsProfileOpen] = useState(false); 
-  const profileRef = useRef(null);  //dropdowns
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [users, setUsers] = useState([]);  // State for storing users
+  const profileRef = useRef(null); // dropdowns
 
   // Handle window resize
   useEffect(() => {
@@ -18,7 +20,7 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-    // Close dropdown when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -32,8 +34,26 @@ const AdminDashboard = () => {
     };
   }, [isProfileOpen]);
 
+  // Fetch all users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/users/getAllUser'); // Adjust the URL as needed
+        if (response.data.successful) {
+          setUsers(response.data.data); // Store fetched users
+        } else {
+          console.error('Failed to fetch users:', response.data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   // Determine number of users per page based on screen size
-  const usersPerPage = windowWidth < 768 ? 5 : 11;
+  const usersPerPage = windowWidth < 768 ? 10 : 11;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -47,7 +67,7 @@ const AdminDashboard = () => {
     const parts = date.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }).split('/');
     return (
       <div className="text-center">
@@ -61,7 +81,7 @@ const AdminDashboard = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true
+      hour12: true,
     });
 
     const [time, period] = timeString.split(' ');
@@ -72,21 +92,6 @@ const AdminDashboard = () => {
     );
   };
 
-  // Simplified user data for mobile
-  const users = [
-    { id: '212236', name: 'Simon Masucol', department: 'Broadcast', title: 'Web dev' },
-    { id: '212546', name: 'John Trasporto', department: 'IT Department', title: 'Intern' },
-    { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
-    { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
-    { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
-    { id: '212236', name: 'Simon Masucol', department: 'Broadcast', title: 'Web dev' },
-    { id: '212546', name: 'John Trasporto', department: 'IT Department', title: 'Intern' },
-    { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
-    { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
-    { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
-    
-  ];
-
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
@@ -95,7 +100,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex h-screen bg-black/90">
       {/* Mobile Nav Toggle */}
-      <button 
+      <button
         onClick={() => setIsNavOpen(!isNavOpen)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
       >
@@ -103,9 +108,10 @@ const AdminDashboard = () => {
       </button>
 
       {/* Sidebar - Hidden on mobile by default */}
-      <div className={`${
-        isNavOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
+      <div
+        className={`${isNavOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}
+      >
         {/* Your existing sidebar content */}
         <div className="mb-8">
           <div className="w-full text-white p-4 flex justify-center items-center">
@@ -124,7 +130,7 @@ const AdminDashboard = () => {
           </nav>
         </div>
 
-                {/* Profile Section with Clickable Dropdown */}
+        {/* Profile Section with Clickable Dropdown */}
         <div className="mt-auto relative" ref={profileRef}>
           <div
             className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
@@ -148,9 +154,8 @@ const AdminDashboard = () => {
               </button>
             </div>
           )}
-        </div>    
         </div>
-
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
@@ -173,13 +178,14 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
           <div className="flex gap-2">
             <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
-              <option className='bg-white text-black'>Employee</option>
-              <option className='bg-white text-black'>Intern</option>
-              <option className='bg-white text-black'>Inactive</option>
+              <option className="bg-white text-black">All Users</option>
+              <option className="bg-white text-black">Employee</option>
+              <option className="bg-white text-black">Intern</option>
+              <option className="bg-white text-black">Inactive</option>
             </select>
             <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
-              <option className='bg-white text-black'>Active</option>
-              <option className='bg-white text-black'>Archive</option>
+              <option className="bg-white text-black">All Users</option>
+              <option className="bg-white text-black">Admin</option>
             </select>
           </div>
           <div className="relative">
@@ -201,20 +207,20 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                   <tr>
-                    <th className="text-[#4E9F48] text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">ID</th>
-                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Name</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Department</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Job Title</th>
+                    <th className="text-[#4E9F48] text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Employee ID</th>
+                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Email</th>
+                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Name</th>
+                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Employment Status</th>
                     <th className="text-white text-left py-2 md:py-3 px-2 md:px-4"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentUsers.map((user) => (
                     <tr key={user.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.id}</td>
-                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.name}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.department}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.title}</td>
+                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.employeeId}</td>
+                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.email}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.name}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.employment_status}</td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4">
                         <button className="bg-green-600 hover:bg-green-800 duration-300 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
                           Edit
@@ -233,11 +239,10 @@ const AdminDashboard = () => {
               <button
                 key={index}
                 onClick={() => paginate(index + 1)}
-                className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${
-                  currentPage === index + 1
+                className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${currentPage === index + 1
                     ? 'bg-green-600 text-white'
                     : 'bg-[#363636] text-white hover:bg-[#404040]'
-                }`}
+                  }`}
               >
                 {index + 1}
               </button>
@@ -258,7 +263,7 @@ const AdminDashboard = () => {
 
       {/* Mobile Nav Overlay */}
       {isNavOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
           onClick={() => setIsNavOpen(false)}
         />
