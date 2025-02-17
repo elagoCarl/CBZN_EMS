@@ -58,41 +58,34 @@ const getSchedule = async (req, res) => {
     }
 }
 
+// Update Schedule
 const updateSchedule = async (req, res) => {
-    try {
-        const { id } = req.params;  // Extract id from the URL params
-        const { title, schedule, isActive } = req.body; // Extract fields from the request body
+    try{
+        const {id} = req.params;
+        const { title, schedule, isActive } = req.body;
 
-        // Check if schedule with the provided ID exists
-        const scheduleExists = await Schedule.findByPk(id);
-
-        if (!scheduleExists) {
-            return res.status(404).json({ error: 'Schedule not found' });
+        const updatedSchedule = await Schedule.update({ 
+            title,
+            schedule,
+            isActive }, { where: { id } });
+        
+        if(updatedSchedule){
+            return res.status(200).json({
+                successful: true,
+                message: "Updated successfully"
+            });
         }
 
-        // Perform the update and check if any rows were updated
-        const [updatedRowCount] = await Schedule.update(
-            { title, schedule, isActive },
-            { where: { id } }
-        );
+        return res.status(404).json({ 
+            error: 'Schedule not found'
+         });
 
-        // If no rows were updated, return an error message
-        if (updatedRowCount === 0) {
-            return res.status(400).json({ error: 'Failed to update schedule' });
-        }
-
-        return res.status(200).json({
-            successful: true,
-            message: 'Schedule updated successfully'
-        });
-    } catch (error) {
-        console.error(error);  // Log the error for debugging
-        return res.status(500).json({
+    } catch(error){
+        return res.status(500).json({ 
             error: 'Internal server error'
-        });
+         });
     }
-};
-
+}
 // Export the functions
 module.exports = {
     addSchedule,

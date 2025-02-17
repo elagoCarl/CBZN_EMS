@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
                             throw new Error(`Invalid day: ${day}. Allowed days are ${validDays.join(', ')}`);
                         }
 
-                        // Check In and Out time for each day
+                    // Check In and Out time for each day
                         const { In, Out } = value[day];
                         if (!timePattern.test(In) || !timePattern.test(Out)) {
                             throw new Error(`Invalid time format for ${day}. Time should be in HH:MM format`);
