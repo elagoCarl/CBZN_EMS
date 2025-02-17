@@ -4,26 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('User', {
         employeeId: {
             type: DataTypes.INTEGER,
-            allowNull: false
-        },
-        password: {
-            type: DataTypes.STRING,
             allowNull: false,
-        },
-        surname: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        first_name: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        middle_name: {
-            type: DataTypes.STRING
-        },
-        birthdate: {
-            type: DataTypes.DATEONLY,
-            allowNull: false
+            unique: true
         },
         email: {
             type: DataTypes.STRING,
@@ -34,14 +16,11 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: { msg: "Email is required." }
             }
         },
-        contact_number: {
+        password: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
-        address: {
-            type: DataTypes.STRING
-        },
-        job_title: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -49,6 +28,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
+        employment_status: {
+            type: DataTypes.ENUM('Employee', 'Intern', 'Inactive'),
+            allowNull: false,
+            defaultValue: 'Employee'
+        }
     }, {
         timestamps: true,
         hooks: {
@@ -66,13 +50,13 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.associate = (models) => {
-        User.belongsTo(models.Department, {
+        User.belongsTo(models.Schedule, {
         });
-        User.hasOne(models.Schedule, {
+        User.hasMany(models.Attendance, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
-        User.hasMany(models.Attendance, {
+        User.hasOne(models.EmgncyContact, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });

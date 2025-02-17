@@ -20,10 +20,6 @@ function App() {
           <Route path="/addUser" element={<AddUser />} />
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           <Route path="/adminEms" element={<AdminEms />} />
-          <Route path="/editUser" element={<EditUser />} />
-          <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
-          <Route path="/viewEmploy" element={<ViewEmployee />} />
-          <Route path="/adminEMS" element={<AdminEms />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/editUser" element={<EditUser/>} />
       </Routes>
