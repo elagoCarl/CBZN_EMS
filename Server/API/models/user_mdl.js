@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
     User.associate = (models) => {
         User.belongsTo(models.Schedule, {
         });
-        User.hasOne(models.Attendance, {
+        User.hasMany(models.Attendance, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
