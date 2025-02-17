@@ -10,7 +10,7 @@ const EmployeeDashboard = () => {
   const paginate = (pageNumber) => {
   setCurrentPage(pageNumber);
 };
-  const recordsPerPage = windowWidth < 768 ? 5 : 8;
+  const recordsPerPage = windowWidth < 768 ? 5 : 12;
 
   // Handle window resize
   useEffect(() => {
@@ -68,6 +68,11 @@ const EmployeeDashboard = () => {
     { day: 'Thursday', status: 'Present', timestamp: '08:10 AM' },
     { day: 'Friday', status: 'Present', timestamp: '08:00 AM' },
     { day: 'Saturday', status: 'Absent', timestamp: '--' },
+    { day: 'Tuesday', status: 'Absent', timestamp: '--' },
+    { day: 'Wednesday', status: 'Present', timestamp: '08:05 AM' },
+    { day: 'Thursday', status: 'Present', timestamp: '08:10 AM' },
+    { day: 'Friday', status: 'Present', timestamp: '08:00 AM' },
+    { day: 'Saturday', status: 'Absent', timestamp: '--' },
   ];
 
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -92,7 +97,7 @@ const EmployeeDashboard = () => {
             <img src={logo} alt="Logo" className="h-8 w-auto" />
           </div>
         </div>
-        <nav className="w-full space-y-4 text-center font-semibold text-base items-center justify-center flex-1 flex flex-col">
+        <nav className="w-full space-y-4 text-center font-semibold text-base items-center justify-center flex-1 flex flex-col mb-20">
           <div className="text-white hover:bg-gray-900 duration-300 px-4 py-2 rounded cursor-pointer">Home</div>
           <div className="text-white hover:bg-gray-900 duration-300  px-4 py-2 rounded cursor-pointer">Attendance</div>
           <div className="text-white hover:bg-gray-900 duration-300  px-4 py-2 rounded cursor-pointer">Reports</div>
@@ -138,10 +143,10 @@ const EmployeeDashboard = () => {
                     <tr key={index} className="border-b border-gray-700 hover:bg-[#404040]">
                       <td className="py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{record.day}</td>
                       <td className={`py-2 md:py-3 px-2 md:px-4 text-sm md:text-base ${
-                        record.status === 'Present' ? 'text-green-500' : 'text-red-500'
-                      }`}>
-                        {record.status}
-                      </td>
+                      record.status === 'Present' ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {record.status}
+                    </td>
                       <td className="py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{record.timestamp}</td>
                     </tr>
                   ))}
@@ -153,21 +158,31 @@ const EmployeeDashboard = () => {
           {/* Responsive Pagination */}
            <div className="bg-[#2b2b2b] py-2 px-2 md:px-4 flex justify-center gap-1">
           {Array.from({ length: totalPages }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => paginate(index + 1)}
-              className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${
-                currentPage === index + 1
-                  ? 'bg-green-600 text-white'
-                  : 'bg-[#363636] text-white hover:bg-[#404040] duration-300'
-              }`}
-            >
-              {index + 1}
-            </button>
+              <button
+            key={index}
+            onClick={() => paginate(index + 1)}
+            className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${
+              currentPage === index + 1 ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300'
+            }`}
+          >
+            {index + 1}
+          </button>
           ))}
         </div>
         </div>
+
+         {/* Responsive Time Buttons */}
+        <div className="flex justify-end mt-2 gap-2">
+          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
+            TIME-IN
+          </button>
+          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40">
+            TIME-OUT
+          </button>
+        </div>
       </div>
+
+      
 
       {isNavOpen && (
         <div 
