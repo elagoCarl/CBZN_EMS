@@ -12,8 +12,6 @@ const addSchedule = async (req, res) => {
             data: newSchedule});
 
     } catch(error){
-        console.error("Error creating schedule:", error);
-
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({ error: error.errors[0].message });
         }
@@ -81,9 +79,11 @@ const updateSchedule = async (req, res) => {
          });
 
     } catch(error){
-        return res.status(500).json({ 
-            error: 'Internal server error'
-         });
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ error: error.errors[0].message });
+        }
+
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }
 // Export the functions
