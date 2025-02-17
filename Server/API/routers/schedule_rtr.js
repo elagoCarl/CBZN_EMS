@@ -4,8 +4,8 @@ const router = express.Router();
 
 router.post('/addSchedule', schedule.addSchedule);
 router.get('/getSchedule/:id', schedule.getSchedule)
-router.get('/getScheduleByUser/:id',schedule.getScheduleByUser)
+router.get('/getAllSchedules', schedule.getAllSchedules)
 router.put('/updateSchedule/:id', schedule.updateSchedule);
-router.delete('/deleteSchedule/:id', schedule.deleteSchedule);
+// router.delete('/deleteSchedule/:id', schedule.deleteSchedule);
 
 module.exports = router;

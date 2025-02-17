@@ -22,74 +22,72 @@ const ViewEmployee = () => {
                 {/* Menu Button */}
                 <div className="flex items-center">
                     <div className="p-2 rounded-lg transition-colors hover:bg-gray-800 mr-8">
-                        <img className="w-12 h-12" src={three} alt="Menu" />
+                        <img className="w-12 w-50 h-12" src={three} alt="Menu" />
                     </div>
                 </div>
             </nav>
 
-       
-
-            <div className="bg-white bg-opacity-100 shadow-lg w-full max-w-6xl ">
+            <div className="bg-white bg-opacity-100 shadow-lg w-full max-w-7xl ">
                 <table className="table-auto w-full border-collapse">
                     <thead>
                         <tr style={{ backgroundColor: "#555454", color: "#ffffff" }}>
-                            <th className="h-12 w-50">User ID</th>
-                            <th className="h-12 w-50">Name</th>
-                            <th className="h-12 w-50">Department</th>
-                            <th className="h-12 w-50">Time In</th>
+                            <th className="w-50 h-12"style={{color: "#58B030"}}>User ID</th>
+                            <th className="w-50 h-12">Name</th>
+                            <th className="w-50 h-12">Department</th>
+                            <th className="w-50 h-12">Time In</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr className="text-center ">
-                            <td className="h-12 w-100">00001</td>
-                            <td className="h-12 w-100">Harry Styles</td>
-                            <td className="h-12 w-100">Web Development</td>
-                            <td className="h-12 w-100">Web Development</td>
+                            <td className="w-50 h-12">00001</td>
+                            <td className="w-50 h-12">Harry Styles</td>
+                            <td className="w-50 h-12">Web Development</td>
+                            <td className="w-50 h-12">Web Development</td>
 
                         </tr>
                         <tr className=" text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
-                            <td className="h-12 w-50">00002</td>
-                            <td className="h-12 w-50">Gigi Hadid</td>
-                            <td className="h-12 w-50">Web Development</td>
-                            <td className="h-12 w-50">Web Development</td>
+                            <td className="w-50 h-12">00002</td>
+                            <td className="w-50 h-12">Gigi Hadid</td>
+                            <td className="w-50 h-12">Web Development</td>
+                            <td className="w-50 h-12">Web Development</td>
 
                         </tr>
 
                         <tr className="text-center">
-                            <td className="h-12 w-50">00003</td>
-                            <td className="h-12 w-50">Solana Boop</td>
-                            <td className="h-12 w-50">Broadcasting</td>
-                            <td className="h-12 w-50">Web Development</td>
+                            <td className="w-50 h-12">00003</td>
+                            <td className="w-50 h-12">Solana Boop</td>
+                            <td className="w-50 h-12">Broadcasting</td>
+                            <td className="w-50 h-12">Web Development</td>
 
                         </tr>
 
                         <tr className="text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
-                            <td className="h-12 w-50">00003</td>
-                            <td className="h-12 w-50">Analos Low</td>
-                            <td className="h-12 w-50">Broadcasting</td>
-                            <td className="h-12 w-50">Web Development</td>
+                            <td className="w-50 h-12">00003</td>
+                            <td className="w-50 h-12">Analos Low</td>
+                            <td className="w-50 h-12">Broadcasting</td>
+                            <td className="w-50 h-12">Web Development</td>
 
                         </tr>
 
                          <tr className="text-center">
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
                          </tr>
 
-                        <tr className=" opacity-85 text-center" style={{ backgroundColor: "#D2FFC8", color: "#black" }}>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
+                        <tr className=" opacity-85 text-center" style={{ backgroundColor: "#D2FFC8", color: "black" }}>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
                         </tr>
                         
-                            <tr className="text-center">
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
-                            <td className="h-12 w-50"></td>
+                            <tr className="text-center" >
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
+                            <td className="w-50 h-12"></td>
 
                         </tr>
                     </tbody>

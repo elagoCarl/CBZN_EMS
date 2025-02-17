@@ -34,8 +34,6 @@ const createAccessToken = (id) => {
     });
 };
 
-
-
 // Create refresh token
 const createRefreshToken = (id) => {
     return jwt.sign({ id }, REFRESH_TOKEN_SECRET, {
@@ -96,14 +94,24 @@ const generateAccessToken = async (req, res, next) => {
 const addUser = async (req, res, next) => {
     try {
         const {
+<<<<<<<<< Temporary merge branch 1
+            companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, birthdate, DepartmentId
+=========
             employeeId, first_name, surname, middle_name,
             email, contact_number, address, job_title, birthdate, departmentId, isAdmin
+>>>>>>>>> Temporary merge branch 2
         } = req.body;
 
-        const DefaultPassword = "UserPass123"; // Default password
+        const DefaultPassword = "UserPass123"; // Default password      
 
         // Validate mandatory fields
+<<<<<<<<< Temporary merge branch 1
+        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, birthdate, DepartmentId])) {
+=========
         if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
+>>>>>>>>> Temporary merge branch 2
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -128,13 +136,28 @@ const addUser = async (req, res, next) => {
         }
 
 
+        // Check if department exists
+        const existingDepartment = await Department.findByPk(DepartmentId   );
+        if (!existingDepartment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Department not found."
+            });
+        }
+
+        
 
         // Create and save the new user
         const newUser = await User.create({
             employeeId,
             first_name,
             surname,
+<<<<<<<<< Temporary merge branch 1
+            middle_initial,
+            birthdate,
+=========
             middle_name,
+>>>>>>>>> Temporary merge branch 2
             email,
             contact_number,
             address,
@@ -142,16 +165,24 @@ const addUser = async (req, res, next) => {
             birthdate,
             departmentId,
             password: DefaultPassword,
+<<<<<<<<< Temporary merge branch 1
+            isAdmin: false,
+            DepartmentId: DepartmentId
+=========
             isAdmin
+>>>>>>>>> Temporary merge branch 2
         });
 
         return res.status(201).json({
             successful: true,
-            message: "Successfully added new user. Verification email sent."
+            message: "Successfully added new user. Verification email sent.",
+            user: { id: newUser.id, name: newUser.name, email: newUser.email } // Returning basic details
         });
 
     } catch (err) {
-        console.error(err);
+        await t.rollback(); // Rollback transaction on error
+        console.error("Error in addUser:", err);
+
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
@@ -162,8 +193,13 @@ const addUser = async (req, res, next) => {
 const updateUserById = async (req, res, next) => {
     try {
         const {
+<<<<<<<<< Temporary merge branch 1
+            companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, status
+=========
             employeeId, first_name, surname, middle_name,
             email, contact_number, address, job_title, birthdate, departmentId, isAdmin
+>>>>>>>>> Temporary merge branch 2
         } = req.body;
 
         // Check if the user exists
@@ -176,7 +212,12 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
+<<<<<<<<< Temporary merge branch 1
+        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
+            email, contact_number, address, job_title, birthdate, department_id])) {
+=========
         if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
+>>>>>>>>> Temporary merge branch 2
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -192,7 +233,12 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Check if the email is already in use by another user
-        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: id } } });
+        const existingEmail = await User.findOne({
+            where: {
+                email,
+                id: { [Op.ne]: req.params.id }
+            }
+        });
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -200,19 +246,48 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
+<<<<<<<<< Temporary merge branch 1
+        // Check if the username is already in use by another user
+        const existingUsername = await User.findOne({ where: { username, id: { [Op.ne]: id } } });
+        if (existingUsername) {
+            return res.status(406).json({
+                successful: false,
+                message: "Username is already in use by another user."
+            });
+        }
+
+        // Check if the department exists
+        const existingDepartment = await Department.findByPk(DepartmentId);
+        if (!existingDepartment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Department not found."
+            });
+        }
+=========
+>>>>>>>>> Temporary merge branch 2
         // Update user data
         await user.update({
             employeeId,
             first_name,
             surname,
+<<<<<<<<< Temporary merge branch 1
+            middle_initial,
+            birthdate,
+=========
             middle_name,
+>>>>>>>>> Temporary merge branch 2
             email,
             contact_number,
             address,
             job_title,
+<<<<<<<<< Temporary merge branch 1
+            department_id
+=========
             birthdate,
             departmentId,
             isAdmin
+>>>>>>>>> Temporary merge branch 2
         });
 
         return res.status(200).json({
@@ -254,7 +329,6 @@ const getUserById = async (req, res, next) => {
         });
     }
 };
-
 
 const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
@@ -298,12 +372,12 @@ const loginUser = async (req, res, next) => {
 
         return res.status(201).json({
             successful: true,
-                message: "Successfully logged in.",
-                userEmail: user.email,
-                userPassword: user.password,
-                user: user.id,
-                accessToken: accessToken,
-                refreshToken: refreshToken
+            message: "Successfully logged in.",
+            userEmail: user.email,
+            userPassword: user.password,
+            user: user.id,
+            accessToken: accessToken,
+            refreshToken: refreshToken
         });
 
     } catch (err) {
@@ -431,15 +505,25 @@ const forgotPass = async (req, res) => {
     }
 };
 
-// CREATE GET ALL USER
 const getAllUsers = async (req, res, next) => {
     try {
         const users = await User.findAll();
+
+        if (!users || users.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No user found.",
+                count: 0,
+                data: [],
+            });
+        }
+
         res.status(200).send({
             successful: true,
             message: "Retrieved all users.",
             data: users
         });
+
     } catch (err) {
         res.status(500).send({
             successful: false,
@@ -450,6 +534,7 @@ const getAllUsers = async (req, res, next) => {
 
 
 
+>>>>>>>>> Temporary merge branch 2
 module.exports = {
     addUser,
     getUserById,

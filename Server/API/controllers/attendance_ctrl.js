@@ -1,4 +1,4 @@
-const { Attendance, User } = require("../models"); // Ensure models match
+const { Attendance, User, Schedule } = require("../models"); // Ensure models match
 const util = require("../../utils"); // Utility functions if needed
 
 // Create Attendance
@@ -23,6 +23,17 @@ const addAttendance = async (req, res) => {
             });
         }
 
+        const today = Date.now();   
+        const day = today.getDay();
+        const time = today.toLocaleTimeString();
+        const schedule = await Schedule.findOne({ where: { UserId } });
+        if (!schedule) {
+            return res.status(404).json({
+                successful: false,
+                message: "User schedule not found."
+            });
+        }
+
         // Create Attendance
         const newAttendance = await Attendance.create({
             UserId
@@ -35,7 +46,6 @@ const addAttendance = async (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
