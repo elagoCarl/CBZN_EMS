@@ -1,6 +1,5 @@
 const { User, EmgncyContact } = require('../models')
 const util = require('../../utils');
-const { get } = require('../routers/emgncy_contact_rtr');
 
 const addEmgncyContact = async (req, res, next) => {
     try {

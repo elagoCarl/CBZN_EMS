@@ -1,16 +1,23 @@
 module.exports = (sequelize, DataTypes) => {
     const Attendance = sequelize.define('Attendance', {
-        day: {
-            type: DataTypes.STRING,
+        weekday: {
+            type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
             allowNull: false,
             validate: {
-                notEmpty: { msg: "Status is required." }
+                notEmpty: { msg: "Day is required." }
             }
         },
         isRestDay: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        date: {
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: "Date is required." }
+            }
         },
         time_in: {
             type: DataTypes.DATE,
