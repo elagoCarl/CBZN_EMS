@@ -7,6 +7,7 @@ import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminDashboard from "./Components/adminDashboard.jsx"; 
 import EmployeeDashboard from "./Components/employeeDashboard.jsx";
+import EmployeeSettings from "./Components/employeeSettings.jsx";
 
 
 
@@ -23,10 +24,11 @@ function App() {
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
+          <Route path="/employeeSettings" element={<EmployeeSettings />} />
       </Routes>
       </Router>
     </>
   )
 }
 
-export default App
+export default App;

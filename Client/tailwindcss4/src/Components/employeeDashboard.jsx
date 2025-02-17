@@ -101,6 +101,7 @@ const EmployeeDashboard = () => {
           <div className="text-white hover:bg-gray-900 duration-300 px-4 py-2 rounded cursor-pointer">Home</div>
           <div className="text-white hover:bg-gray-900 duration-300  px-4 py-2 rounded cursor-pointer">Attendance</div>
           <div className="text-white hover:bg-gray-900 duration-300  px-4 py-2 rounded cursor-pointer">Reports</div>
+          <div className="text-white hover:bg-gray-900 duration-300  px-4 py-2 rounded cursor-pointer">Settings</div>
         </nav>
 
         <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
