@@ -1,5 +1,3 @@
-const bcrypt = require('bcrypt');
-
 module.exports = (sequelize, DataTypes) => {
     const UserInfo = sequelize.define('UserInfo', {
         age : { 
@@ -46,11 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
     });
     UserInfo.associate = (models) => {
-        UserInfo.belongsTo(models.Schedule, {
-        });
-        UserInfo.hasOne(models.Attendance, {
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+        UserInfo.belongsTo(models.User, {
         });
     };
     return UserInfo;

@@ -92,16 +92,14 @@ const generateAccessToken = async (req, res, next) => {
 
 
 const addUser = async (req, res, next) => {
-    try {
-        const {
-            employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin
-        } = req.body;
+    const t = await User.sequelize.transaction(); // Start transaction
 
-        const DefaultPassword = "UserPass123"; // Default password      
+    try {
+        const { employeeId, name, email, isAdmin, employment_status } = req.body;
+        const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,    DepartmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([employeeId, name, email])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -125,40 +123,31 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if department exists
-        const existingDepartment = await Department.findByPk(   DepartmentId   );
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
+        // Create new user with a hashed password
+        const newUser = await User.create(
+            {
+                employeeId,
+                name,
+                email,
+                password: DefaultPassword,
+                isAdmin: isAdmin || false, // Default to false if not provided
+                employment_status: employment_status || 'Employee' // Default to 'Employee'
+            },
+            { transaction: t }
+        );
 
-        
-
-        // Create and save the new user
-        const newUser = await User.create({
-            employeeId,
-            first_name,
-            surname,
-            middle_name,
-            email,
-            contact_number,
-            address,
-            job_title,
-            birthdate,
-               DepartmentId,
-            password: DefaultPassword,
-            isAdmin
-        });
+        await t.commit(); // Commit transaction
 
         return res.status(201).json({
             successful: true,
-            message: "Successfully added new user. Verification email sent."
+            message: "Successfully added new user. Verification email sent.",
+            user: { id: newUser.id, name: newUser.name, email: newUser.email } // Returning basic details
         });
 
     } catch (err) {
-        console.error(err);
+        await t.rollback(); // Rollback transaction on error
+        console.error("Error in addUser:", err);
+
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
@@ -168,7 +157,7 @@ const addUser = async (req, res, next) => {
 
 const updateUserById = async (req, res, next) => {
     try {
-        const { employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin } = req.body;
+        const { name, email, isAdmin, employment_status } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);
@@ -180,7 +169,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([name, email])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -196,7 +185,12 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Check if the email is already in use by another user
-        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: req.params.id } } });
+        const existingEmail = await User.findOne({
+            where: {
+                email,
+                id: { [Op.ne]: req.params.id }
+            }
+        });
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -214,14 +208,10 @@ const updateUserById = async (req, res, next) => {
         }
         // Update user data
         await user.update({
-            employeeId,
-            first_name,
-            surname,
-            middle_name,
+            name,
             email,
-            contact_number,
-            address,
-            job_title
+            isAdmin: isAdmin || user.isAdmin, // Only update if provided
+            employment_status: employment_status || user.employment_status // Default to existing status if not provided
         });
 
         return res.status(200).json({
