@@ -1,6 +1,6 @@
-const { User, Session, Department } = require('../models'); // Ensure model name matches exported model
+const { User, Session } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
@@ -97,13 +97,13 @@ const addUser = async (req, res, next) => {
     try {
         const {
             employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin
+            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
         } = req.body;
 
-        const DefaultPassword = "UserPass123"; // Default password      
+        const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,    DepartmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -127,16 +127,7 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if department exists
-        const existingDepartment = await Department.findByPk(   DepartmentId   );
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
 
-        
 
         // Create and save the new user
         const newUser = await User.create({
@@ -149,7 +140,7 @@ const addUser = async (req, res, next) => {
             address,
             job_title,
             birthdate,
-               DepartmentId,
+            departmentId,
             password: DefaultPassword,
             isAdmin
         });
@@ -172,7 +163,7 @@ const updateUserById = async (req, res, next) => {
     try {
         const {
             employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, DepartmentId, isAdmin
+            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
         } = req.body;
 
         // Check if the user exists
@@ -185,7 +176,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate,   DepartmentId, isAdmin])) {
+        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -201,7 +192,7 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Check if the email is already in use by another user
-        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: req.params.id } } });
+        const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: id } } });
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -209,14 +200,6 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
-        // Check if the department exists
-        const existingDepartment = await Department.findByPk(  DepartmentId);
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
         // Update user data
         await user.update({
             employeeId,
@@ -226,7 +209,10 @@ const updateUserById = async (req, res, next) => {
             email,
             contact_number,
             address,
-            job_title
+            job_title,
+            birthdate,
+            departmentId,
+            isAdmin
         });
 
         return res.status(200).json({
@@ -312,7 +298,12 @@ const loginUser = async (req, res, next) => {
 
         return res.status(201).json({
             successful: true,
-            message: "Successfully logged in."
+                message: "Successfully logged in.",
+                userEmail: user.email,
+                userPassword: user.password,
+                user: user.id,
+                accessToken: accessToken,
+                refreshToken: refreshToken
         });
 
     } catch (err) {
@@ -456,6 +447,8 @@ const getAllUsers = async (req, res, next) => {
         });
     }
 }
+
+
 
 module.exports = {
     addUser,
