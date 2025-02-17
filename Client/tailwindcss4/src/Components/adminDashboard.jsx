@@ -137,14 +137,14 @@ const AdminDashboard = () => {
         {/* Responsive Filters and Search */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
           <div className="flex gap-2">
-            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base">
-              <option>Employee</option>
-              <option>Intern</option>
-              <option>Inactive</option>
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
+              <option className='bg-white text-black'>Employee</option>
+              <option className='bg-white text-black'>Intern</option>
+              <option className='bg-white text-black'>Inactive</option>
             </select>
-            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base">
-              <option>Active</option>
-              <option>Archive</option>
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
+              <option className='bg-white text-black'>Active</option>
+              <option className='bg-white text-black'>Archive</option>
             </select>
           </div>
           <div className="relative">
@@ -212,10 +212,10 @@ const AdminDashboard = () => {
 
         {/* Responsive Time Buttons */}
         <div className="flex justify-end mt-2 gap-2">
-          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base">
+          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
             TIME-IN
           </button>
-          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base">
+          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40">
             TIME-OUT
           </button>
         </div>
