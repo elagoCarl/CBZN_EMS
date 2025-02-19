@@ -4,11 +4,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: false
         },
-        time_in: {
+        start_time: {
             type: DataTypes.TIME,
             allowNull: false
         },
-        time_out: {
+        end_time: {
             type: DataTypes.TIME,
             allowNull: false
         },
@@ -17,20 +17,33 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         status: {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.ENUM('pending', 'approved', 'denied'),
+            allowNull: false,
+            defaultValue: 'pending'
+        },
+        review_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
         }
-    }, {timestamps: true});
+    },
+    {
+        timepstamps: true
+
+    });
+     
 
     OvertimeRequest.associate = (models) => {
         OvertimeRequest.belongsTo(models.User, {
-            foreignKey: 'reviewer_id'
+            foreignKey: 'reviewer_id',
+           
         }),
 
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
+           
 
         });
     }
     return OvertimeRequest;
+
 }

@@ -1,16 +1,27 @@
 module.exports = (sequelize, DataTypes) => {
     const Attendance = sequelize.define('Attendance', {
-        day: {
-            type: DataTypes.STRING,
+        weekday: {
+            type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
             allowNull: false,
             validate: {
-                notEmpty: { msg: "Status is required." }
+                notEmpty: { msg: "Day is required." }
             }
         },
         isRestDay: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
+        },
+        site : {
+            type: DataTypes.ENUM('Onsite', 'Remote'),
+            allowNull: true
+        },
+        date: {
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+            validate: {
+                notEmpty: { msg: "Date is required." }
+            }
         },
         time_in: {
             type: DataTypes.DATE,
@@ -26,5 +37,5 @@ module.exports = (sequelize, DataTypes) => {
     Attendance.associate = (models) => {
         Attendance.belongsTo(models.User)
     }
-    return Attendance;
+    return Attendance;
 }
