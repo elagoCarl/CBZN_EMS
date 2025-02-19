@@ -151,7 +151,7 @@ const EmployeeDashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 mt-40">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 mt-20">
           <h1 className="text-xl md:text-2xl text-white sm:mb-auto md:mb-[-4rem] xl:mb-[-6rem] duration-300 transition-shadow">
             Hello, <span className="text-green-500">Employee</span>
           </h1>
