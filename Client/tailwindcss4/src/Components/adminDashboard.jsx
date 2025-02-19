@@ -9,7 +9,7 @@ const AdminDashboard = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
-  const profileRef = useRef(null);  //dropdowns
+  const profileRef = useRef(null);
 
   // Handle window resize
   useEffect(() => {
@@ -18,23 +18,23 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-    // Close dropdown when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isProfileOpen]);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  // Determine number of users per page based on screen size
-  const usersPerPage = windowWidth < 768 ? 5 : 11;
+  // Reset to first page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
+  // Timer for real-time clock
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Your existing format functions
+  // Format functions
   const formatDate = (date) => {
     const parts = date.toLocaleDateString('en-US', {
       month: '2-digit',
@@ -63,7 +63,6 @@ const AdminDashboard = () => {
       second: '2-digit',
       hour12: true
     });
-
     const [time, period] = timeString.split(' ');
     return (
       <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
@@ -79,18 +78,32 @@ const AdminDashboard = () => {
     { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
     { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
     { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
-    { id: '212236', name: 'Simon Masucol', department: 'Broadcast', title: 'Web dev' },
-    { id: '212546', name: 'John Trasporto', department: 'IT Department', title: 'Intern' },
-    { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
-    { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
-    { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
-    
+    { id: '215236', name: 'David Wilson', department: 'Marketing', title: 'Content Manager' },
+    { id: '216546', name: 'Sarah Johnson', department: 'Sales', title: 'Sales Representative' },
+    { id: '217578', name: 'Michael Brown', department: 'Engineering', title: 'Software Engineer' },
+    { id: '218631', name: 'Emma Davis', department: 'Design', title: 'UI/UX Designer' },
+    { id: '219205', name: 'James Miller', department: 'Finance', title: 'Financial Analyst' }
   ];
 
+  // Filter users based on search query
+  const filteredUsers = users.filter(user =>
+    user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Determine number of users per page based on screen size
+  const usersPerPage = windowWidth < 768 ? 8 : 12;
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Use filteredUsers for pagination so search results are paginated correctly
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-black/90">
@@ -106,7 +119,7 @@ const AdminDashboard = () => {
       <div className={`${
         isNavOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
-        {/* Your existing sidebar content */}
+        {/* Sidebar content */}
         <div className="mb-8">
           <div className="w-full text-white p-4 flex justify-center items-center">
             <img src={logo} alt="Logo" className="h-12 w-auto" />
@@ -124,7 +137,7 @@ const AdminDashboard = () => {
           </nav>
         </div>
 
-                {/* Profile Section with Clickable Dropdown */}
+        {/* Profile Section with Clickable Dropdown */}
         <div className="mt-auto relative" ref={profileRef}>
           <div
             className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
@@ -149,8 +162,7 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>    
-        </div>
-
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
@@ -172,7 +184,7 @@ const AdminDashboard = () => {
         {/* Responsive Filters and Search */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
           <div className="flex gap-2">
-            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
               <option className='bg-white text-black'>Employee</option>
               <option className='bg-white text-black'>Intern</option>
               <option className='bg-white text-black'>Inactive</option>
@@ -229,7 +241,7 @@ const AdminDashboard = () => {
 
           {/* Responsive Pagination */}
           <div className="bg-[#2b2b2b] py-2 px-2 md:px-4 flex justify-center gap-1">
-            {Array.from({ length: Math.ceil(users.length / usersPerPage) }).map((_, index) => (
+            {Array.from({ length: totalPages }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => paginate(index + 1)}
@@ -238,6 +250,7 @@ const AdminDashboard = () => {
                     ? 'bg-green-600 text-white'
                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                 }`}
+                disabled={currentPage === index + 1}
               >
                 {index + 1}
               </button>
