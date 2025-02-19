@@ -116,6 +116,14 @@ const addUser = async (req, res, next) => {
 
         // Check if the email already exists
         const existingEmail = await User.findOne({ where: { email } });
+        const existingEmployeeId = await User.findOne({ where: { employeeId } });
+        
+        if (existingEmployeeId) {
+            return res.status(406).json({
+                successful: false,
+                message: "Employee ID already exists. Please provide a different Employee ID."
+            });
+        }
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
