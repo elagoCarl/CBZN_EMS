@@ -21,6 +21,8 @@ const department_rtr = require('./API/routers/department_rtr')
 const user_info_rtr = require('./API/routers/user_info_rtr')
 const emgncy_contact_rtr = require('./API/routers/emgncy_contact_rtr')
 const sched_adjustment_rtr = require('./API/routers/sched_adjustment_rtr')
+const job_title_rtr = require ('./API/routers/job_title_rtr')
+const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -98,6 +100,9 @@ app.use('/department', department_rtr)
 app.use('/userInfo', user_info_rtr)
 app.use('/emgncyContact', emgncy_contact_rtr)
 app.use('/schedAdjustment', sched_adjustment_rtr)
+app.use('/jobtitle', job_title_rtr)
+app.use('/OTrequests', overtime_request_rtr)
+
 
 
 //ERROR MIDDLEWARES
