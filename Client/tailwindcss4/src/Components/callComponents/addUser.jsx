@@ -1,128 +1,159 @@
-import React from 'react';
+import { useState } from 'react';
 
 const AddUser = () => {
-  return (
-    <div className="min-h-screen w-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="bg-black/90 bg-opacity-90 shadow-2xl w-full max-w-4xl flex flex-col items-center p-8 justify-center rounded-lg my-5">
-          <h1 className="text-3xl font-bold text-center text-white mb-6">Add User</h1>
+  const [formData, setFormData] = useState({});
 
-          <form className="space-y-6 w-full">
-            {/* Company Info Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Employee ID</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Employee ID"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Department</label>
-                <select
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white">
-                  <option value="" className="bg-black/80">Select Department</option>
-                  <option value="it" className="bg-black/80">IT</option>
-                  <option value="hr" className="bg-black/80">HR</option>
-                  <option value="finance" className="bg-black/80">Finance</option>
-                  <option value="operations" className="bg-black/80">Operations</option>
-                </select>
-              </div>
-            </div>
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-            {/* Position Info Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Job Title</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Job Title"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Role</label>
-                <select
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white">
-                  <option value="" className="bg-black/80">Select Role</option>
-                  <option value="admin" className="bg-black/80">Admin</option>
-                  <option value="employee" className="bg-black/80">Employee</option>
-                </select>
-              </div>
-            </div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
 
-            {/* Rest of the form remains unchanged */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">First Name</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter First Name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Last Name</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Last Name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Middle Name</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Middle Name"
-                />
-              </div>
-            </div>
+  const inputClass = "w-full p-2 sm:p-3 rounded-lg bg-white/10 focus:outline focus:outline-green-400 text-white text-sm sm:text-base";
+  const selectClass = "w-full p-2 sm:p-3 rounded-lg bg-white/10 focus:outline focus:outline-green-400 text-white text-sm sm:text-base";
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Email Address</label>
-                <input
-                  type="email"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter your email..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Contact Number</label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                  placeholder="Enter Mobile Number..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Birthdate</label>
-                <input
-                  type="date"
-                  className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                />
-              </div>
-            </div>
+  const formSections = {
+    company: [
+      { name: 'employeeId', placeholder: 'Employee ID', type: 'text' },
+      {
+        name: 'department',
+        type: 'select',
+        placeholder: 'Select Department',
+        options: ['IT', 'HR', 'Finance', 'Operations']
+      }
+    ],
+    position: [
+      { name: 'jobTitle', placeholder: 'Job Title', type: 'text' },
+      {
+        name: 'role',
+        type: 'select',
+        placeholder: 'Select Role',
+        options: ['Admin', 'Employee']
+      }
+    ],
+    personal: [
+      { name: 'firstName', placeholder: 'First Name', type: 'text' },
+      { name: 'lastName', placeholder: 'Last Name', type: 'text' },
+      { name: 'middleName', placeholder: 'Middle Name', type: 'text' },
+      { name: 'email', placeholder: 'Email Address', type: 'email' },
+      { name: 'mobile', placeholder: 'Mobile Number', type: 'tel' },
+      { name: 'birthDate', placeholder: 'Birth Date', type: 'date' }
+    ],
+    address: [
+      { name: 'homeAddress', placeholder: 'Home Address', type: 'text' },
+      { name: 'provincialAddress', placeholder: 'Provincial Address', type: 'text' }
+    ],
+    userInfo: [
+      { name: 'age', placeholder: 'Age', type: 'number' },
+      { name: 'height', placeholder: 'Height', type: 'number' },
+      { name: 'weight', placeholder: 'Weight', type: 'number' },
+      { name: 'citizenship', placeholder: 'Citizenship', type: 'text' },
+      { name: 'religion', placeholder: 'Religion', type: 'text' },
+      { name: 'nickname', placeholder: 'Nickname', type: 'text' },
+      { name: 'civilStatus', placeholder: 'Civil Status', type: 'text' },
+      { name: 'siblings', placeholder: 'No. of Siblings', type: 'number' },
+      { name: 'children', placeholder: 'No. of Children', type: 'number' }
+    ],
+    family: [
+      { name: 'spouseName', placeholder: "Spouse's Name", type: 'text' },
+      { name: 'spouseOccupation', placeholder: "Spouse's Occupation", type: 'text' },
+      { name: 'spouseEmployer', placeholder: 'Employer', type: 'text' },
+      { name: 'motherName', placeholder: "Mother's Name", type: 'text' },
+      { name: 'motherOccupation', placeholder: "Mother's Occupation", type: 'text' },
+      { name: 'motherEmployer', placeholder: 'Employer', type: 'text' },
+      { name: 'fatherName', placeholder: "Father's Name", type: 'text' },
+      { name: 'fatherOccupation', placeholder: "Father's Occupation", type: 'text' },
+      { name: 'fatherEmployer', placeholder: 'Employer', type: 'text' }
+    ],
+    emergency: [
+      { name: 'emergencyName', placeholder: 'Name', type: 'text' },
+      { name: 'emergencyRelation', placeholder: 'Relationship', type: 'text' },
+      { name: 'emergencyContact', placeholder: 'Contact Number', type: 'tel' },
+      { name: 'emergencyAddress', placeholder: 'Home Address', type: 'text' },
+      { name: 'emergencyProvincial', placeholder: 'Provincial Address', type: 'text' }
+    ]
+  };
 
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">Address</label>
-              <input
-                type="text"
-                className="w-full p-3 rounded-lg bg-white/10 focus:border-none focus:outline focus:outline-green-400 shadow-sm text-white"
-                placeholder="Enter Address..."
-              />
-            </div>
+  const renderField = (field) => {
+    const fieldWrapper = "mb-2 sm:mb-0";
 
-            <button
-              type="submit"
-              className="w-full bg-green-500 text-white py-3 rounded-lg shadow-md hover:bg-green-600"
-            >
-              Submit
-            </button>
-          </form>
+    if (field.type === 'select') {
+      return (
+        <div key={field.name} className={fieldWrapper}>
+          <select
+            name={field.name}
+            onChange={handleChange}
+            className={selectClass}
+          >
+            <option value="">{field.placeholder}</option>
+            {field.options.map(opt => (
+              <option key={opt} value={opt.toLowerCase()} className="bg-black/80">
+                {opt}
+              </option>
+            ))}
+          </select>
         </div>
+      );
+    }
+    return (
+      <div key={field.name} className={fieldWrapper}>
+        <input
+          type={field.type}
+          name={field.name}
+          placeholder={field.placeholder}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </div>
+    );
+  };
+
+  const renderSection = (title, fields, cols) => {
+    // Define grid columns based on screen size
+    const gridClass = {
+      2: "grid grid-cols-1 sm:grid-cols-2 gap-4",
+      3: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    }[cols];
+
+    return (
+      <div className="space-y-4">
+        {title && (
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-green-600 mt-8">
+            {title}
+          </h2>
+        )}
+        <div className={gridClass}>
+          {fields.map(renderField)}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen w-full p-2 sm:p-4 bg-gray-900">
+      <div className="max-w-5xl mx-auto bg-black/90 p-4 sm:p-8 rounded-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-600 mb-6 sm:mb-8">
+          Add User
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          {renderSection(null, formSections.company, 2)}
+          {renderSection(null, formSections.position, 2)}
+          {renderSection(null, formSections.personal, 3)}
+          {renderSection(null, formSections.address, 2)}
+          {renderSection('User Info', formSections.userInfo, 3)}
+          {renderSection('Family Information', formSections.family, 3)}
+          {renderSection('Emergency Contact', formSections.emergency, 3)}
+
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white py-2 sm:py-3 rounded-lg shadow-md hover:bg-green-600 text-sm sm:text-base mt-8"
+          >
+            Submit
+          </button>
+        </form>
       </div>
     </div>
   );

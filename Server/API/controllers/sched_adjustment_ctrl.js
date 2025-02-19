@@ -84,7 +84,39 @@ const updateSchedAdjustment = async (req, res) => {
     }
 };
 
+
+const getAllSchedAdjustments = async (req, res) => {
+    try {
+        const adjustments = await ScheduleAdjustment.findAll();
+        return res.status(200).json({ successful: true, data: adjustments });
+    } catch (error) {
+        console.error("Error fetching schedule adjustments:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
+
+const getSchedAdjustmentById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const adjustment = await ScheduleAdjustment.findByPk(id);
+        
+        if (!adjustment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Schedule adjustment not found."
+            });
+        }
+        
+        return res.status(200).json({ successful: true, data: adjustment });
+    } catch (error) {
+        console.error("Error fetching schedule adjustment by ID:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+};
+
 module.exports = {
     addSchedAdjustment,
     updateSchedAdjustment,
+    getAllSchedAdjustments,
+    getSchedAdjustmentById
 };
