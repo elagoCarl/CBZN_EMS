@@ -3,14 +3,13 @@ import { Menu, X, Eye, EyeOff } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 import defaulticon from '../Components/Img/default-icon.png';
 
+
 const EmployeeSettings = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
-    const [setWindowWidth] = useState(window.innerWidth);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [profilePic, setProfilePic] = useState(null);
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -71,10 +70,11 @@ const EmployeeSettings = () => {
             reader.readAsDataURL(file);
         }
     };
+    
 
-    const handleSaveChanges = () => {
-        // Handle save changes logic here
-        console.log('Changes saved:', { username, email, contactNumber });
+    const handleEmailChange = () => {
+        // Handle email change logic here
+        console.log('Changes saved:', { email });
     };
 
     const handlePasswordChange = () => {
@@ -94,7 +94,7 @@ const EmployeeSettings = () => {
 
             <div className={`${isNavOpen ? 'translate-x-0' : '-translate-x-full'
                 } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
-                
+
                 <div className="mb-8">
                     <div className="w-full text-white p-4 flex justify-center items-center">
                         <img src={logo} alt="Logo" className="h-8 w-auto" />
@@ -119,11 +119,9 @@ const EmployeeSettings = () => {
                 </div>
             </div>
 
-            {/* Account settengs */}
-
             <div className="flex-1 p-4 md:p-6 flex flex-col">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <h1 className="text-6xl px-15  text-white mb-4 md:mb-0"> {/* md:text-2xl */}
+                    <h1 className="text-xl md:text-5xl text-white mb-4 ml-10 md:mb-0">
                         Account Settings
                     </h1>
                     <div className="flex flex-col items-center">
@@ -137,116 +135,115 @@ const EmployeeSettings = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-6 py-15 justify-center">
-                    {/* Profile Section */}
-                    <div className="bg-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-lg mx-auto md:mx-0">
-                        <h2 className="text-xl font-bold mb-4">Profile</h2>
-                        <div className="flex flex-col items-center mb-4">
-                            <div className="relative">
-                                <img
-                                    src={profilePic || 'https://via.placeholder.com/150'}
-                                    alt="Profile"
-                                    className="w-24 h-24 rounded-full object-cover"
-                                />
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={handleProfilePicChange}
-                                />
-                            </div>
-                        </div>
-                        <div className="mb-4 w-full">
-                            <label className="block text-gray-700">Username</label>
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
-                        </div>
-                        <div className="mb-4 w-full">
-                            <label className="block text-gray-700">Email</label>
-                            <input
-                                type="email"
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div className="mb-4 w-full">
-                            <label className="block text-gray-700">Contact Number</label>
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={contactNumber}
-                                onChange={(e) => setContactNumber(e.target.value)}
-                            />
-                        </div>
-                        <button
-                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                            onClick={handleSaveChanges}
-                        >
-                            Save Changes
-                        </button>
+    {/* Profile and Change Password Section */}
+    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[800px]">
+        <div className="flex flex-col md:flex-row h-full">
+            {/* Left Column - Titles */}
+            <div className="flex flex-col md:w-1/3">
+                <h2 className="text-xl text-white mb-4 md:text-3xl">Profile</h2>
+                <h3 className="text-xl text-white mb-4 md:text-3xl mt-90">Change Password</h3>
+            </div>
+
+            {/* Right Column */}
+            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 min-h-[800px] absolute top-0 right-0 bottom-0">
+
+                {/* Top Section - Two Columns: Profile Pic and Email */}
+                <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+                    {/* Profile Pic */}
+                    <div className="relative">
+                        <img
+                            src={profilePic || 'https://via.placeholder.com/150'}
+                            alt="Profile"
+                            className="w-50 h-40 rounded-full object-cover"
+                        />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={handleProfilePicChange}
+                        />
                     </div>
 
-                    {/* Password Change Section */}
-                    <div className="bg-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-lg mx-auto md:mx-0">
-                        <h2 className="text-xl font-bold mb-31.5">Change Password</h2>
-                        <div className="mb-4 w-full relative">
-                            <label className="block text-gray-700">Old Password</label>
-                            <input
-                                type={showOldPassword ? 'text' : 'password'}
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={oldPassword}
-                                onChange={(e) => setOldPassword(e.target.value)}
-                            />
-                            <button
+                    {/* Email Input */}
+                    <div className="relative w-full">
+                        <input
+                            type="email"
+                            placeholder="EMAIL ADDRESS"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Change Button */}
+                <div className="flex justify-end mb-6">
+                    <button
+                        className="bg-green-600 text-white px-7 py-2 rounded hover:bg-green-700"
+                        onClick={handleEmailChange}
+                    >
+                        Change Email
+                    </button>
+                </div>
+
+                {/* Password Fields */}
+                <div className="mt-40">
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showOldPassword ? 'text' : 'password'}
+                            placeholder="OLD PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                        />
+                        <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 px-3 py-11 flex items-center"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
                                 onMouseDown={() => setShowOldPassword(true)}
                                 onMouseUp={() => setShowOldPassword(false)}
                                 onMouseLeave={() => setShowOldPassword(false)}
                             >
                                 {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                        <div className="mb-4 w-full  relative">
-                            <label className="block text-gray-700">New Password</label>
-                            <input
-                                type={showNewPassword ? 'text' : 'password'}
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                            />
-                            <button
+                        </button>
+                        
+                    </div>
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            placeholder="NEW PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 px-3 py-11 flex items-center"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
                                 onMouseDown={() => setShowNewPassword(true)}
                                 onMouseUp={() => setShowNewPassword(false)}
                                 onMouseLeave={() => setShowNewPassword(false)}
                             >
                                 {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
-                        <div className="mb-4 w-full relative">
-                            <label className="block text-gray-700">Confirm Password</label>
-                            <input
-                                type={showConfirmPassword ? 'text' : 'password'}
-                                className="w-full p-2 border border-gray-300 rounded"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                            <button
+                        </button>
+                    </div>
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="CONFIRM PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 px-3 py-11 flex items-center"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
                                 onMouseDown={() => setShowConfirmPassword(true)}
                                 onMouseUp={() => setShowConfirmPassword(false)}
                                 onMouseLeave={() => setShowConfirmPassword(false)}
                             >
                                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
+                        </button>
+                    </div>
+                    <div className="flex justify-end w-full mt-8">
                         <button
                             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                             onClick={handlePasswordChange}
@@ -255,6 +252,14 @@ const EmployeeSettings = () => {
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
             </div>
 
             {/* Mobile Nav Overlay */}
