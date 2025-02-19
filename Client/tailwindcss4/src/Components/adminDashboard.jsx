@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
-import axios from 'axios';
 
 const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,9 +8,8 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [users, setUsers] = useState([]);  // State for storing users
-  const profileRef = useRef(null); // dropdowns
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const profileRef = useRef(null);
 
   // Handle window resize
   useEffect(() => {
@@ -27,34 +25,16 @@ const AdminDashboard = () => {
         setIsProfileOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isProfileOpen]);
-
-  // Fetch all users on component mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/users/getAllUser'); // Adjust the URL as needed
-        if (response.data.successful) {
-          setUsers(response.data.data); // Store fetched users
-        } else {
-          console.error('Failed to fetch users:', response.data.message);
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    };
-
-    fetchUsers();
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Determine number of users per page based on screen size
-  const usersPerPage = windowWidth < 768 ? 10 : 11;
+  // Reset to first page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
+  // Timer for real-time clock
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -62,12 +42,12 @@ const AdminDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Your existing format functions
+  // Format functions
   const formatDate = (date) => {
     const parts = date.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
-      year: 'numeric',
+      year: 'numeric'
     }).split('/');
     return (
       <div className="text-center">
@@ -81,9 +61,8 @@ const AdminDashboard = () => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true,
+      hour12: true
     });
-
     const [time, period] = timeString.split(' ');
     return (
       <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
@@ -92,15 +71,44 @@ const AdminDashboard = () => {
     );
   };
 
+  // Simplified user data for mobile
+  const users = [
+    { id: '212236', name: 'Simon Masucol', department: 'Broadcast', title: 'Web dev' },
+    { id: '212546', name: 'John Trasporto', department: 'IT Department', title: 'Intern' },
+    { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
+    { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
+    { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
+    { id: '215236', name: 'David Wilson', department: 'Marketing', title: 'Content Manager' },
+    { id: '216546', name: 'Sarah Johnson', department: 'Sales', title: 'Sales Representative' },
+    { id: '217578', name: 'Michael Brown', department: 'Engineering', title: 'Software Engineer' },
+    { id: '218631', name: 'Emma Davis', department: 'Design', title: 'UI/UX Designer' },
+    { id: '219205', name: 'James Miller', department: 'Finance', title: 'Financial Analyst' }
+  ];
+
+  // Filter users based on search query
+  const filteredUsers = users.filter(user =>
+    user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Determine number of users per page based on screen size
+  const usersPerPage = windowWidth < 768 ? 8 : 12;
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // Use filteredUsers for pagination so search results are paginated correctly
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-black/90">
       {/* Mobile Nav Toggle */}
-      <button
+      <button 
         onClick={() => setIsNavOpen(!isNavOpen)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
       >
@@ -108,11 +116,10 @@ const AdminDashboard = () => {
       </button>
 
       {/* Sidebar - Hidden on mobile by default */}
-      <div
-        className={`${isNavOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}
-      >
-        {/* Your existing sidebar content */}
+      <div className={`${
+        isNavOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
+        {/* Sidebar content */}
         <div className="mb-8">
           <div className="w-full text-white p-4 flex justify-center items-center">
             <img src={logo} alt="Logo" className="h-12 w-auto" />
@@ -154,7 +161,7 @@ const AdminDashboard = () => {
               </button>
             </div>
           )}
-        </div>
+        </div>    
       </div>
 
       {/* Main Content */}
@@ -177,15 +184,14 @@ const AdminDashboard = () => {
         {/* Responsive Filters and Search */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
           <div className="flex gap-2">
-            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
-              <option className="bg-white text-black">All Users</option>
-              <option className="bg-white text-black">Employee</option>
-              <option className="bg-white text-black">Intern</option>
-              <option className="bg-white text-black">Inactive</option>
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
+              <option className='bg-white text-black'>Employee</option>
+              <option className='bg-white text-black'>Intern</option>
+              <option className='bg-white text-black'>Inactive</option>
             </select>
             <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
-              <option className="bg-white text-black">All Users</option>
-              <option className="bg-white text-black">Admin</option>
+              <option className='bg-white text-black'>Active</option>
+              <option className='bg-white text-black'>Archive</option>
             </select>
           </div>
           <div className="relative">
@@ -207,20 +213,20 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                   <tr>
-                    <th className="text-[#4E9F48] text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Employee ID</th>
-                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Email</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Name</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Employment Status</th>
+                    <th className="text-[#4E9F48] text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">ID</th>
+                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Name</th>
+                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Department</th>
+                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Job Title</th>
                     <th className="text-white text-left py-2 md:py-3 px-2 md:px-4"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentUsers.map((user) => (
                     <tr key={user.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.employeeId}</td>
-                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.email}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.name}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.employment_status}</td>
+                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.id}</td>
+                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.name}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.department}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.title}</td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4">
                         <button className="bg-green-600 hover:bg-green-800 duration-300 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
                           Edit
@@ -235,14 +241,16 @@ const AdminDashboard = () => {
 
           {/* Responsive Pagination */}
           <div className="bg-[#2b2b2b] py-2 px-2 md:px-4 flex justify-center gap-1">
-            {Array.from({ length: Math.ceil(users.length / usersPerPage) }).map((_, index) => (
+            {Array.from({ length: totalPages }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => paginate(index + 1)}
-                className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${currentPage === index + 1
+                className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${
+                  currentPage === index + 1
                     ? 'bg-green-600 text-white'
                     : 'bg-[#363636] text-white hover:bg-[#404040]'
-                  }`}
+                }`}
+                disabled={currentPage === index + 1}
               >
                 {index + 1}
               </button>
@@ -263,7 +271,7 @@ const AdminDashboard = () => {
 
       {/* Mobile Nav Overlay */}
       {isNavOpen && (
-        <div
+        <div 
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
           onClick={() => setIsNavOpen(false)}
         />
