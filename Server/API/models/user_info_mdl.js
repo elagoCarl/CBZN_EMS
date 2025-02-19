@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        employed_by: {
+        spouse_employed_by: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -37,6 +37,42 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         father_occupation: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        father_employed_by: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        height: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        weight: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        religion: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        citizenship: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        no_of_children: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_occupation: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_employed_by: {
             type: DataTypes.STRING,
             allowNull: false
         },
