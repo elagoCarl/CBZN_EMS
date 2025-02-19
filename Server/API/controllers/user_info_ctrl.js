@@ -6,13 +6,20 @@ const addUserInfo = async (req, res, next) => {
     try {
         const {
             age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation, UserId
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
         } = req.body;
 
         // Check if any mandatory fields are missing
-        if (!util.checkMandatoryFields([age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by, father_name, father_occupation, UserId])) {
+        if (!util.checkMandatoryFields([
+            age, city_add, provincial_add, birthdate, civil_status,
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
+        ])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -40,8 +47,10 @@ const addUserInfo = async (req, res, next) => {
         // Create UserInfo
         await UserInfo.create({
             age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation, UserId
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
         });
 
         return res.status(201).json({
@@ -56,6 +65,7 @@ const addUserInfo = async (req, res, next) => {
         });
     }
 };
+
 
 
 
