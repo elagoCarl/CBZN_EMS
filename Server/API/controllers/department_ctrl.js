@@ -80,7 +80,7 @@ const getDepartment = async (req, res) => {
 const updateDepartment = async (req, res) => {
 
     try {
-        const { name } = req.body;
+        const { name, isActive } = req.body;
 
         if (!name) {
             return res.status(400).json({
@@ -109,7 +109,7 @@ const updateDepartment = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             successful: false,
-            message: `Error updatidsafasdasng department: ${error}`,
+            message: `Error updating department: ${error}`,
         });
     }
 }

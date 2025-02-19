@@ -92,6 +92,7 @@ module.exports = (sequelize, DataTypes) => {
 
         // Other existing associations
         User.belongsTo(models.Schedule);
+        User.belongsTo(models.JobTitle);
         User.hasMany(models.Attendance, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
