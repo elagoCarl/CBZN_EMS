@@ -17,3 +17,4 @@ db.sequelize.sync({ alter: true }) // Change `force` to `true` only for developm
   .catch((err) => {
     console.error('Failed to connect and sync database:', err);
   });
+  

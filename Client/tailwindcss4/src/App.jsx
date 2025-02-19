@@ -6,11 +6,12 @@ import ViewEmployee from "./Components/viewEmploy.jsx";
 
 import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
-import EditUser from './Components/callComponents/editUser.jsx';
+import AdminDashboard from "./Components/adminDashboard.jsx"; 
+import EmployeeDashboard from "./Components/employeeDashboard.jsx";
 
 
 
-function App() {
+function App() {dasdzxcaseqwe
   return (
     <>
       <Router>
@@ -21,7 +22,8 @@ function App() {
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           <Route path="/adminEms" element={<AdminEms />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
-          <Route path="/editUser" element={<EditUser/>} />
+          <Route path="/adminDashboard" element={<AdminDashboard />} />
+          <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
       </Routes>
       </Router>
     </>

@@ -5,5 +5,6 @@ const router = express.Router()
 router.post('/addAttendance', Attendance.addAttendance)
 router.get('/getAttendance/:id', Attendance.getAttendanceById)
 router.get('/getAllAttendances', Attendance.getAllAttendances)
+router.put('/updateAttendance', Attendance.updateAttendance)
 
 module.exports = router;
