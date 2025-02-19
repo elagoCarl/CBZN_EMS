@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     },
     {
-        timepstamps: true
+        timestamps: true
 
     });
      
@@ -35,11 +35,13 @@ module.exports = (sequelize, DataTypes) => {
     OvertimeRequest.associate = (models) => {
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'reviewer_id',
+            as: "reviewer"
            
         }),
 
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
+          
            
 
         });

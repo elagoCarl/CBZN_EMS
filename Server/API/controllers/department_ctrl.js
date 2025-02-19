@@ -3,7 +3,7 @@ const util = require('../../utils');
 
 // CREATE a new department
 const addDepartment = async (req, res) => {
-    const { name } = req.body;
+    const { name, isActive } = req.body;
 
     if (!util.checkMandatoryFields([name])) {
         return res.status(400).json({
@@ -14,7 +14,7 @@ const addDepartment = async (req, res) => {
 
     try {
         const department = await Department.create({
-            name,
+            name,isActive
         });
         return res.status(201).json({
             successful: true,
