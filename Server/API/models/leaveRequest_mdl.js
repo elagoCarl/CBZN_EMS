@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const LeaveRequest = sequelize.define('LeaveRequest', {
-        leave_type: {
+        type: {
             type: DataTypes.ENUM('vacation', 'sick', 'emergency', 'other'),
             allowNull: false,
             validate: {
@@ -44,14 +44,12 @@ module.exports = (sequelize, DataTypes) => {
     LeaveRequest.associate = (models) => {
         // Employee submitting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'user_id',
-            as: 'user'
+            foreignKey: 'user_id'
         });
 
         // Admin approving/rejecting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'reviewer_id',
-            as: 'reviewer'
+            foreignKey: 'reviewer_id'
         });
     };
 

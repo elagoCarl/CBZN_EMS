@@ -6,7 +6,7 @@ const addSchedule = async (req, res) => {
     try{
         const { title, schedule, isActive } = req.body;
 
-        if(!util.checkMandatoryFields({ title, schedule, isActive })){
+        if(!util.improvedCheckMandatoryFields({ title, schedule, isActive })){
             return res.status(400).json({ error: 'A mandatory field is missing.' });
         };
 
@@ -20,7 +20,7 @@ const addSchedule = async (req, res) => {
             return res.status(400).json({ error: error.errors[0].message });
         }
 
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: error.message });
     }
 }
 
@@ -66,7 +66,7 @@ const updateSchedule = async (req, res) => {
         const {id} = req.params;
         const { title, schedule, isActive } = req.body;
 
-        if(!util.checkMandatoryFields({ title, schedule, isActive })){
+        if(!util.improvedCheckMandatoryFields({ title, schedule, isActive })){
             return res.status(400).json({ error: 'A mandatory field is missing.' });
         };
         

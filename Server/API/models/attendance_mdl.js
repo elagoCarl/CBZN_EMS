@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: false
         },
+        site : {
+            type: DataTypes.ENUM('Onsite', 'Remote'),
+            allowNull: true
+        },
         date: {
             type: DataTypes.DATEONLY,
             allowNull: false,
@@ -33,5 +37,5 @@ module.exports = (sequelize, DataTypes) => {
     Attendance.associate = (models) => {
         Attendance.belongsTo(models.User)
     }
-    return Attendance;
+    return Attendance;
 }

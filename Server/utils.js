@@ -15,7 +15,7 @@ const checkIfNull = (data) => {
         }
     });
   
-    return result
+    return result 
   }
   
   const improvedCheckMandatoryFields = (obj) => {
@@ -34,6 +34,9 @@ const checkIfNull = (data) => {
     return passwordRegex.test(password);
   };
   
+
+
+
   module.exports = {
     checkIfNull, 
     checkMandatoryFields,

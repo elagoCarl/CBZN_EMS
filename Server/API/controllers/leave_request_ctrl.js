@@ -4,10 +4,11 @@ const { Op } = require('sequelize');
 
 const addLeaveRequest = async (req, res) => {
     try {
-        const { user_id, leave_type, start_date, end_date, reason, reviewer_id } = req.body;
+        const { user_id, type, start_date, end_date, reason } = req.body;
 
+        
         // Check mandatory fields
-        if (!util.improvedCheckMandatoryFields({ user_id, leave_type, start_date, end_date, reason })) {
+        if (!util.improvedCheckMandatoryFields({ user_id, type, start_date, end_date, reason })) {
             return res.status(400).json({ error: 'A mandatory field is missing.' });
         }
 
@@ -17,13 +18,11 @@ const addLeaveRequest = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        // Check if reviewer exists (if provided)
-        if (reviewer_id) {
-            const reviewerExists = await User.findByPk(reviewer_id);
-            if (!reviewerExists) {
-                return res.status(404).json({ error: 'Reviewer not found.' });
-            }
-        }
+        // Validate date format and start/end date order
+        if (!validateDate(req, res, start_date, end_date)) return;
+        if (!validateStartEndDates(req, res, start_date, end_date)) return;
+
+
 
         // Check for overlapping leave dates for the same user
         const overlappingLeave = await LeaveRequest.findOne({
@@ -47,7 +46,7 @@ const addLeaveRequest = async (req, res) => {
         }
 
         // Create leave request
-        const newLeaveRequest = await LeaveRequest.create({ user_id, leave_type, start_date, end_date, reason, reviewer_id });
+        const newLeaveRequest = await LeaveRequest.create({ user_id, type, start_date, end_date, reason });
         return res.status(201).json({
             successful: true,
             data: newLeaveRequest
@@ -86,9 +85,7 @@ const getAllLeaveRequests = async (req, res) => {
 const getLeaveRequest = async (req, res) => {
     try{
         const { id } = req.params;
-        const leaveRequest = await LeaveRequest.findByPk(id, {
-            include: [{ model: User, as: 'employee', attributes: ['name', 'email'] }]
-        });
+        const leaveRequest = await LeaveRequest.findByPk(id);
 
         if (!leaveRequest) return res.status(404).json({ error: 'Leave request not found' });
         
@@ -105,10 +102,10 @@ const getLeaveRequest = async (req, res) => {
 const updateLeaveRequest = async (req, res) => {
     try {
         const { id } = req.params;
-        const { user_id, leave_type, start_date, end_date, reason, reviewer_id, status, review_date } = req.body;
+        const { user_id, type, start_date, end_date, reason, reviewer_id, status, review_date } = req.body;
 
         // Check mandatory fields
-        if (!util.improvedCheckMandatoryFields({ user_id, leave_type, start_date, end_date, reason })) {
+        if (!util.improvedCheckMandatoryFields({ user_id, type, start_date, end_date, reason })) {
             return res.status(400).json({ error: 'A mandatory field is missing.' });
         }
 
@@ -149,7 +146,7 @@ const updateLeaveRequest = async (req, res) => {
         }
 
         // Update leave request
-        const updatedLeaveRequest = await LeaveRequest.update({ user_id, leave_type, start_date, end_date, reason, reviewer_id, status, review_date }, { where: { id } });
+        const updatedLeaveRequest = await LeaveRequest.update({ user_id, type, start_date, end_date, reason, reviewer_id, status, review_date }, { where: { id } });
 
         if (updatedLeaveRequest[0] > 0) {
             return res.status(200).json({
@@ -167,6 +164,28 @@ const updateLeaveRequest = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Requests Validation
+
+// Check if the date is in a valid format (YYYY-MM-DD)
+const validateDate = (req, res, start_date, end_date) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start_date) || !/^\d{4}-\d{2}-\d{2}$/.test(end_date)) {
+        res.status(400).json({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+        return false;
+    }
+    return true;
+}
+  
+  // Check if the start date is before the end date
+  const validateStartEndDates = (req, res, start_date, end_date) => {
+    if (!validateDate(req, res, start_date, end_date)) return false;
+  
+    if (start_date > end_date) {
+        res.status(400).json({ error: 'Start date must be before or equal to end date.' });
+        return false;
+    }
+    return true;
+}
 
 
 // Export the functions
