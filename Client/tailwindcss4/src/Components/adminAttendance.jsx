@@ -95,9 +95,9 @@ const AdminAttendance = () => {
       id: "213631",
       date: "2025-02-17",
       day: "Monday",
-      type: "Remote",
-      timeIn: "08:00 AM",
-      timeOut: "04:00 PM",
+      type: "-",
+      timeIn: "-",
+      timeOut: "-",
       status: "Rest Day",
     },
     {
