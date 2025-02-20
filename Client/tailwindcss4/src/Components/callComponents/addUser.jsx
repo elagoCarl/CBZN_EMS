@@ -9,22 +9,28 @@ const AddUser = () => {
   };
 
   const handleSubmit = async (e) => {
-    console.log("formData", formData);
     e.preventDefault();
+    console.log("formData", formData);
+
     try {
       // Create main user
       const { data: user } = await axios.post('http://localhost:8080/users/addUser', {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
-        // password: formData.password,
         name: formData.name,
         isAdmin: formData.role === 'admin',
         employment_status: formData.employment_status
       });
 
+      if (!user || !user.user || !user.user.id) {
+        throw new Error("Failed to retrieve user ID.");
+      }
+
+      const userId = user.user.id;
+
       // Create user info with all required fields
       await axios.post('http://localhost:8080/userInfo/addUserInfo', {
-        userId: user.id,
+        UserId: userId,
         age: parseInt(formData.age),
         city_add: formData.city_add,
         provincial_add: formData.provincial_add,
@@ -48,7 +54,7 @@ const AddUser = () => {
 
       // Create emergency contact
       await axios.post('http://localhost:8080/emgncyContact/addEmgncyContact', {
-        userId: user.id,
+        UserId: userId,
         name: formData.emergency_name,
         relationship: formData.emergency_relationship,
         contact_number: formData.emergency_contact
@@ -61,15 +67,15 @@ const AddUser = () => {
     }
   };
 
-  const inputClass = "w-full p-2 sm:p-3 rounded-lg bg-white/10 focus:outline focus:outline-green-400 text-white text-sm sm:text-base";
-  const selectClass = "w-full p-2 sm:p-3 rounded-lg bg-white/10 focus:outline focus:outline-green-400 text-white text-sm sm:text-base";
+  // Updated input and select classes with proper text color handling
+  const inputClass = "w-full p-1 sm:p-2 rounded-lg bg-gray-800 focus:bg-gray-700 text-white placeholder-gray-400 focus:outline focus:outline-green-400 text-sm sm:text-base";
+  const selectClass = "w-full p-1 sm:p-2 rounded-lg bg-gray-800 focus:bg-gray-700 text-white focus:outline focus:outline-green-400 text-sm sm:text-base";
 
   const formSections = {
     userAccount: [
       { name: 'employeeId', placeholder: 'Employee ID', type: 'number' },
       { name: 'name', placeholder: 'Full Name', type: 'text' },
       { name: 'email', placeholder: 'Email Address', type: 'email' },
-      // { name: 'password', placeholder: 'Password', type: 'password' },
       {
         name: 'employment_status',
         type: 'select',
@@ -131,7 +137,7 @@ const AddUser = () => {
           >
             <option value="">{field.placeholder}</option>
             {field.options.map(opt => (
-              <option key={opt} value={opt.toLowerCase()} className="bg-black/80">
+              <option key={opt} value={opt.toLowerCase()} className="bg-gray-800">
                 {opt}
               </option>
             ))}
@@ -155,8 +161,8 @@ const AddUser = () => {
 
   const renderSection = (title, fields, cols) => {
     const gridClass = {
-      2: "grid grid-cols-1 sm:grid-cols-2 gap-4",
-      3: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      2: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+      3: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
     }[cols];
 
     return (
@@ -175,8 +181,8 @@ const AddUser = () => {
 
   return (
     <div className="min-h-screen w-full p-2 sm:p-4 bg-gray-900">
-      <div className="max-w-5xl mx-auto bg-black/90 p-4 sm:p-8 rounded-lg">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-600 mb-6 sm:mb-8">
+      <div className="max-w-5xl mx-auto bg-black/50 p-4 sm:p-8 rounded-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-green-600">
           Add User
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
