@@ -6,8 +6,9 @@ import AddUser from './Components/callComponents/addUser.jsx';
 import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminDashboard from "./Components/adminDashboard.jsx"; 
-import EmployeeDashboard from "./Components/employeeDashboard.jsx";
-import EmployeeSettings from "./Components/employeeSettings.jsx";
+import EmployeeDashboard from './Components/employeeDashboard.jsx';
+import EmployeeSettings from './Components/employeeSettings.jsx';
+import AdminSettings from './Components/adminSettings.jsx';
 
 
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
+          <Route path="/adminSettings" element={<AdminSettings />} />
       </Routes>
       </Router>
     </>
