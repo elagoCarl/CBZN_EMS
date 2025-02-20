@@ -5,7 +5,7 @@ const router = express.Router()
 router.post('/addAttendance', Attendance.addAttendance)
 router.get('/getAttendance/:id', Attendance.getAttendanceById)
 router.get('/getAllAttendances', Attendance.getAllAttendances)
-router.delete('/deleteAttendance/:id', Attendance.deleteAttendance)
-router.put('/updateAttendance/:id', Attendance.updateAttendance)
+router.put('/updateAttendance', Attendance.updateAttendance)
+router.get('/getAttendanceByUser/:id', Attendance.getAttendancesByUserId)
 
 module.exports = router;

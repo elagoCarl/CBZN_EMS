@@ -1,6 +1,6 @@
-const { User, Session } = require('../models'); // Ensure model name matches exported model
+const { User, Session, Department } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
@@ -116,6 +116,14 @@ const addUser = async (req, res, next) => {
 
         // Check if the email already exists
         const existingEmail = await User.findOne({ where: { email } });
+        const existingEmployeeId = await User.findOne({ where: { employeeId } });
+        
+        if (existingEmployeeId) {
+            return res.status(406).json({
+                successful: false,
+                message: "Employee ID already exists. Please provide a different Employee ID."
+            });
+        }
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -198,6 +206,14 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
+        // Check if the department exists
+        const existingDepartment = await Department.findByPk(  DepartmentId);
+        if (!existingDepartment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Department not found."
+            });
+        }
         // Update user data
         await user.update({
             name,
@@ -447,8 +463,6 @@ const getAllUsers = async (req, res, next) => {
         });
     }
 }
-
-
 
 module.exports = {
     addUser,

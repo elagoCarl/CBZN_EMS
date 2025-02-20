@@ -15,7 +15,7 @@ const checkIfNull = (data) => {
         }
     });
   
-    return result
+    return result 
   }
   
   const improvedCheckMandatoryFields = (obj) => {
@@ -33,11 +33,29 @@ const checkIfNull = (data) => {
   const validatePassword = (password) => {
     return passwordRegex.test(password);
   };
+
+  const isValidDate = (dateString) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date);
+};
+
+const isValidTime = (timeString) => {
+    const regex = /^([01]\d|2[0-3]):([0-5]\d)$/; // Matches HH:MM in 24-hour format
+    return regex.test(timeString);
+};
   
+
+
+
   module.exports = {
     checkIfNull, 
     checkMandatoryFields,
     improvedCheckMandatoryFields,
     validateEmail,
-    validatePassword
+    validatePassword,
+    isValidDate,
+    isValidTime
   }
