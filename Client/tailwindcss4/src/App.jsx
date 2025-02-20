@@ -9,7 +9,7 @@ import { Req } from './Components/callComponents/Req.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
-
+import AdminAttendance from './Components/adminAttendance.jsx';
 
 function App() {
   return (
@@ -27,6 +27,7 @@ function App() {
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
+          <Route path="/adminAttendance" element={<AdminAttendance />} />
       </Routes>
       </Router>
     </>
