@@ -10,7 +10,10 @@ export const Req = () => {
   const [formData, setFormData] = useState({
     overtimeDate: '',
     overtimeReason: '',
-    leaveDate: '',
+    overtimeStart: '',
+    overtimeEnd: '',
+    leaveStartDate: '',
+    leaveEndDate: '',
     leaveType: '',
     leaveReason: '',
     timeAdjustDate: '',
@@ -18,7 +21,7 @@ export const Req = () => {
     timeAdjustTo: '',
     timeAdjustReason: '',
     scheduleDate: '',
-    scheduleTime: '',
+    schedule: '',
     scheduleReason: ''
   });
 
@@ -48,7 +51,10 @@ export const Req = () => {
     setFormData({
       overtimeDate: '',
       overtimeReason: '',
-      leaveDate: '',
+      overtimeStart: '',
+      overtimeEnd: '',
+      leaveStartDate: '',
+      leaveEndDate: '',
       leaveType: '',
       leaveReason: '',
       timeAdjustDate: '',
@@ -56,7 +62,7 @@ export const Req = () => {
       timeAdjustTo: '',
       timeAdjustReason: '',
       scheduleDate: '',
-      scheduleTime: '',
+      schedule: '',
       scheduleReason: ''
     });
     setActiveRequest(null);
@@ -73,18 +79,38 @@ export const Req = () => {
               name="overtimeDate"
               value={formData.overtimeDate}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             />
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="time"
+                name="overtimeStart"
+                value={formData.overtimeStart}
+                onChange={handleInputChange}
+                className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
+                placeholder="Start Time"
+              />
+              <input
+                type="time"
+                name="overtimeEnd"
+                value={formData.overtimeEnd}
+                onChange={handleInputChange}
+                className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
+                placeholder="End Time"
+              />
+            </div>
             <textarea
               name="overtimeReason"
               placeholder="Reason for overtime..."
               value={formData.overtimeReason}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32 focus:border-none focus:outline focus:outline-green-400"
             />
-            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Submit Overtime Request
-            </button>
+            <div className='flex justify-end'>
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Submit Overtime Request
+              </button>
+            </div>
           </form>
         );
 
@@ -92,18 +118,28 @@ export const Req = () => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Leave Request</h2>
+            <div className="grid grid-cols-2 gap-4">
             <input
               type="date"
-              name="leaveDate"
-              value={formData.leaveDate}
+              name="leavStartDate"
+              value={formData.leaveStartDate}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             />
+            <input
+              type="date"
+              name="leaveEndDate"
+              value={formData.leaveEndDate}
+              onChange={handleInputChange}
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
+            />
+            </div>
+            
             <select
               name="leaveType"
               value={formData.leaveType}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             >
               <option value="">Select Leave Type</option>
               <option value="vacation">Vacation Leave</option>
@@ -115,11 +151,14 @@ export const Req = () => {
               placeholder="Reason for leave..."
               value={formData.leaveReason}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32 focus:border-none focus:outline focus:outline-green-400"
             />
-            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Submit Leave Request
-            </button>
+            <div className='flex justify-end'>
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Submit Leave Request
+              </button>
+            </div>
+
           </form>
         );
 
@@ -132,7 +171,7 @@ export const Req = () => {
               name="timeAdjustDate"
               value={formData.timeAdjustDate}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             />
             <div className="grid grid-cols-2 gap-4">
               <input
@@ -140,7 +179,7 @@ export const Req = () => {
                 name="timeAdjustFrom"
                 value={formData.timeAdjustFrom}
                 onChange={handleInputChange}
-                className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+                className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
                 placeholder="Original Time"
               />
               <input
@@ -148,7 +187,7 @@ export const Req = () => {
                 name="timeAdjustTo"
                 value={formData.timeAdjustTo}
                 onChange={handleInputChange}
-                className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+                className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
                 placeholder="Adjusted Time"
               />
             </div>
@@ -157,14 +196,16 @@ export const Req = () => {
               placeholder="Reason for time adjustment..."
               value={formData.timeAdjustReason}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32 focus:border-none focus:outline focus:outline-green-400"
             />
-            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Submit Time Adjustment
-            </button>
+            <div className='flex justify-end'>
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Submit Time Adjustment
+              </button>
+            </div>
           </form>
         );
-      
+
       case 'schedule':
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -174,25 +215,31 @@ export const Req = () => {
               name="scheduleDate"
               value={formData.scheduleDate}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             />
-            <input
-              type="time"
-              name="scheduleTime"
-              value={formData.scheduleTime}
+            <select
+              name="schedule"
+              value={formData.schedule}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded"
-            />
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
+            >
+              <option value="">Select Schedule</option>
+              <option value="9AM-6PM">9AM-6PM</option>
+              <option value="10AM-7PM">10AM-7PM</option>
+            </select>
             <textarea
               name="scheduleReason"
               placeholder="Reason for schedule change..."
               value={formData.scheduleReason}
               onChange={handleInputChange}
-              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32"
+              className="w-full bg-[#2b2b2b] text-white p-2 rounded h-32 focus:border-none focus:outline focus:outline-green-400"
             />
-            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Submit Schedule Change
-            </button>
+            <div className='flex justify-end'>
+              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Submit Schedule Change
+              </button>
+            </div>
+
           </form>
         );
       default:
@@ -202,97 +249,24 @@ export const Req = () => {
 
   return (
     <div className="min-h-screen bg-black/90 flex">
-      {/* Mobile Nav Toggle */}
-      <button 
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-      >
-        {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Sidebar */}
-      <div className={`${
-        isNavOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0 fixed md:relative w-64 bg-[#000000] flex flex-col min-h-screen transition-transform duration-300 ease-in-out z-40`}>
-        {/* Logo Section */}
-        <div className="p-6">
-          <div className="w-full flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-12 w-auto" />
-          </div>
-        </div>
-
-        {/* Navigation Links - Centered */}
-        <nav className="flex-1 flex flex-col justify-center px-4">
-          <div className="space-y-8 text-xl cursor-pointer font-semibold">
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Home</a>
-            </div>
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Attendance</a>
-            </div>
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Manage Users</a>
-            </div>
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Reports</a>
-            </div>
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Settings</a>
-            </div>
-            <div className="flex justify-center">
-              <a href="#" className="text-white hover:text-green-600 duration-300">Help</a>
-            </div>
-          </div>
-        </nav>
-
-        {/* Profile Section */}
-        <div className="p-4 border-t border-[#363636]" ref={profileRef}>
-          <div 
-            className="flex items-center gap-2 text-sm cursor-pointer"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-          >
-            <div className="w-8 h-8 bg-[#363636] rounded-full flex items-center justify-center text-white">
-              A
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white">ADMIN</span>
-              <span className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</span>
-            </div>
-          </div>
-
-          {/* Profile Dropdown */}
-          {isProfileOpen && (
-            <div
-              className="absolute right-6 bottom-full mb-2 w-40 bg-[#2b2b2b] text-white p-2 rounded-lg shadow-md duration-300"
-              onClick={() => setIsProfileOpen(false)}
-            >
-              <button className="w-full text-left px-3 py-2 hover:bg-red-600 rounded duration-300">
-                Log Out
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-3xl mx-auto">
+      <div className="flex flex-col justify-center items-center flex-1">
+        <div className="flex flex-col justify-center px-4 w-full md:w-3/4 lg:w-1/2">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <button
               onClick={() => setActiveRequest('overtime')}
-              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-                activeRequest === 'overtime' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-              }`}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === 'overtime' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+                }`}
             >
               <Clock className="w-6 h-6 text-white" />
               <span className="text-white text-sm">Overtime</span>
             </button>
-            
+
             <button
               onClick={() => setActiveRequest('leave')}
-              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-                activeRequest === 'leave' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-              }`}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === 'leave' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+                }`}
             >
               <Calendar className="w-6 h-6 text-white" />
               <span className="text-white text-sm">Leave</span>
@@ -300,9 +274,8 @@ export const Req = () => {
 
             <button
               onClick={() => setActiveRequest('timeadjustment')}
-              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-                activeRequest === 'timeadjustment' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-              }`}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === 'timeadjustment' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+                }`}
             >
               <Clock className="w-6 h-6 text-white" />
               <span className="text-white text-sm">Time Adjustment</span>
@@ -310,9 +283,8 @@ export const Req = () => {
 
             <button
               onClick={() => setActiveRequest('schedule')}
-              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-                activeRequest === 'schedule' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-              }`}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === 'schedule' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+                }`}
             >
               <UserCheck className="w-6 h-6 text-white" />
               <span className="text-white text-sm">Schedule Change</span>

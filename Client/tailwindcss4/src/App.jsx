@@ -7,7 +7,8 @@ import { Req } from './Components/callComponents/Req.jsx';
 // import EmployeeHome from './Components/employHome.jsx';
 // import AdminEms from './Components/admin_Ems.jsx'
 import AddUser from './Components/callComponents/addUser.jsx';
-
+import EmployeeSettings from './Components/employeeSettings.jsx';
+import AdminSettings from './Components/adminSettings.jsx';
 
 
 function App() {
@@ -24,6 +25,8 @@ function App() {
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
+          <Route path="/employeeSettings" element={<EmployeeSettings />} />
+          <Route path="/adminSettings" element={<AdminSettings />} />
       </Routes>
       </Router>
     </>

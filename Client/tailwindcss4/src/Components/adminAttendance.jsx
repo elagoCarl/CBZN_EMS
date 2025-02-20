@@ -59,15 +59,15 @@ const AdminAttendance = () => {
   // Sample attendance data
   const attendanceData = [
     { id: '212236', status: 'Present', timestamp: '2025-02-17 08:00:00' },
-    { id: '212236', status: 'Absent', timestamp: '2025-02-16 00:00:00' },
-    { id: '212236', status: 'Present', timestamp: '2025-02-15 08:10:00' },
-    { id: '212236', status: 'Late', timestamp: '2025-02-14 08:30:00' },
-    { id: '212236', status: 'Present', timestamp: '2025-02-13 08:05:00' },
-    { id: '212236', status: 'Present', timestamp: '2025-02-12 08:00:00' },
-    { id: '212236', status: 'Absent', timestamp: '2025-02-11 00:00:00' },
-    { id: '212236', status: 'Present', timestamp: '2025-02-10 08:10:00' },
-    { id: '212236', status: 'Late', timestamp: '2025-02-09 08:30:00' },
-    { id: '212236', status: 'Present', timestamp: '2025-02-08 08:05:00' },
+    { id: '212546', status: 'Absent', timestamp: '2025-02-17 00:00:00' },
+    { id: '212578', status: 'Present', timestamp: '2025-02-17 08:10:00' },
+    { id: '213631', status: 'Late', timestamp: '2025-02-17 08:30:00' },
+    { id: '214205', status: 'Present', timestamp: '2025-02-17 08:05:00' },
+    { id: '212236', status: 'Present', timestamp: '2025-02-17 08:00:00' },
+    { id: '212546', status: 'Absent', timestamp: '2025-02-17 00:00:00' },
+    { id: '212578', status: 'Present', timestamp: '2025-02-17 08:10:00' },
+    { id: '213631', status: 'Late', timestamp: '2025-02-17 08:30:00' },
+    { id: '214205', status: 'Present', timestamp: '2025-02-17 08:05:00' },
   ];
 
   const indexOfLastEntry = currentPage * entriesPerPage;
@@ -131,6 +131,31 @@ const AdminAttendance = () => {
           </div>
         </div>
 
+        {/* Responsive Filters and Search */}
+                <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
+                  <div className="flex gap-2">
+                    <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
+                      <option className='bg-white text-black'>Employee</option>
+                      <option className='bg-white text-black'>Intern</option>
+                      <option className='bg-white text-black'>Inactive</option>
+                    </select>
+                    <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
+                      <option className='bg-white text-black'>Active</option>
+                      <option className='bg-white text-black'>Archive</option>
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search ID..."
+                      className="bg-black/80 text-white px-3 md:px-4 py-1 md:py-2 rounded pl-8 md:pl-10 text-sm md:text-base w-full md:w-auto"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                  </div>
+                </div>
+
         {/* Attendance Table */}
         <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
@@ -146,9 +171,9 @@ const AdminAttendance = () => {
                 <tbody>
                   {currentEntries.filter(entry => entry.id.includes(searchQuery)).map((entry) => (
                     <tr key={entry.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.id}</td>
-                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.status}</td>
-                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.timestamp}</td>
+                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-10 text-sm md:text-base text-center">{entry.id}</td>
+                      <td className="text-white py-2 md:py-3 px-2 md:px-10 text-sm md:text-base text-center">{entry.status}</td>
+                      <td className="text-white py-2 md:py-3 px-2 md:px-10 text-sm md:text-base text-center">{entry.timestamp}</td>
                     </tr>
                   ))}
                 </tbody>
