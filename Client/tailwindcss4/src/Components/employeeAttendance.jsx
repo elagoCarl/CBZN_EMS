@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 
 const AdminAttendance = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const setSearchQuery = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
