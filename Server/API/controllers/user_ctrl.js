@@ -90,7 +90,6 @@ const generateAccessToken = async (req, res, next) => {
     }
 };
 
-
 const addUser = async (req, res, next) => {
     const t = await User.sequelize.transaction(); // Start transaction
 
@@ -159,6 +158,113 @@ const addUser = async (req, res, next) => {
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
+const updateUserEmail = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        // Check if the user exists
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                successful: false,
+                message: "User not found."
+            });
+        }
+
+        // Validate mandatory fields
+        if (!util.checkMandatoryFields([email])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        // Validate email format
+        if (!util.validateEmail(email)) {
+            return res.status(406).json({
+                successful: false,
+                message: "Email format is invalid."
+            });
+        }
+
+        // Check if the email is already in use by another user
+        const existingEmail = await User.findOne({
+            where: {
+                email,
+                id: { [Op.ne]: req.params.id }
+            }
+        });
+        if (existingEmail) {
+            return res.status(406).json({
+                successful: false,
+                message: "Email is already in use by another user."
+            });
+        }
+
+        // Update user email
+        await user.update({ email });
+
+        return res.status(200).json({
+            successful: true,
+            message: "User email updated successfully."
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
+const updateUserPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { password: old_password, new_password, confirm_password } = req.body;
+
+        if (!util.checkMandatoryFields([old_password, new_password, confirm_password])){
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        // Find user by ID
+        const user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ 
+                successful: false, 
+                message: "User not found." 
+            });
+        }
+
+        // Verify old password
+        const isMatch = await bcrypt.compare(old_password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ 
+                successful: false, 
+                message: "Old password is incorrect." 
+            });
+        }
+        
+        // Update user's password
+        await user.update({ password: new_password });
+
+        return res.status(200).json({ 
+            successful: true, 
+            message: "Password updated successfully." 
+        });
+
+    } catch (error) {
+        console.error("Error updating password:", error);
+        return res.status(500).json({ 
+            successful: false, 
+            message: "An unexpected error occurred. Please try again later." 
         });
     }
 };
@@ -467,6 +573,8 @@ const getAllUsers = async (req, res, next) => {
 module.exports = {
     addUser,
     getUserById,
+    updateUserEmail,    
+    updateUserPassword,
     updateUserById,
     loginUser,
     logoutUser,

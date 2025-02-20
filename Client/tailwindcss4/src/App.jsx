@@ -10,7 +10,6 @@ import AddUser from './Components/callComponents/addUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 
-
 function App() {
   return (
     <>
