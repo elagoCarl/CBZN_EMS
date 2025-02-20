@@ -10,6 +10,7 @@ import AddUser from './Components/callComponents/addUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
+import EmployeeAttendance from './Components/employeeAttendance.jsx';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
+          <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
       </Routes>
       </Router>
     </>
