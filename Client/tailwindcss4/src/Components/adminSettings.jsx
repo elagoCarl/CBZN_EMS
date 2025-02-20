@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
+import axios from 'axios';
 
 const AccountSettings = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -13,6 +14,8 @@ const AccountSettings = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const userId = 23;
 
   // Update time every second
   useEffect(() => {
@@ -64,18 +67,69 @@ const AccountSettings = () => {
     }
   };
 
-  const handleEmailChange = () => {
-    console.log('Email updated:', email);
-    // Here you would implement the actual email change logic
+      // Fetch User Data
+    //   useEffect(() => {
+    //     const fetchUserData = async () => {
+    //         try {
+    //             const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);              
+    //             console.log('API Response:', response.data);
+    //         } catch (error) {
+    //             console.error('Error fetching user data:', error);
+    //         }
+    //     };
+    
+    //     fetchUserData();
+    // }, []);
+    
+  const handleEmailChange = async () => {
+    try {
+        const response = await axios.put(`http://localhost:8080/users/updateUserEmail/${userId}`, { email });
+
+        if (response.data.successful) {
+            console.log('Email updated successfully:', response.data);
+            alert('Email updated successfully!');
+        } else {
+            console.error('Error updating email:', response.data.message);
+            alert(response.data.message || 'Failed to update email. Please try again.');
+        }
+
+    } catch (error) {
+        console.error('Error updating email:', error);
+
+        // Check if the response exists and has a message from the backend
+        if (error.response && error.response.data && error.response.data.message) {
+            alert(error.response.data.message);
+        } else {
+            alert('An error occurred. Please try again later.');
+        }
+    }
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      console.log('Passwords do not match');
+      alert('Passwords do not match');
       return;
     }
-    console.log('Password changed');
-    // Here you would implement the actual password change logic
+  
+    try {
+      const response = await axios.put(`http://localhost:8080/users/updateUserPassword/${userId}`, {
+        password: oldPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      });
+  
+      if (response.data.successful) {
+        alert('Password updated successfully!');
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        alert(response.data.message || 'Failed to update password.');
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      alert(error.response?.data?.message || 'An error occurred. Please try again.');
+    }
   };
 
   return (
