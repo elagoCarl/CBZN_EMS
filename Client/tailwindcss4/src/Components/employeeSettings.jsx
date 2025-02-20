@@ -136,7 +136,7 @@ const EmployeeSettings = () => {
 
                 <div className="flex flex-col md:flex-row gap-6 py-15 justify-center">
     {/* Profile and Change Password Section */}
-    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[800px]">
+    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px]">
         <div className="flex flex-col md:flex-row h-full">
             {/* Left Column - Titles */}
             <div className="flex flex-col md:w-1/3">
@@ -145,7 +145,7 @@ const EmployeeSettings = () => {
             </div>
 
             {/* Right Column */}
-            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 min-h-[800px] absolute top-0 right-0 bottom-0">
+            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 min-h-[900px] absolute top-0 right-0 bottom-0">
 
                 {/* Top Section - Two Columns: Profile Pic and Email */}
                 <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
