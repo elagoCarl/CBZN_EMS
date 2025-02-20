@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, UserCheck } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Calendar, Clock, UserCheck, Menu } from 'lucide-react';
+import logo from '../Img/CBZN-Logo.png';
 
 export const Req = () => {
   const [activeRequest, setActiveRequest] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const sidebarRef = useRef(null); 
+  const profileRef = useRef(null);
   const [formData, setFormData] = useState({
     overtimeDate: '',
     overtimeReason: '',
@@ -25,6 +30,30 @@ export const Req = () => {
       [name]: value
     }));
   };
+
+   // Close menu when clicking outside
+   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close menu when screen expands
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -185,52 +214,114 @@ export const Req = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black/90 p-6 w-full flex items-center justify-center">
-      <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 w-auto">
-          <button
-            onClick={() => setActiveRequest('overtime')}
-            className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-              activeRequest === 'overtime' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-            }`}
-          >
-            <Clock className="w-6 h-6 text-white" />
-            <span className="text-white text-sm">Overtime</span>
-          </button>
-          
-          <button
-            onClick={() => setActiveRequest('leave')}
-            className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-              activeRequest === 'leave' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-            }`}
-          >
-            <Calendar className="w-6 h-6 text-white" />
-            <span className="text-white text-sm">Leave</span>
-          </button>
+    <div className="flex min-h-screen bg-black/90">
+      {/* Mobile Menu Button */}
+      <button 
+        className="lg:hidden fixed top-4 left-4 z-50 text-white p-2 rounded-lg bg-green-600"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        <Menu className="w-6 h-6" />
+      </button>
 
-          <button
-            onClick={() => setActiveRequest('timeadjustment')}
-            className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-              activeRequest === 'timeadjustment' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-            }`}
-          >
-            <Clock className="w-6 h-6 text-white" />
-            <span className="text-white text-sm">Time Adjustment</span>
-          </button>
-
-          <button
-            onClick={() => setActiveRequest('schedule')}
-            className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-              activeRequest === 'schedule' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-            }`}
-          >
-            <UserCheck className="w-6 h-6 text-white" />
-            <span className="text-white text-sm">Schedule Change</span>
-          </button>
+      {/* Sidebar - Hidden on mobile by default */}
+      <div className={`w-64 bg-black p-6 flex flex-col h-screen fixed transition-transform duration-300 ease-in-out items-center justify-center ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}>
+        <div className="mb-8">
+          <div className="w-full text-white p-4 flex justify-center items-center">
+            <img src={logo} alt="Logo" className="h-8 w-auto" />
+          </div>
         </div>
+        
+        <nav className="space-y-4">
+          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
+            Home
+          </div>
+          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
+            Attendance
+          </div>
+          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
+            Reports
+          </div>
+        </nav>
 
-        <div className="bg-[#363636] rounded-lg p-4">
-          {renderForm()}
+        {/* Profile Section */}
+        <div className="mt-auto relative" ref={profileRef}>
+          <div
+            className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <div className="w-8 h-8 bg-gray-600 rounded-full" />
+            <div>
+              <div className="text-white text-sm font-medium">EMPLOYEE</div>
+              <div className="text-gray-400 text-xs">Employee@CBZN@GMAIL.COM</div>
+            </div>
+          </div>
+
+          {isProfileOpen && (
+            <div className="absolute right-0 bottom-full mb-2 w-48 bg-[#2b2b2b] text-white rounded-lg shadow-lg overflow-hidden">
+              <button 
+                className="w-full text-left px-4 py-3 hover:bg-red-600 transition-colors duration-200"
+                onClick={() => {
+                  console.log('Logging out...');
+                  setIsProfileOpen(false);
+                }}
+              >
+                Log Out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content Area - Responsive margin */}
+      <div className="w-full lg:ml-64 p-6 transition-all duration-300">
+        <div className="max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <button
+              onClick={() => setActiveRequest('overtime')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
+                activeRequest === 'overtime' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+              }`}
+            >
+              <Clock className="w-6 h-6 text-white" />
+              <span className="text-white text-sm">Overtime</span>
+            </button>
+            
+            <button
+              onClick={() => setActiveRequest('leave')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
+                activeRequest === 'leave' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+              }`}
+            >
+              <Calendar className="w-6 h-6 text-white" />
+              <span className="text-white text-sm">Leave</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRequest('timeadjustment')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
+                activeRequest === 'timeadjustment' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+              }`}
+            >
+              <Clock className="w-6 h-6 text-white" />
+              <span className="text-white text-sm">Time Adjustment</span>
+            </button>
+
+            <button
+              onClick={() => setActiveRequest('schedule')}
+              className={`p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
+                activeRequest === 'schedule' ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+              }`}
+            >
+              <UserCheck className="w-6 h-6 text-white" />
+              <span className="text-white text-sm">Schedule Change</span>
+            </button>
+          </div>
+
+          <div className="bg-[#363636] rounded-lg p-4">
+            {renderForm()}
+          </div>
         </div>
       </div>
     </div>
