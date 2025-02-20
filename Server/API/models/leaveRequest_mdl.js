@@ -21,17 +21,17 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: { msg: "End date is required." }
             }
         },
-        status: {
-            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
-            allowNull: false,
-            defaultValue: 'pending'
-        },
         reason: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: { msg: "Reason is required." }
             }
+        },
+        status: {
+            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+            allowNull: false,
+            defaultValue: 'pending'
         },
         review_date: {
             type: DataTypes.DATEONLY,
@@ -44,14 +44,12 @@ module.exports = (sequelize, DataTypes) => {
     LeaveRequest.associate = (models) => {
         // Employee submitting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'user_id',
-            as: 'user'  // Alias for clarity
+            foreignKey: 'user_id'
         });
 
         // Admin approving/rejecting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'reviewer_id',
-            as: 'reviewer'  // Alias for clarity
+            foreignKey: 'reviewer_id'
         });
     };
 

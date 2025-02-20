@@ -29,9 +29,9 @@ module.exports = function (sequelize, DataTypes) {
             }
         },
         status: {
-            type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+            type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
             allowNull: false,
-            defaultValue: 'pending'
+            defaultValue: 'Pending'
         },
         review_date: {
             type: DataTypes.DATEONLY,

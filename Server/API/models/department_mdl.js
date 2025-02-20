@@ -6,15 +6,21 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 notEmpty: { msg: "Dept. Name is required." }
             }
+        },
+        isActive: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     }, {
         timestamps: true
     });
+
     Department.associate = (models) => {
-        Department.hasMany(models.User,{
+        Department.hasMany(models.User, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
-        })
-    }
+        });
+    };
+
     return Department;
-}
+};

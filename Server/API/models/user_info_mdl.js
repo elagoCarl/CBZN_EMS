@@ -1,5 +1,3 @@
-const bcrypt = require('bcrypt');
-
 module.exports = (sequelize, DataTypes) => {
     const UserInfo = sequelize.define('UserInfo', {
         age : { 
@@ -7,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false 
         },
         city_add: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false
         },
         provincial_add: {
@@ -30,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        employed_by: {
+        spouse_employed_by: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -42,15 +40,47 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        father_employed_by: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        height: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        weight: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        religion: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        citizenship: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        no_of_children: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_occupation: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        mother_employed_by: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
     }, {
         timestamps: true,
     });
     UserInfo.associate = (models) => {
-        UserInfo.belongsTo(models.Schedule, {
-        });
-        UserInfo.hasOne(models.Attendance, {
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+        UserInfo.belongsTo(models.User, {
         });
     };
     return UserInfo;

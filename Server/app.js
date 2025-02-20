@@ -18,6 +18,12 @@ const schedule_rtr = require('./API/routers/schedule_rtr');
 const user_rtr = require('./API/routers/user_rtr');
 const attendance_rtr = require('./API/routers/attendance_rtr');
 const department_rtr = require('./API/routers/department_rtr')
+const user_info_rtr = require('./API/routers/user_info_rtr')
+const emgncy_contact_rtr = require('./API/routers/emgncy_contact_rtr')
+const sched_adjustment_rtr = require('./API/routers/sched_adjustment_rtr')
+const job_title_rtr = require ('./API/routers/job_title_rtr')
+const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
+const time_adjustment_rtr = require('./API/routers/timeAdjustment_rtr');
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -92,6 +98,13 @@ app.use('/schedule', schedule_rtr);
 app.use('/users', user_rtr);
 app.use('/attendance', attendance_rtr);
 app.use('/department', department_rtr)
+app.use('/userInfo', user_info_rtr)
+app.use('/emgncyContact', emgncy_contact_rtr)
+app.use('/schedAdjustment', sched_adjustment_rtr)
+app.use('/jobtitle', job_title_rtr)
+app.use('/OTrequests', overtime_request_rtr)
+app.use('/timeAdjustment', time_adjustment_rtr);
+
 
 
 //ERROR MIDDLEWARES
