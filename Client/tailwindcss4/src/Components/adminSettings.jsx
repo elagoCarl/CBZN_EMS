@@ -79,7 +79,7 @@ const AccountSettings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
+    <div className="flex h-screen bg-black/90">
       {/* Mobile Nav Toggle */}
       <button
         onClick={() => setIsNavOpen(!isNavOpen)}
@@ -140,15 +140,15 @@ const AccountSettings = () => {
         </div>
 
         {/* Settings Content */}
-        <div className="bg-gray-800/80 rounded-lg overflow-hidden shadow-xl max-w-2xl justify-center items-center mx-auto">
+        <div className="bg-black/60 rounded-lg overflow-hidden shadow-xl max-w-2xl justify-center items-center mx-auto">
           <div className="grid grid-cols-1 gap-8 p-6 md:p-8 max-w-2xl">
             {/* Profile Section */}
             <div>
               <h2 className="text-2xl text-white pb-2">Profile</h2>
-              <div className="bg-black/30 p-6 rounded-lg shadow-inner">
+              <div className="bg-black/80 p-6 rounded-lg shadow-inner">
                 <div className="flex flex-col items-center gap-8">
                   <div className="relative group">
-                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center border-3 border-green-500/20">
+                    <div className="w-32 h-32 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border-3 border-green-500/80 hover:bg-white/0 duration-300">
                       {profilePic ? (
                         <img
                           src={profilePic}
@@ -177,7 +177,7 @@ const AccountSettings = () => {
                         <input
                           type="email"
                           placeholder="Email Address"
-                          className="w-full p-3 bg-gray-800 rounded border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent pr-10"
+                          className="w-full p-3 bg-white/10 rounded text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 pr-10"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                         />
@@ -208,7 +208,7 @@ const AccountSettings = () => {
                       <input
                         type={showOldPassword ? 'text' : 'password'}
                         placeholder="Enter current password"
-                        className="w-full p-3 bg-gray-800 rounded border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                        className="w-full p-3 bg-white/10 rounded text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                         value={oldPassword}
                         onChange={(e) => setOldPassword(e.target.value)}
                       />
@@ -230,7 +230,7 @@ const AccountSettings = () => {
                       <input
                         type={showNewPassword ? 'text' : 'password'}
                         placeholder="Enter new password"
-                        className="w-full p-3 bg-gray-800 rounded border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                        className="w-full p-3 bg-white/10 rounded  text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -252,7 +252,7 @@ const AccountSettings = () => {
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         placeholder="Confirm new password"
-                        className="w-full p-3 bg-gray-800 rounded border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
+                        className="w-full p-3 bg-white/10 rounded  text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
