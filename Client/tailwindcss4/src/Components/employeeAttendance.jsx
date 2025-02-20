@@ -30,30 +30,33 @@ const EmployeeAttendance = () => {
                 <table className="table-auto w-full border-collapse">
                     <thead>
                         <tr style={{ backgroundColor: "#555454", color: "#ffffff" }}>
-                            <th className="px-8 py-4">User ID</th>
+                            <th className="px-8 py-4">Day</th>
                             <th className="px-8 py-4">Status</th>
                             <th className="px-8 py-4">Timestamp</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr className="text-center ">
-                            <td className="p-4">00001</td>
+                            <td className="p-4">Thursday</td>
                             <td className="p-4">Present</td>
                             <td className="p-4">Feb 04, 2025 8:59 AM</td>
                         </tr>
                         <tr className="bg-gray-200 text-center">
-                            <td className="p-4">00002</td>
+                            <td className="p-4">Wednesday</td>
                             <td className="p-4">Present</td>
                             <td className="p-4">Feb 03, 2025 7:59 AM</td>
                         </tr>
 
                         <tr className="text-center">
-                            <td className="p-4">00003</td>
+                            <td className="p-4">Tuesday</td>
                             <td className="p-4">Absent</td>
                             <td className="p-4">Feb 02, 2025 00:00:00</td>
                         </tr>
 
                         <tr className="text-center">
+                            <td className="p-4">Monday</td>
+                            <td className="p-4">Absent</td>
+                            <td className="p-4">Feb 02, 2025 00:00:00</td>
 
                         </tr>
                     </tbody>
