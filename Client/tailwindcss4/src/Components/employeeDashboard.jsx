@@ -10,7 +10,7 @@ const EmployeeDashboard = () => {
   const paginate = (pageNumber) => {
   setCurrentPage(pageNumber);
 };
-  const recordsPerPage = windowWidth < 768 ? 5 : 12;
+  const recordsPerPage = windowWidth < 768 ? 5 : 10;
 
   // Handle window resize
   useEffect(() => {

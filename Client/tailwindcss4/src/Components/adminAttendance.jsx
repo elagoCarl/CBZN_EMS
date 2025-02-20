@@ -17,7 +17,7 @@ const AdminAttendance = () => {
   }, []);
 
   // Determine number of entries per page based on screen size
-  const entriesPerPage = windowWidth < 768 ? 5 : 11;
+  const entriesPerPage = windowWidth < 768 ? 5 : 10;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -95,10 +95,55 @@ const AdminAttendance = () => {
       id: "213631",
       date: "2025-02-17",
       day: "Monday",
-      type: "Remote",
-      timeIn: "08:00 AM",
-      timeOut: "04:00 PM",
+      type: "-",
+      timeIn: "-",
+      timeOut: "-",
       status: "Rest Day",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
     },
     {
       id: "214205",
@@ -113,10 +158,7 @@ const AdminAttendance = () => {
 
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-  const currentEntries = attendanceData.slice(
-    indexOfFirstEntry,
-    indexOfLastEntry
-  );
+  const currentEntries = attendanceData.slice(indexOfFirstEntry, indexOfLastEntry);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
@@ -226,13 +268,13 @@ const AdminAttendance = () => {
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                   <tr>
-                    <th className="text-[#4E9F48] py-2 px-4 text-center">User ID</th>
-                    <th className="text-white py-2 px-4 text-center">Date</th>
-                    <th className="text-white py-2 px-4 text-center">Day</th>
-                    <th className="text-white py-2 px-4 text-center">Type</th>
-                    <th className="text-white py-2 px-4 text-center">Time-in</th>
-                    <th className="text-white py-2 px-4 text-center">Time-out</th>
-                    <th className="text-white py-2 px-4 text-center">Status</th>
+                    <th className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">User ID</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Date</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Day</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Type</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Time-in</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Time-out</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -242,13 +284,13 @@ const AdminAttendance = () => {
                       <tr
                         key={entry.id}
                         className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                        <td className="text-[#4E9F48] py-2 px-4 text-center">{entry.id}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.date}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.day}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.type}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.timeIn}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.timeOut}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.status}
+                        <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.id}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.date}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.day}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.type}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.timeIn}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.timeOut}</td>
+                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.status}
                         </td>
                       </tr>
                     ))}
