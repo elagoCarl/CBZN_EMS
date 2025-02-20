@@ -4,8 +4,6 @@ import logo from '../Img/CBZN-Logo.png';
 
 export const Req = () => {
   const [activeRequest, setActiveRequest] = useState(null);
-  const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
     overtimeDate: '',

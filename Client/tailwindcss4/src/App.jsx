@@ -3,13 +3,13 @@ import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminDashboard from "./Components/adminDashboard.jsx"; 
 import EmployeeDashboard from "./Components/employeeDashboard.jsx";
-import { Req } from './Components/callComponents/Req.jsx';
+import Req from './Components/callComponents/Req.jsx';
 // import EmployeeHome from './Components/employHome.jsx';
 // import AdminEms from './Components/admin_Ems.jsx'
 import AddUser from './Components/callComponents/addUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
-
+import ReqPage from './Components/reqPage.jsx';
 
 function App() {
   return (
@@ -22,7 +22,9 @@ function App() {
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           {/* <Route path="/adminEms" element={<AdminEms />} /> */}
           <Route path="/req" element={<Req />} />
-          <Route path="/forgotPass" element={<ForgotPass />} />
+          <Route path="/request" element={<ForgotPass />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
