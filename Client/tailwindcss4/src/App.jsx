@@ -10,6 +10,7 @@ import AddUser from './Components/callComponents/addUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import ReqPage from './Components/reqPage.jsx';
+import DeptPage from "./Components/departmentPage.jsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
+          <Route path="/deptPage" element={<DeptPage />} />
       </Routes>
       </Router>
     </>
