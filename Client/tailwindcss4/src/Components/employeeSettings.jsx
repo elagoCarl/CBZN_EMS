@@ -136,11 +136,11 @@ const EmployeeSettings = () => {
 
                 <div className="flex flex-col md:flex-row gap-6 py-15 justify-center">
     {/* Profile and Change Password Section */}
-    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px] ">
+    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px] max-[768px]:">
         <div className="flex flex-col md:flex-row h-full">
             {/* Left Column - Titles */}
             <div className="flex flex-col md:w-1/3">
-                <h2 className="text-3xl text-white mb-4  ">Profile</h2>
+                <h2 className="text-3xl text-white mb-4 max-[768px]:absolute ">Profile</h2>
                 <h3 className="text-3xl text-white mb-4  mt-90 max-[1142px]:text-[25px]">Change Password</h3>
             </div>
 

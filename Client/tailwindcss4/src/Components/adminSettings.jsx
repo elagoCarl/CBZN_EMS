@@ -70,7 +70,7 @@ const AdminSettings = () => {
             reader.readAsDataURL(file);
         }
     };
-
+    
 
     const handleEmailChange = () => {
         // Handle email change logic here
@@ -83,7 +83,7 @@ const AdminSettings = () => {
     };
 
     return (
-        <div className="flex h-screen bg-black/90">
+        <div className="flex h-screen  md:bg-black/90 min-[320px]:bg-black/90 ">
             {/* Mobile Nav Toggle */}
             <button
                 onClick={() => setIsNavOpen(!isNavOpen)}
@@ -119,9 +119,9 @@ const AdminSettings = () => {
                 </div>
             </div>
 
-            <div className="flex-1 p-4 md:p-6 flex flex-col">
+            <div className="flex-1 p-4 md:p-10  flex flex-col">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <h1 className="text-xl md:text-5xl text-white mb-4 ml-10 md:mb-0">
+                    <h1 className="text-xl md:text-5xl sm:text-4xl max-[640px]:text-4xl text-white mb-4 ml-10 md:mb-0">
                         Account Settings
                     </h1>
                     <div className="flex flex-col items-center">
@@ -135,127 +135,127 @@ const AdminSettings = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-6 py-15 justify-center">
-                    {/* Profile and Change Password Section */}
-                    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[800px]">
-                        <div className="flex flex-col md:flex-row h-full">
-                            {/* Left Column - Titles */}
-                            <div className="flex flex-col md:w-1/3">
-                                <h2 className="text-xl text-white mb-4 md:text-3xl">Profile</h2>
-                                <h3 className="text-xl text-white mb-4 md:text-3xl mt-90">Change Password</h3>
-                            </div>
+    {/* Profile and Change Password Section */}
+    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px] ">
+        <div className="flex flex-col md:flex-row h-full">
+            {/* Left Column - Titles */}
+            <div className="flex flex-col md:w-1/3">
+                <h2 className="text-3xl text-white mb-4  ">Profile</h2>
+                <h3 className="text-3xl text-white mb-4  mt-90 max-[1142px]:text-[25px]">Change Password</h3>
+            </div>
 
-                            {/* Right Column */}
-                            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 min-h-[800px] absolute top-0 right-0 bottom-0">
+            {/* Right Column */}
+            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 sm:l-20 min-h-[900px] absolute top-0 right-0 bottom-0">
 
-                                {/* Top Section - Two Columns: Profile Pic and Email */}
-                                <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
-                                    {/* Profile Pic */}
-                                    <div className="relative">
-                                        <img
-                                            src={profilePic || defaulticon}
-                                            alt="Profile"
-                                            className="w-50 h-40 rounded-full object-cover"
-                                        />
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={handleProfilePicChange}
-                                        />
-                                    </div>
-
-                                    {/* Email Input */}
-                                    <div className="relative w-full">
-                                        <input
-                                            type="email"
-                                            placeholder="EMAIL ADDRESS"
-                                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Change Button */}
-                                <div className="flex justify-end mb-6">
-                                    <button
-                                        className="bg-green-600 text-white px-7 py-2 rounded hover:bg-green-700"
-                                        onClick={handleEmailChange}
-                                    >
-                                        Change Email
-                                    </button>
-                                </div>
-
-                                {/* Password Fields */}
-                                <div className="mt-40">
-                                    <div className="mb-8 w-full relative">
-                                        <input
-                                            type={showOldPassword ? 'text' : 'password'}
-                                            placeholder="OLD PASSWORD"
-                                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
-                                            value={oldPassword}
-                                            onChange={(e) => setOldPassword(e.target.value)}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
-                                            onMouseDown={() => setShowOldPassword(true)}
-                                            onMouseUp={() => setShowOldPassword(false)}
-                                            onMouseLeave={() => setShowOldPassword(false)}
-                                        >
-                                            {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-
-                                    </div>
-                                    <div className="mb-8 w-full relative">
-                                        <input
-                                            type={showNewPassword ? 'text' : 'password'}
-                                            placeholder="NEW PASSWORD"
-                                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
-                                            onMouseDown={() => setShowNewPassword(true)}
-                                            onMouseUp={() => setShowNewPassword(false)}
-                                            onMouseLeave={() => setShowNewPassword(false)}
-                                        >
-                                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
-                                    <div className="mb-8 w-full relative">
-                                        <input
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            placeholder="CONFIRM PASSWORD"
-                                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                        />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
-                                            onMouseDown={() => setShowConfirmPassword(true)}
-                                            onMouseUp={() => setShowConfirmPassword(false)}
-                                            onMouseLeave={() => setShowConfirmPassword(false)}
-                                        >
-                                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
-                                    <div className="flex justify-end w-full mt-8">
-                                        <button
-                                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                                            onClick={handlePasswordChange}
-                                        >
-                                            Change Password
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                {/* Top Section - Two Columns: Profile Pic and Email */}
+                <div className="flex flex-col md:flex-row gap-6 mb-6">
+                    {/* Profile Pic */}
+                    <div className="relative">
+                        <img
+                            src={profilePic || defaulticon}
+                            alt="Profile"
+                            className="min-[320px]:w-50 rounded-full"
+                        />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            onChange={handleProfilePicChange}
+                        />
                     </div>
                 </div>
+
+                {/* Email Input */}
+                <div className="relative w-full ">
+                    <input
+                        type="email"
+                        placeholder="EMAIL ADDRESS"
+                        className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent "
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </div>
+
+                {/* Change Button */}
+                <div className="flex justify-end mt-8">
+                    <button
+                        className="bg-green-600 text-white px-7 py-2 rounded hover:bg-green-700"
+                        onClick={handleEmailChange}
+                    >
+                        Change Email
+                    </button>
+                </div>
+
+                {/* Password Fields */}
+                <div className="mt-40">
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showOldPassword ? 'text' : 'password'}
+                            placeholder="OLD PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                        />
+                        <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
+                                onMouseDown={() => setShowOldPassword(true)}
+                                onMouseUp={() => setShowOldPassword(false)}
+                                onMouseLeave={() => setShowOldPassword(false)}
+                            >
+                                {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                        
+                    </div>
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            placeholder="NEW PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
+                                onMouseDown={() => setShowNewPassword(true)}
+                                onMouseUp={() => setShowNewPassword(false)}
+                                onMouseLeave={() => setShowNewPassword(false)}
+                            >
+                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+                    <div className="mb-8 w-full relative">
+                        <input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="CONFIRM PASSWORD"
+                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 px-3 py-7 flex items-center"
+                                onMouseDown={() => setShowConfirmPassword(true)}
+                                onMouseUp={() => setShowConfirmPassword(false)}
+                                onMouseLeave={() => setShowConfirmPassword(false)}
+                            >
+                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    </div>
+                    <div className="flex justify-end w-full mt-8">
+                        <button
+                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                            onClick={handlePasswordChange}
+                        >
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
