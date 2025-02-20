@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, Menu } from 'lucide-react';
+import { Calendar, Clock, UserCheck, Menu, X } from 'lucide-react';
 import logo from '../Img/CBZN-Logo.png';
 
 export const Req = () => {
   const [activeRequest, setActiveRequest] = useState(null);
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const sidebarRef = useRef(null); 
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
     overtimeDate: '',
@@ -23,19 +22,11 @@ export const Req = () => {
     scheduleReason: ''
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-   // Close menu when clicking outside
-   useEffect(() => {
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setIsMobileMenuOpen(false);
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
       }
     };
 
@@ -43,17 +34,13 @@ export const Req = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close menu when screen expands
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -214,59 +201,72 @@ export const Req = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black/90">
-      {/* Mobile Menu Button */}
+    <div className="min-h-screen bg-black/90 flex">
+      {/* Mobile Nav Toggle */}
       <button 
-        className="lg:hidden fixed top-4 left-4 z-50 text-white p-2 rounded-lg bg-green-600"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onClick={() => setIsNavOpen(!isNavOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
       >
-        <Menu className="w-6 h-6" />
+        {isNavOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Sidebar - Hidden on mobile by default */}
-      <div className={`w-64 bg-black p-6 flex flex-col h-screen fixed transition-transform duration-300 ease-in-out items-center justify-center ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0`}>
-        <div className="mb-8">
-          <div className="w-full text-white p-4 flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-8 w-auto" />
+      {/* Sidebar */}
+      <div className={`${
+        isNavOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 fixed md:relative w-64 bg-[#000000] flex flex-col min-h-screen transition-transform duration-300 ease-in-out z-40`}>
+        {/* Logo Section */}
+        <div className="p-6">
+          <div className="w-full flex justify-center items-center">
+            <img src={logo} alt="Logo" className="h-12 w-auto" />
           </div>
         </div>
-        
-        <nav className="space-y-4">
-          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
-            Home
-          </div>
-          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
-            Attendance
-          </div>
-          <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer text-center">
-            Reports
+
+        {/* Navigation Links - Centered */}
+        <nav className="flex-1 flex flex-col justify-center px-4">
+          <div className="space-y-8 text-xl cursor-pointer font-semibold">
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Home</a>
+            </div>
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Attendance</a>
+            </div>
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Manage Users</a>
+            </div>
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Reports</a>
+            </div>
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Settings</a>
+            </div>
+            <div className="flex justify-center">
+              <a href="#" className="text-white hover:text-green-600 duration-300">Help</a>
+            </div>
           </div>
         </nav>
 
         {/* Profile Section */}
-        <div className="mt-auto relative" ref={profileRef}>
-          <div
-            className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
+        <div className="p-4 border-t border-[#363636]" ref={profileRef}>
+          <div 
+            className="flex items-center gap-2 text-sm cursor-pointer"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
-            <div className="w-8 h-8 bg-gray-600 rounded-full" />
-            <div>
-              <div className="text-white text-sm font-medium">EMPLOYEE</div>
-              <div className="text-gray-400 text-xs">Employee@CBZN@GMAIL.COM</div>
+            <div className="w-8 h-8 bg-[#363636] rounded-full flex items-center justify-center text-white">
+              A
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white">ADMIN</span>
+              <span className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</span>
             </div>
           </div>
 
+          {/* Profile Dropdown */}
           {isProfileOpen && (
-            <div className="absolute right-0 bottom-full mb-2 w-48 bg-[#2b2b2b] text-white rounded-lg shadow-lg overflow-hidden">
-              <button 
-                className="w-full text-left px-4 py-3 hover:bg-red-600 transition-colors duration-200"
-                onClick={() => {
-                  console.log('Logging out...');
-                  setIsProfileOpen(false);
-                }}
-              >
+            <div
+              className="absolute right-6 bottom-full mb-2 w-40 bg-[#2b2b2b] text-white p-2 rounded-lg shadow-md duration-300"
+              onClick={() => setIsProfileOpen(false)}
+            >
+              <button className="w-full text-left px-3 py-2 hover:bg-red-600 rounded duration-300">
                 Log Out
               </button>
             </div>
@@ -274,8 +274,8 @@ export const Req = () => {
         </div>
       </div>
 
-      {/* Main Content Area - Responsive margin */}
-      <div className="w-full lg:ml-64 p-6 transition-all duration-300">
+      {/* Main Content */}
+      <div className="flex-1 p-6">
         <div className="max-w-3xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <button
@@ -327,3 +327,5 @@ export const Req = () => {
     </div>
   );
 };
+
+export default Req;
