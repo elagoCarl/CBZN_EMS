@@ -152,7 +152,7 @@ const AdminSettings = () => {
                                     {/* Profile Pic */}
                                     <div className="relative">
                                         <img
-                                            src={profilePic || 'https://via.placeholder.com/150'}
+                                            src={profilePic || defaulticon}
                                             alt="Profile"
                                             className="w-50 h-40 rounded-full object-cover"
                                         />

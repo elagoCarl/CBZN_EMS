@@ -83,7 +83,7 @@ const EmployeeSettings = () => {
     };
 
     return (
-        <div className="flex h-screen bg-black/90">
+        <div className="flex h-screen  md:bg-black/90 min-[320px]:bg-black/90 ">
             {/* Mobile Nav Toggle */}
             <button
                 onClick={() => setIsNavOpen(!isNavOpen)}
@@ -119,9 +119,9 @@ const EmployeeSettings = () => {
                 </div>
             </div>
 
-            <div className="flex-1 p-4 md:p-6 flex flex-col">
+            <div className="flex-1 p-4 md:p-10  flex flex-col">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <h1 className="text-xl md:text-5xl text-white mb-4 ml-10 md:mb-0">
+                    <h1 className="text-xl md:text-5xl sm:text-4xl sm:ml-2 text-white mb-4 ml-10 md:mb-0">
                         Account Settings
                     </h1>
                     <div className="flex flex-col items-center">
@@ -136,25 +136,25 @@ const EmployeeSettings = () => {
 
                 <div className="flex flex-col md:flex-row gap-6 py-15 justify-center">
     {/* Profile and Change Password Section */}
-    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px]">
+    <div className="bg-[#313131] p-6 shadow-lg w-full max-w-7xl mx-auto md:mx-0 relative min-h-[900px] ">
         <div className="flex flex-col md:flex-row h-full">
             {/* Left Column - Titles */}
             <div className="flex flex-col md:w-1/3">
-                <h2 className="text-xl text-white mb-4 md:text-3xl">Profile</h2>
-                <h3 className="text-xl text-white mb-4 md:text-3xl mt-90">Change Password</h3>
+                <h2 className="text-3xl text-white mb-4  ">Profile</h2>
+                <h3 className="text-3xl text-white mb-4  mt-90 max-[1142px]:text-[25px]">Change Password</h3>
             </div>
 
             {/* Right Column */}
-            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 min-h-[900px] absolute top-0 right-0 bottom-0">
+            <div className="bg-[#3E3E3E] p-15 shadow-lg flex-5 w-full md:w-2/3 sm:l-20 min-h-[900px] absolute top-0 right-0 bottom-0">
 
                 {/* Top Section - Two Columns: Profile Pic and Email */}
-                <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+                <div className="flex flex-col md:flex-row gap-6 mb-6">
                     {/* Profile Pic */}
                     <div className="relative">
                         <img
-                            src={profilePic || 'https://via.placeholder.com/150'}
+                            src={profilePic || defaulticon}
                             alt="Profile"
-                            className="w-50 h-40 rounded-full object-cover"
+                            className="min-[320px]:w-50 rounded-full"
                         />
                         <input
                             type="file"
@@ -163,21 +163,21 @@ const EmployeeSettings = () => {
                             onChange={handleProfilePicChange}
                         />
                     </div>
+                </div>
 
-                    {/* Email Input */}
-                    <div className="relative w-full">
-                        <input
-                            type="email"
-                            placeholder="EMAIL ADDRESS"
-                            className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div>
+                {/* Email Input */}
+                <div className="relative w-full ">
+                    <input
+                        type="email"
+                        placeholder="EMAIL ADDRESS"
+                        className="w-full p-4 bg-[#757575] rounded text-white placeholder-white focus:placeholder-transparent "
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
                 </div>
 
                 {/* Change Button */}
-                <div className="flex justify-end mb-6">
+                <div className="flex justify-end mt-8">
                     <button
                         className="bg-green-600 text-white px-7 py-2 rounded hover:bg-green-700"
                         onClick={handleEmailChange}
