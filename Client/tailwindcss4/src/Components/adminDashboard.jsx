@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Menu, X } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 
@@ -8,8 +8,6 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [isProfileOpen, setIsProfileOpen] = useState(false); 
-  const profileRef = useRef(null);
 
   // Handle window resize
   useEffect(() => {
@@ -18,23 +16,9 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Determine number of users per page based on screen size
+  const usersPerPage = windowWidth < 768 ? 5 : 11;
 
-  // Reset to first page when search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
-
-  // Timer for real-time clock
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -42,20 +26,19 @@ const AdminDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Format functions
+  // Your existing format functions
   const formatDate = (date) => {
-  const parts = date.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).split('-');
-  return (
-    <div className="text-center">
-      {parts[0]}<span className="text-green-500">/</span>{parts[1]}<span className="text-green-500">/</span>{parts[2]}
-    </div>
-  );
-};
-
+    const parts = date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    }).split('/');
+    return (
+      <div className="text-center">
+        {parts[0]}<span className="text-green-500">/</span>{parts[1]}<span className="text-green-500">/</span>{parts[2]}
+      </div>
+    );
+  };
 
   const formatTime = (date) => {
     const timeString = date.toLocaleTimeString('en-US', {
@@ -64,6 +47,7 @@ const AdminDashboard = () => {
       second: '2-digit',
       hour12: true
     });
+
     const [time, period] = timeString.split(' ');
     return (
       <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
@@ -79,32 +63,18 @@ const AdminDashboard = () => {
     { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
     { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
     { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
-    { id: '215236', name: 'David Wilson', department: 'Marketing', title: 'Content Manager' },
-    { id: '216546', name: 'Sarah Johnson', department: 'Sales', title: 'Sales Representative' },
-    { id: '217578', name: 'Michael Brown', department: 'Engineering', title: 'Software Engineer' },
-    { id: '218631', name: 'Emma Davis', department: 'Design', title: 'UI/UX Designer' },
-    { id: '219205', name: 'James Miller', department: 'Finance', title: 'Financial Analyst' }
+    { id: '212236', name: 'Simon Masucol', department: 'Broadcast', title: 'Web dev' },
+    { id: '212546', name: 'John Trasporto', department: 'IT Department', title: 'Intern' },
+    { id: '212578', name: 'Charles Davies', department: 'Intern', title: 'Executive Marketing' },
+    { id: '213631', name: 'Sweden Sadaya', department: 'Intern', title: 'System Analyst' },
+    { id: '214205', name: 'Karen Bautista', department: 'Human Resources', title: 'HR Manager' },
+    
   ];
 
-  // Filter users based on search query
-  const filteredUsers = users.filter(user =>
-    user.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Determine number of users per page based on screen size
-  const usersPerPage = windowWidth < 768 ? 8 : 12;
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  // Use filteredUsers for pagination so search results are paginated correctly
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  
-  const paginate = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="flex h-screen bg-black/90">
@@ -120,57 +90,39 @@ const AdminDashboard = () => {
       <div className={`${
         isNavOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
-        {/* Sidebar content */}
+        {/* Your existing sidebar content */}
         <div className="mb-8">
           <div className="w-full text-white p-4 flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-12 w-auto" />
+            <img src={logo} alt="Logo" className="h-8 w-auto" />
           </div>
         </div>
 
         <div className="flex flex-col h-screen justify-center items-center space-y-4">
-          <nav className="w-full space-y-4 text-center font-semibold md:text-xl sm:text-base">
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Home</div>
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Attendance</div>
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Manage Users</div>
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Reports</div>
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Settings</div>
-            <div className="text-white hover:text-green-500 duration-300 px-4 py-2 rounded cursor-pointer">Help</div>
+          <nav className="w-full space-y-4 text-center font-semibold text-base">
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Home</div>
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Attendance</div>
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Manage Users</div>
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Reports</div>
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Settings</div>
+            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">Help</div>
           </nav>
         </div>
 
-        {/* Profile Section with Clickable Dropdown */}
-        <div className="mt-auto relative" ref={profileRef}>
-          <div
-            className="flex items-center space-x-3 p-4 border-t border-gray-800 cursor-pointer"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-          >
-            <div className="w-6 h-6 bg-gray-600 rounded-full" />
-            <div>
-              <div className="text-white text-xs font-medium">ADMIN</div>
-              <div className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</div>
-            </div>
+        <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
+          <div className="w-6 h-6 bg-gray-600 rounded-full" />
+          <div>
+            <div className="text-white text-xs font-medium">ADMIN</div>
+            <div className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</div>
           </div>
-
-          {/* Pop-up Menu */}
-          {isProfileOpen && (
-            <div
-              className="absolute right-6 bottom-full mb-2 w-40 bg-[#2b2b2b] text-white p-2 rounded-lg shadow-md duration-300"
-              onClick={() => setIsProfileOpen(false)} // Close on click
-            >
-              <button className="w-full text-left px-3 py-2 hover:bg-red-600 rounded duration-300">
-                Log Out
-              </button>
-            </div>
-          )}
-        </div>    
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
         {/* Centered Header for mobile */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="ext-xl md:text-2xl text-white sm:mb-auto md:mb-[-7rem] xl:mb-[-10rem] duration-300 transition-shadow">
-            Hello, <span className="text-green-500">Admin</span>
+          <h1 className="text-xl md:text-5xl text-white mb-4 md:mb-0">
+            Hello, <span className="text-green-500">Admin!</span>
           </h1>
           <div className="flex flex-col items-center">
             <div className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-white">
@@ -185,7 +137,7 @@ const AdminDashboard = () => {
         {/* Responsive Filters and Search */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
           <div className="flex gap-2">
-            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
               <option className='bg-white text-black'>Employee</option>
               <option className='bg-white text-black'>Intern</option>
               <option className='bg-white text-black'>Inactive</option>
@@ -214,22 +166,22 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                   <tr>
-                    <th className="text-[#4E9F48] text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">ID</th>
-                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">Name</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Department</th>
-                    <th className="hidden md:table-cell text-white text-left py-2 md:py-3 px-2 md:px-4">Job Title</th>
-                    <th className="text-white text-left py-2 md:py-3 px-2 md:px-4"></th>
+                    <th className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">ID</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Name</th>
+                    <th className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4 text-center">Department</th>
+                    <th className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4 text-center">Job Title</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentUsers.map((user) => (
                     <tr key={user.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.id}</td>
-                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">{user.name}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.department}</td>
-                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4">{user.title}</td>
+                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{user.id}</td>
+                      <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{user.name}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4 text-center">{user.department}</td>
+                      <td className="hidden md:table-cell text-white py-2 md:py-3 px-2 md:px-4 text-center">{user.title}</td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4">
-                        <button className="bg-green-600 hover:bg-green-800 duration-300 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
+                        <button className="bg-green-600 text-white px-2 md:px-4 py-1 rounded text-sm md:text-base">
                           Edit
                         </button>
                       </td>
@@ -242,7 +194,7 @@ const AdminDashboard = () => {
 
           {/* Responsive Pagination */}
           <div className="bg-[#2b2b2b] py-2 px-2 md:px-4 flex justify-center gap-1">
-            {Array.from({ length: totalPages }).map((_, index) => (
+            {Array.from({ length: Math.ceil(users.length / usersPerPage) }).map((_, index) => (
               <button
                 key={index}
                 onClick={() => paginate(index + 1)}
@@ -251,7 +203,6 @@ const AdminDashboard = () => {
                     ? 'bg-green-600 text-white'
                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                 }`}
-                disabled={currentPage === index + 1}
               >
                 {index + 1}
               </button>
@@ -261,10 +212,10 @@ const AdminDashboard = () => {
 
         {/* Responsive Time Buttons */}
         <div className="flex justify-end mt-2 gap-2">
-          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700 duration-300">
+          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
             TIME-IN
           </button>
-          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40 duration-300">
+          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40">
             TIME-OUT
           </button>
         </div>
