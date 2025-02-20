@@ -44,17 +44,18 @@ const AdminDashboard = () => {
 
   // Format functions
   const formatDate = (date) => {
-    const parts = date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
-    }).split('/');
-    return (
-      <div className="text-center">
-        {parts[0]}<span className="text-green-500">/</span>{parts[1]}<span className="text-green-500">/</span>{parts[2]}
-      </div>
-    );
-  };
+  const parts = date.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).split('-');
+  return (
+    <div className="text-center">
+      {parts[0]}<span className="text-green-500">/</span>{parts[1]}<span className="text-green-500">/</span>{parts[2]}
+    </div>
+  );
+};
+
 
   const formatTime = (date) => {
     const timeString = date.toLocaleTimeString('en-US', {
