@@ -22,13 +22,13 @@ const addEmgncyContact = async (req, res, next) => {
             });
         }
 
-        // Validate contact number format (basic example)
-        if (!/^\+?\d{10,14}$/.test(contact_number)) {
-            return res.status(400).json({
-                successful: false,
-                message: "Invalid contact number format. It should be between 10-14 digits."
-            });
-        }
+        // // Validate contact number format (basic example)
+        // if (!/^\+?\d{10,14}$/.test(contact_number)) {
+        //     return res.status(400).json({
+        //         successful: false,
+        //         message: "Invalid contact number format. It should be between 10-14 digits." + error
+        //     });
+        // }
 
         // Create emergency contact
         await EmgncyContact.create({

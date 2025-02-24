@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import bg from './img/mainbg.png';
 import icon from './Img/Icone.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 
@@ -28,11 +27,10 @@ const LoginPage = () => {
 
   return (
     <div
-      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen"
-      style={{ backgroundImage: `url(${bg})` }}
+      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/90"
     >
-      <div className="fixed top-0 left-0 w-full bg-black text-white p-4 flex justify-between items-center z-50">
-        <img src={logo} alt="Logo" className="h-10 w-auto" />
+      <div className="fixed top-0 left-0 w-full bg-black text-white p-8 flex justify-between items-center z-50">
+        <img src={logo} alt="Logo" className="h-11 w-auto ml-8" />
       </div>
 
       <div className="flex items-center justify-center h-[calc(100vh-88px)]">
