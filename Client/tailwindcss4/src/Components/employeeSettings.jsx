@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, Eye, EyeOff } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
-import defaulticon from '../Components/Img/default-icon.png';
+// import defaulticon from '../Components/Img/default-icon.png';
 
 
 const EmployeeSettings = () => {
     const [isNavOpen, setIsNavOpen] = useState(false);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const setWindowWidth = useState(window.innerWidth);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [profilePic, setProfilePic] = useState(null);
     const [email, setEmail] = useState('');
