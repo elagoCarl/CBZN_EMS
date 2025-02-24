@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Search, Menu } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
+import AddReq  from './callComponents/addReq';
+import CancelReq from './callComponents/cancelReq';
 
 const ReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [isAddReqOpen, setIsAddReqOpen] = useState(false);
+    const [isCancelReqOpen, setIsCancelReqOpen] = useState(false);
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
@@ -14,6 +18,18 @@ const ReqPage = () => {
         // Request data remains unchanged
         {
             id: 1,
+            type: 'overtime',
+            date: '2025-02-15',
+            status: 'pending',
+            details: {
+                overtimeDate: '2025-02-15',
+                overtimeStart: '18:00',
+                overtimeEnd: '21:00',
+                overtimeReason: 'Need to complete the quarterly report'
+            }
+        },
+        {
+            id: 2,
             type: 'overtime',
             date: '2025-02-15',
             status: 'pending',
@@ -41,6 +57,20 @@ const ReqPage = () => {
             clearTimeout(window.resizeTimer);
         };
     }, []);
+
+    const handleAddReqClick = () => {
+        setIsAddReqOpen(true);
+    };
+    const handleAddReqClose = () => {
+        setIsAddReqOpen(false);
+    };
+
+    const handleCancelReqClick = () => {
+        setIsCancelReqOpen(true);
+    };
+    const handleCancelReqClose = () => {
+        setIsCancelReqOpen(false);
+    };
 
     // Clock update
     useEffect(() => {
@@ -376,7 +406,7 @@ const ReqPage = () => {
 
                     {/* Add request button */}
                     <div className="flex justify-end">
-                        <button className="bg-green-600 text-white px-3 py-1 sm:p-2 rounded text-xs sm:text-sm hover:bg-green-700 flex items-center transition-colors">
+                        <button className="bg-green-600 text-white px-3 py-1 sm:p-2 rounded text-xs sm:text-sm hover:bg-green-700 flex items-center transition-colors" onClick={handleAddReqClick}>
                             <Plus className="w-4 h-4 mr-1" /> Add Request
                         </button>
                     </div>
@@ -461,7 +491,7 @@ const ReqPage = () => {
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
                                                         {request.status === 'pending' && (
                                                             <button
-                                                                onClick={() => handleCancel(request.id)}
+                                                                onClick={handleCancelReqClick}
                                                                 className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors"
                                                             >
                                                                 Cancel
@@ -549,6 +579,8 @@ const ReqPage = () => {
                         </div>
                     )}
                 </div>
+                <AddReq isOpen={isAddReqOpen} onClose={handleAddReqClose} />
+                <CancelReq isOpen={isCancelReqOpen} onClose={handleCancelReqClose} />
             </main>
         </div>
     );
