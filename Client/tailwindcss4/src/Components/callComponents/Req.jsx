@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, Clock, UserCheck} from 'lucide-react';
-// import logo from '../Img/CBZN-Logo.png';
+import { Calendar, Clock, UserCheck, Menu, X } from 'lucide-react';
+import logo from '../Img/CBZN-Logo.png';
 
 export const Req = () => {
   const [activeRequest, setActiveRequest] = useState(null);
-  // const [isNavOpen, setIsNavOpen] = useState(false);
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
     overtimeDate: '',
@@ -25,14 +24,12 @@ export const Req = () => {
   });
 
   // Close profile dropdown when clicking outside
-   useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
-        if (profileRef.current && !profileRef.current.contains(event.target)) {
-          // handle click outside
-        }
-        };
-      };
+        setIsProfileOpen(false);
+      }
+    };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -122,7 +119,7 @@ export const Req = () => {
             <div className="grid grid-cols-2 gap-4">
             <input
               type="date"
-              name="leaveStartDate"
+              name="leavStartDate"
               value={formData.leaveStartDate}
               onChange={handleInputChange}
               className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
