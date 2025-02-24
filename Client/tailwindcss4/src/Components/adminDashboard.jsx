@@ -3,16 +3,16 @@ import axios from 'axios';
 import { Search, Plus } from 'lucide-react';
 import Sidebar from '../Components/callComponents/sidebar';
 import AddUserModal from '../Components/callComponents/addUser';
-import EditUserModal from '../Components/callComponents/editUser'; // Import the edit modal
+import EditUserModal from '../Components/callComponents/editUser';
 
 const AdminDashboard = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [employmentFilter, setEmploymentFilter] = useState('Employee');
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
   // New state for edit modal
@@ -38,8 +38,8 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -68,11 +68,15 @@ const AdminDashboard = () => {
     fetchUsers();
   };
 
-  // New handler to open the edit modal for a specific user
-  const handleEditUser = (userId) => {
-    setSelectedUserId(userId);
-    setIsEditUserModalOpen(true);
-  };
+  // Handler to open the edit modal for a specific user using the employeeId
+  const handleEditUser = (employeeId) => {
+    const userToEdit = users.find(user => user.employeeId === employeeId);
+    if (userToEdit) {
+      setSelectedUserId(userToEdit.id); // The issue might be here
+      setIsEditUserModalOpen(true);
+    }
+  }
+
 
   // Handler to close the edit modal
   const handleCloseEditModal = () => {
@@ -81,7 +85,7 @@ const AdminDashboard = () => {
   };
 
   // Callback after user is updated via the edit modal
-  const handleUserUpdated = (updatedUser) => {
+  const handleUserUpdated = () => {
     // You can optimistically update the UI or refetch all users
     fetchUsers();
     handleCloseEditModal();
@@ -95,7 +99,7 @@ const AdminDashboard = () => {
       user.name?.toLowerCase().includes(searchTerm) ||
       user.email?.toLowerCase().includes(searchTerm)
     );
-  }); // Add this closing parenthesis
+  });
 
   const usersPerPage = windowWidth < 768 ? 8 : 12;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -207,6 +211,7 @@ const AdminDashboard = () => {
                         >
                           Edit
                         </button>
+
                       </td>
                     </tr>
                   ))}
@@ -233,16 +238,6 @@ const AdminDashboard = () => {
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Responsive Time Buttons */}
-        <div className="flex justify-end mt-2 gap-2">
-          <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
-            TIME-IN
-          </button>
-          <button className="bg-black/90 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-black/40">
-            TIME-OUT
-          </button>
         </div>
       </div>
 
