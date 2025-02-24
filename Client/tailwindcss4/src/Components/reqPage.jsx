@@ -3,6 +3,7 @@ import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu } fro
 import logo from '../Components/Img/CBZN-Logo.png';
 import AddReq  from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const ReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
@@ -291,50 +292,7 @@ const ReqPage = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-            {/* Mobile Nav Toggle */}
-            <button
-                onClick={() => setIsNavOpen(!isNavOpen)}
-                className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-                aria-label={isNavOpen ? "Close menu" : "Open menu"}
-            >
-                {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Sidebar - Responsive implementation */}
-            <aside
-                className={`fixed md:sticky top-0 md:top-auto h-full w-64 md:w-1/4 lg:w-1/5 bg-black p-6 flex flex-col z-40
-                  transform ${isNavOpen ? 'translate-x-0' : '-translate-x-full'} 
-                  md:translate-x-0 transition-transform duration-300 ease-in-out`}
-                aria-hidden={!isNavOpen && windowWidth < 768}
-            >
-                {/* Sidebar content */}
-                <div className="mb-8">
-                    <div className="w-full text-white p-4 flex justify-center items-center">
-                        <img src={logo} alt="CBZN Logo" className="h-6 sm:h-8 w-auto" />
-                    </div>
-                </div>
-
-                <div className="flex flex-col flex-grow justify-center">
-                    <nav className="w-full space-y-3 text-center font-medium">
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Dashboard</div>
-                        <div className="text-white bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base">My Requests</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Attendance</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Calendar</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Settings</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Help</div>
-                    </nav>
-                </div>
-
-                <div className="mt-auto border-t border-gray-800 pt-4">
-                    <div className="flex items-center space-x-3 p-2">
-                        <div className="w-8 h-8 bg-gray-600 rounded-full flex-shrink-0" />
-                        <div className="overflow-hidden">
-                            <div className="text-white text-sm font-medium truncate">John Doe</div>
-                            <div className="text-gray-400 text-xs truncate">employee@cbzn.com</div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+            <Sidebar /> {/* Mobile Nav Toggle */}
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
