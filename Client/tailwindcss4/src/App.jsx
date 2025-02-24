@@ -6,10 +6,13 @@ import EmployeeDashboard from "./Components/employeeDashboard.jsx"
 import Sidebar from './Components/callComponents/sidebar.jsx';
 import EmployeeHome from './Components/employHome.jsx';
 import AddUser from './Components/callComponents/addUser.jsx';
+import EditUser from './Components/callComponents/editUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import EmployeeAttendance from './Components/employeeAttendance.jsx';
+// import ReqPage from './Components/reqPage.jsx';
+import DeptPage from "./Components/departmentPage.jsx";
 
 function App() {
   return (
@@ -28,6 +31,8 @@ function App() {
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
+          <Route path="/deptPage" element={<DeptPage />} />
+          <Route path="/editUser" element={<EditUser />} />
       </Routes>
       </Router>
     </>

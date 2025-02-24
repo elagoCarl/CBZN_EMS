@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Department.associate = (models) => {
-        Department.hasMany(models.User, {
+        Department.hasMany(models.JobTitle, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
