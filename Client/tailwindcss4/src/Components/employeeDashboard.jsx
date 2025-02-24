@@ -10,7 +10,7 @@ const EmployeeDashboard = () => {
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-  const recordsPerPage = windowWidth < 768 ? 5 : 10;
+  const recordsPerPage = windowWidth < 768 ? 5 : 10 ;
 
   // Handle window resize
   useEffect(() => {
@@ -102,6 +102,14 @@ const EmployeeDashboard = () => {
       time_out: "03:30 PM",
       isRestDay: "Work",
     },
+    {
+      date: "2025-02-17",
+      day: "Monday",
+      site: "Onsite",
+      time_in: "07:30 AM",
+      time_out: "03:30 PM",
+      isRestDay: "Work",
+    }
   ];
 
   const indexOfLastRecord = currentPage * recordsPerPage;
