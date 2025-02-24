@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM('Employee', 'Intern', 'Inactive'),
             allowNull: false,
             defaultValue: 'Employee'
+        },
+        profilePicture: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         timestamps: true,
@@ -81,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
             onUpdate: 'CASCADE'
         });
-        
+
 
         // Other existing associations
         User.belongsTo(models.Schedule);
