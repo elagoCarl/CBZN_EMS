@@ -23,6 +23,8 @@ function App() {
           <Route path="/employeeHome" element={<EmployeeHome />} />
           {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
           {/* <Route path="/adminEms" element={<AdminEms />} /> */}
+          <Route path="/req" element={<Req/>} />
+          <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/sidebar" element={<Sidebar />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/adminDashboard" element={<AdminDashboard />} />
