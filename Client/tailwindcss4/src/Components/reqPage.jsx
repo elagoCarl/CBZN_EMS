@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu } from 'lucide-react';
-import logo from '../Components/Img/CBZN-Logo.png';
+import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import AddReq  from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
-import Sidebar from "../Components/callComponents/sidebar.jsx"
+import Sidebar from './callComponents/sidebar';
+
 
 const ReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isAddReqOpen, setIsAddReqOpen] = useState(false);
-    const [isCancelReqOpen, setIsCancelReqOpen] = useState(false);
-    const [isNavOpen, setIsNavOpen] = useState(false);
+    const [isCancelReqOpen, setIsCancelReqOpen] = useState(false)
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -109,7 +108,7 @@ const ReqPage = () => {
 
         const [time, period] = timeString.split(' ');
         return (
-            <span className="text-white bg-black/40 rounded-xl px-3 sm:px-4 flex flex-1 items-center justify-center text-sm sm:text-base">
+            <span className="text-white bg-black/40 rounded-md px-3 sm:px-4 flex flex-1 items-center justify-center text-sm sm:text-base">
                 {time} <span className="text-green-500 ml-1 sm:ml-2">{period}</span>
             </span>
         );
@@ -121,12 +120,6 @@ const ReqPage = () => {
         } else {
             setExpandedRow(id);
         }
-    };
-
-    const handleCancel = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'cancelled' } : req
-        ));
     };
 
     const renderTypeIcon = (type) => {
@@ -292,14 +285,14 @@ const ReqPage = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-            <Sidebar /> {/* Mobile Nav Toggle */}
+            <Sidebar />
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 {/* Page header with responsive layout */}
                 <header className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl text-white font-semibold">
-                        My <span className="text-green-500">Requests</span>
+                    <h1 className="text-xl sm:text-2xl md:text-3xl text-green-500 font-semibold">
+                        Requests
                     </h1>
                     <div className="flex flex-col items-center">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-white">
@@ -317,7 +310,7 @@ const ReqPage = () => {
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                         <button
                             onClick={() => setActiveFilter('all')}
-                            className={`px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${activeFilter === 'all'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${activeFilter === 'all'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
@@ -326,7 +319,7 @@ const ReqPage = () => {
                         </button>
                         <button
                             onClick={() => setActiveFilter('overtime')}
-                            className={`px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'overtime'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'overtime'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
@@ -335,7 +328,7 @@ const ReqPage = () => {
                         </button>
                         <button
                             onClick={() => setActiveFilter('leave')}
-                            className={`px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'leave'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'leave'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
@@ -344,7 +337,7 @@ const ReqPage = () => {
                         </button>
                         <button
                             onClick={() => setActiveFilter('timeadjustment')}
-                            className={`px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'timeadjustment'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'timeadjustment'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
@@ -353,7 +346,7 @@ const ReqPage = () => {
                         </button>
                         <button
                             onClick={() => setActiveFilter('schedule')}
-                            className={`px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'schedule'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'schedule'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
@@ -371,7 +364,7 @@ const ReqPage = () => {
                 </div>
 
                 {/* Table Container */}
-                <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col flex-grow">
+                <div className="bg-[#363636] rounded-md overflow-hidden flex flex-col flex-grow">
                     {/* Responsive Table - Scrollable on all devices */}
                     <div className="overflow-x-auto">
                         <div className="overflow-y-auto max-h-[calc(100vh-280px)] sm:max-h-[calc(100vh-300px)]">
@@ -538,7 +531,7 @@ const ReqPage = () => {
                     )}
                 </div>
                 <AddReq isOpen={isAddReqOpen} onClose={handleAddReqClose} />
-                <CancelReq isOpen={isCancelReqOpen} onClose={handleCancelReqClose} />
+                <CancelReq isOpen={isCancelReqOpen} onClose={handleCancelReqClose} message="Are you sure you want to cancel your request?" />
             </main>
         </div>
     );
