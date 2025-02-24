@@ -10,6 +10,9 @@ import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import EmployeeAttendance from './Components/employeeAttendance.jsx';
+import ReqPage from './Components/reqPage.jsx';
+import DeptPage from './Components/departmentPage.jsx';
+import { AddDepartmentModal, EditDepartmentModal, AddJobTitleModal, EditJobTitleModal } from "./Components/callComponents/deptModals.jsx";
 
 function App() {
   return (
@@ -19,6 +22,7 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/addUser" element={<AddUser />} />
           <Route path="/employeeHome" element={<EmployeeHome />} />
+          <Route path="/deptPage" element={<DeptPage />} />
           <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/sidebar" element={<Sidebar />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
