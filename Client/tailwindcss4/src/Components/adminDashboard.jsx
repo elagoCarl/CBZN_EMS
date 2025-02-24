@@ -157,10 +157,10 @@ const AdminDashboard = () => {
         <div className="flex flex-col h-screen justify-center items-center space-y-4">
           <nav className="w-full space-y-4 text-center font-semibold text-base">
             <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Home
+              My Attendance
             </div>
             <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Attendance
+              Attendance List
             </div>
             <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
               Manage Users
@@ -287,7 +287,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Responsive Time Buttons */}
-        <div className="flex justify-end mt-2 gap-2">
+        <div className="flex justify-end mt-4 gap-2">
           <button className="bg-green-600 text-white px-4 md:px-8 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-700">
             TIME-IN
           </button>

@@ -21,12 +21,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     }, [isOpen, toggleSidebar]);
 
     const menuItems = [
-        { label: "HOME", href: "#" },
-        { label: "DASHBOARD", href: "#" },
-        { label: "DEPARTMENTS", href: "#" },
-        { label: "CAREERS", href: "#" },
-        { label: "REPORTS", href: "#" },
-        { label: "USERS", href: "#" },
+        { label: "MY ATTENDANCE", href: "#" },
+        { label: "ATTENDANCE LIST", href: "#" },
+        { label: "MANAGE USERS", href: "#" },
+        { label: "REQUESTS", href: "#" },
+        { label: "SETTINGS", href: "#" },
     ];
 
     return (
