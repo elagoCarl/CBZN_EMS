@@ -9,10 +9,10 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [employmentFilter, setEmploymentFilter] = useState('Employee');
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
   // New state for edit modal
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
       user.name?.toLowerCase().includes(searchTerm) ||
       user.email?.toLowerCase().includes(searchTerm)
     );
-  };
+  }); // Add this closing parenthesis
 
   const usersPerPage = windowWidth < 768 ? 8 : 12;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
