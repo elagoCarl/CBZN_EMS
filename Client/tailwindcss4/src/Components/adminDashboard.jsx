@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import Sidebar from '../Components/callComponents/sidebar';
+import AddUserModal from '../Components/callComponents/addUser';
+import EditUserModal from '../Components/callComponents/editUser'; // Import the edit modal
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -11,148 +13,198 @@ const AdminDashboard = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [employmentFilter, setEmploymentFilter] = useState('Employee');
   const [loading, setLoading] = useState(true);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
-  // Fetch Users from API
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('http://localhost:8080/users/getAllUsers');
-        console.log("response data: ", response.data.data); // Debugging: Log the response
-        setUsers(Array.isArray(response.data?.data) ? response.data.data : []); // Ensure it's always an array
-        console.log("users: ", users); // Debugging: Log the users
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setUsers([]); // Fallback to empty array in case of error
-      } finally {
-        setLoading(false);
-      }
-    };
+  // New state for edit modal
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
-    fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get('http://localhost:8080/users/getAllUsers');
+      setUsers(Array.isArray(data?.data) ? data.data : []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Handle window resize
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Reset to first page when search query or filter changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, employmentFilter]);
 
-  // Real-time clock update
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Filter users safely
-  const filteredUsers = (users || []).filter(user => {
+  const handleAddUser = () => {
+    setIsAddUserModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsAddUserModalOpen(false);
+  };
+
+  // Handler for when a new user is added
+  const handleUserAdded = (newUser) => {
+    // Optimistically update the UI
+    setUsers(prevUsers => [newUser, ...prevUsers]);
+    setIsAddUserModalOpen(false);
+    // Refetch to ensure consistency with backend
+    fetchUsers();
+  };
+
+  // New handler to open the edit modal for a specific user
+  const handleEditUser = (userId) => {
+    setSelectedUserId(userId);
+    setIsEditUserModalOpen(true);
+  };
+
+  // Handler to close the edit modal
+  const handleCloseEditModal = () => {
+    setIsEditUserModalOpen(false);
+    setSelectedUserId(null);
+  };
+
+  // Callback after user is updated via the edit modal
+  const handleUserUpdated = (updatedUser) => {
+    // You can optimistically update the UI or refetch all users
+    fetchUsers();
+    handleCloseEditModal();
+  };
+
+  const filteredUsers = users.filter(user => {
     if (user.employment_status !== employmentFilter) return false;
+    const searchTerm = searchQuery.toLowerCase();
     return (
-      user.employeeId?.toString().includes(searchQuery.toLowerCase()) ||
-      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      user.employeeId?.toString().includes(searchTerm) ||
+      user.name?.toLowerCase().includes(searchTerm) ||
+      user.email?.toLowerCase().includes(searchTerm)
     );
   });
 
-  // Determine number of users per page based on screen size
   const usersPerPage = windowWidth < 768 ? 8 : 12;
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-
-  // Pagination handler
-  const paginate = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
+  const currentUsers = filteredUsers.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
+  );
 
   return (
-    <div className="flex h-screen bg-black/90">
+    <div className="flex h-screen bg-gradient-to-br from-black to-black/95">
       <Sidebar />
 
-      <div className="flex-1 p-4 md:p-6 flex flex-col">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-xl md:text-2xl text-white">
-            Hello, <span className="text-green-500">Admin</span>
-          </h1>
-          <div className="flex flex-col items-center">
-            <div className="text-2xl md:text-4xl font-bold text-white">
+      <div className="flex-1 p-6 space-y-6 overflow-hidden">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-black/40 p-6 rounded-2xl backdrop-blur-sm">
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
+              Welcome Back, <span className="text-green-500">Admin</span>
+            </h1>
+          </div>
+          <div className="text-center backdrop-blur-md bg-black/20 p-4 rounded-xl">
+            <div className="text-3xl font-bold text-white mb-1">
               {currentTime.toLocaleDateString()}
             </div>
-            <div className="text-lg md:text-4xl bg-black/40 px-4 py-1 rounded-xl text-white">
+            <div className="text-2xl text-green-500">
               {currentTime.toLocaleTimeString()}
             </div>
           </div>
         </div>
 
-        {/* Filters and Search */}
-        <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 font-semibold">
+        {/* Controls Section */}
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <button
+            className="bg-green-600 text-white px-6 py-3 rounded-xl font-medium transition-all hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black flex items-center gap-2"
+            onClick={handleAddUser}
+          >
+            <Plus size={20} />
+            Add User
+          </button>
+
           <select
-            className="bg-green-600 text-white px-4 py-2 rounded text-base"
+            className="bg-green-600 text-white px-6 py-3 rounded-xl font-medium transition-all hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
             value={employmentFilter}
             onChange={(e) => setEmploymentFilter(e.target.value)}
           >
-            <option value="Employee">Employee</option>
-            <option value="Intern">Intern</option>
+            <option value="Employee">Employees</option>
+            <option value="Intern">Interns</option>
             <option value="Inactive">Inactive</option>
           </select>
 
-          <div className="relative w-full md:w-auto">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Search ID or name..."
-              className="bg-black/80 text-white px-10 py-2 rounded text-base w-full md:w-auto"
+              placeholder="Search by ID, name, or email..."
+              className="w-full bg-black/40 text-white pl-12 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           </div>
         </div>
 
-        {/* User Table */}
-        <div className="bg-[#363636] rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="text-white text-center p-4">Loading users...</div>
-            ) : (
+        {/* Table Section */}
+        <div className="bg-black/40 rounded-2xl overflow-hidden backdrop-blur-sm">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-green-500 text-xl">Loading users...</div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#2b2b2b] text-white">
-                  <tr>
-                    <th className="py-3 px-4 text-left">Employee ID</th>
-                    <th className="py-3 px-4 text-left">Name</th>
-                    <th className="hidden md:table-cell py-3 px-4 text-left">Email</th>
-                    <th className="hidden md:table-cell py-3 px-4 text-left">Job Title</th>
-                    <th className="hidden md:table-cell py-3 px-4 text-left">Admin</th>
-                    <th className="py-3 px-4 text-left">Actions</th>
+                <thead>
+                  <tr className="bg-black/60 text-gray-300">
+                    <th className="py-4 px-6 text-left">ID</th>
+                    <th className="py-4 px-6 text-left">Name</th>
+                    <th className="hidden md:table-cell py-4 px-6 text-left">Email</th>
+                    <th className="hidden md:table-cell py-4 px-6 text-left">Role</th>
+                    <th className="hidden md:table-cell py-4 px-6 text-left">Status</th>
+                    <th className="py-4 px-6 text-left">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-800">
                   {currentUsers.map((user) => (
-                    <tr key={user.employeeId} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="py-3 px-4 text-green-500">{user.employeeId}</td>
-                      <td className="py-3 px-4 text-white">{user.name}</td>
-                      <td className="hidden md:table-cell py-3 px-4 text-white">{user.email}</td>
-                      <td className="hidden md:table-cell py-3 px-4 text-white">{user.jobTitle?.title || 'N/A'}</td>
-                      <td className="hidden md:table-cell py-3 px-4">
-                        {user.isAdmin ? (
-                          <span className="bg-green-600 text-white px-2 py-1 rounded text-xs">Admin</span>
-                        ) : (
-                          <span className="bg-gray-600 text-white px-2 py-1 rounded text-xs">User</span>
-                        )}
+                    <tr key={user.employeeId} className="transition-colors hover:bg-black/40">
+                      <td className="py-4 px-6">
+                        <span className="text-green-500 font-medium">{user.employeeId}</span>
                       </td>
-                      <td className="py-3 px-4 flex gap-2">
-                        <button className="bg-green-600 hover:bg-green-800 text-white px-3 py-1 rounded text-sm">
+                      <td className="py-4 px-6">
+                        <div className="text-white font-medium">{user.name}</div>
+                      </td>
+                      <td className="hidden md:table-cell py-4 px-6 text-gray-300">{user.email}</td>
+                      <td className="hidden md:table-cell py-4 px-6 text-gray-300">
+                        {user.isAdmin ? 'Admin' : 'User'}
+                      </td>
+                      <td className="hidden md:table-cell py-4 px-6">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${user.employment_status === 'Employee'
+                          ? 'bg-green-500/20 text-green-500'
+                          : user.employment_status === 'Intern'
+                            ? 'bg-blue-500/20 text-blue-500'
+                            : 'bg-gray-500/20 text-gray-400'
+                          }`}>
+                          {user.employment_status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <button
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          onClick={() => handleEditUser(user.employeeId)}
+                        >
                           Edit
                         </button>
                       </td>
@@ -160,17 +212,22 @@ const AdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="bg-[#2b2b2b] py-2 px-4 flex justify-center gap-2">
+          <div className="bg-black/60 py-4 px-6 flex justify-center gap-2">
             {Array.from({ length: totalPages }).map((_, index) => (
               <button
                 key={index}
-                onClick={() => paginate(index + 1)}
-                className={`px-3 py-1 rounded text-sm ${currentPage === index + 1 ? 'bg-green-600 text-white' : 'bg-[#363636] text-white hover:bg-[#404040]'
-                  }`}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`
+                  px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  ${currentPage === index + 1
+                    ? 'bg-green-600 text-white'
+                    : 'bg-black/40 text-gray-400 hover:bg-black/60'
+                  }
+                `}
               >
                 {index + 1}
               </button>
@@ -178,6 +235,21 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Add User Modal */}
+      <AddUserModal
+        isOpen={isAddUserModalOpen}
+        onClose={handleCloseModal}
+        onUserAdded={handleUserAdded}
+      />
+
+      {/* Edit User Modal */}
+      <EditUserModal
+        isOpen={isEditUserModalOpen}
+        onClose={handleCloseEditModal}
+        userId={selectedUserId}
+        onUserUpdated={handleUserUpdated}
+      />
     </div>
   );
 };

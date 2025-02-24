@@ -8,9 +8,10 @@ import Sidebar from './Components/callComponents/sidebar.jsx';
 import EmployeeHome from './Components/employHome.jsx';
 // import AdminEms from './Components/admin_Ems.jsx'
 import AddUser from './Components/callComponents/addUser.jsx';
+import EditUser from './Components/callComponents/editUser.jsx';
 import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
-import ReqPage from './Components/reqPage.jsx';
+// import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/employeeSettings" element={<EmployeeSettings />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/deptPage" element={<DeptPage />} />
+          <Route path="/editUser" element={<EditUser />} />
       </Routes>
       </Router>
     </>
