@@ -11,7 +11,7 @@ import EmployeeSettings from './Components/employeeSettings.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import EmployeeAttendance from './Components/employeeAttendance.jsx';
-// import ReqPage from './Components/reqPage.jsx';
+import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 
 function App() {
