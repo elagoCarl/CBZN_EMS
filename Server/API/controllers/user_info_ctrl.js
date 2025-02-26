@@ -61,7 +61,7 @@ const addUserInfo = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({
             successful: false,
-            message: error.message || "An unexpected error occurred."
+            message: error
         });
     }
 };
