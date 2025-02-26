@@ -30,6 +30,7 @@ function App() {
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/employeeAttendance" element={<EmployeeAttendance />} />
+          {/* <Route path="/employHome" element={<EmployeeHome/>}/> */}
       </Routes>
       </Router>
     </>

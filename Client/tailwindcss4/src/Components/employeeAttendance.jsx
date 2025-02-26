@@ -68,7 +68,7 @@ const AdminAttendance = () => {
       id: "212236",
       date: "2025-02-17",
       day: "Monday",
-      type: "Onsite",
+      site: "Onsite",
       timeIn: "08:00 AM",
       timeOut: "05:00 PM",
       status: "Work",
@@ -77,7 +77,7 @@ const AdminAttendance = () => {
       id: "212546",
       date: "2025-02-17",
       day: "Monday",
-      type: "Remote",
+      site: "Remote",
       timeIn: "08:30 AM",
       timeOut: "04:30 PM",
       status: "Work",
@@ -86,7 +86,7 @@ const AdminAttendance = () => {
       id: "212546",
       date: "2025-02-17",
       day: "Monday",
-      type: "Onsite",
+      site: "Onsite",
       timeIn: "09:00 AM",
       timeOut: "06:00 PM",
       status: "Work",
@@ -95,7 +95,7 @@ const AdminAttendance = () => {
       id: "212546",
       date: "2025-02-17",
       day: "Monday",
-      type: "-",
+      site: "-",
       timeIn: "-",
       timeOut: "-",
       status: "Rest Day",
@@ -104,7 +104,7 @@ const AdminAttendance = () => {
       id: "212546",
       date: "2025-02-17",
       day: "Monday",
-      type: "Onsite",
+      site: "Onsite",
       timeIn: "07:30 AM",
       timeOut: "03:30 PM",
       status: "Work",
@@ -201,7 +201,7 @@ const AdminAttendance = () => {
                     <th className="text-[#4E9F48] py-2 px-4 text-center">User ID</th>
                     <th className="text-white py-2 px-4 text-center">Date</th>
                     <th className="text-white py-2 px-4 text-center">Day</th>
-                    <th className="text-white py-2 px-4 text-center">Type</th>
+                    <th className="text-white py-2 px-4 text-center">Site</th>
                     <th className="text-white py-2 px-4 text-center">Time-in</th>
                     <th className="text-white py-2 px-4 text-center">Time-out</th>
                     <th className="text-white py-2 px-4 text-center">Status</th>
@@ -217,7 +217,7 @@ const AdminAttendance = () => {
                         <td className="text-[#4E9F48] py-2 px-4 text-center">{entry.id}</td>
                         <td className="text-white py-2 px-4 text-center">{entry.date}</td>
                         <td className="text-white py-2 px-4 text-center">{entry.day}</td>
-                        <td className="text-white py-2 px-4 text-center">{entry.type}</td>
+                        <td className="text-white py-2 px-4 text-center">{entry.site}</td>
                         <td className="text-white py-2 px-4 text-center">{entry.timeIn}</td>
                         <td className="text-white py-2 px-4 text-center">{entry.timeOut}</td>
                         <td className="text-white py-2 px-4 text-center">{entry.status}

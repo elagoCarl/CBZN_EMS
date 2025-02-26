@@ -1,4 +1,4 @@
-const { User, Session, Department } = require('../models'); // Ensure model name matches exported model
+const { User, Session } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
@@ -206,14 +206,14 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
-        // Check if the department exists
-        const existingDepartment = await Department.findByPk(  DepartmentId);
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
+        // // Check if the department exists
+        // const existingDepartment = await Department.findByPk(  DepartmentId);
+        // if (!existingDepartment) {
+        //     return res.status(404).json({
+        //         successful: false,
+        //         message: "Department not found."
+        //     });
+        // }
         // Update user data
         await user.update({
             name,

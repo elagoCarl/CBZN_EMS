@@ -334,6 +334,7 @@ const getAttendancesByUserId = async (req, res) => {
   }
 };
 
+
 // Export all functions
 module.exports = {
   addAttendance,
