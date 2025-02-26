@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
-import logo from "../Components/Img/CBZN-Logo.png";
 import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
@@ -163,7 +162,7 @@ const AdminAttendance = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex h-screen bg-black/90">
+    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       < Sidebar />
 
       {/* Main Content */}
