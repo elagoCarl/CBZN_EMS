@@ -6,6 +6,12 @@ const addSchedule = async (req, res) => {
     try{
         const { title, schedule, isActive } = req.body;
 
+        // Check if there's a schedule with the same title
+        const scheduleExists = await Schedule.findOne({ where: { title } });
+        if(scheduleExists){
+            return res.status(409).json({ error: 'Schedule title already exists.' });
+        }
+
         if(!util.improvedCheckMandatoryFields({ title, schedule, isActive })){
             return res.status(400).json({ error: 'A mandatory field is missing.' });
         };
