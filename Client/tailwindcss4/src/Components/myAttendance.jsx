@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../Components/Img/CBZN-Logo.png";
 import axios from "axios";
-import Sidebar from "../Components/callComponents/sidebar.jsx";
+import Sidebar from "./callComponents/sidebar.jsx";
 
 const userId = 1;
 const EmployeeDashboard = () => {

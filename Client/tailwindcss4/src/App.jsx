@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminDashboard from "./Components/adminDashboard.jsx"; 
-import EmployeeDashboard from "./Components/employeeDashboard.jsx"
+import EmployeeDashboard from "./Components/myAttendance.jsx"
 import Sidebar from './Components/callComponents/sidebar.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
