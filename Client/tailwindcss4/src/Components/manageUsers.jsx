@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Search, Plus } from 'lucide-react';
-import Sidebar from '../Components/callComponents/sidebar';
-import AddUserModal from '../Components/callComponents/addUser';
-import EditUserModal from '../Components/callComponents/editUser';
+import Sidebar from './callComponents/sidebar';
+import AddUserModal from './callComponents/addUser';
+import EditUserModal from './callComponents/editUser';
 
-const AdminDashboard = () => {
+const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-black to-black/95">
+    <div className="flex h-screen bg-black/95">
       <Sidebar />
 
       <div className="flex-1 p-6 space-y-6 overflow-hidden">
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead>
                   <tr className="bg-black/60 text-gray-300">
-                    <th className="py-4 px-6 text-left">ID</th>
+                    <th className="py-4 px-6 text-left">Employee ID</th>
                     <th className="py-4 px-6 text-left">Name</th>
                     <th className="hidden md:table-cell py-4 px-6 text-left">Email</th>
                     <th className="hidden md:table-cell py-4 px-6 text-left">Role</th>
@@ -259,4 +259,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default ManageUsers;
