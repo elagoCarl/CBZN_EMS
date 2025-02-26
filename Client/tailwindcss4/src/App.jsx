@@ -9,6 +9,8 @@ import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import SideBar from "./Components/callComponents/sidebar.jsx";
+import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
+import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/deptPage" element={<DeptPage />} />
           <Route path="/sideBar" element={<SideBar />} />
+          <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
+          <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
       </Routes>
       </Router>
     </>
