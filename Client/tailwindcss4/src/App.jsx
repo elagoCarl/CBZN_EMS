@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from "./Components/manageUsers.jsx"; 
-import EmployeeDashboard from "./Components/employeeDashboard.jsx"
+import MyAttendance from "./Components/myAttendance.jsx"
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
@@ -17,7 +17,7 @@ function App() {
           <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/manageUsers" element={<ManageUsers />} />
-          <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/deptPage" element={<DeptPage />} />
