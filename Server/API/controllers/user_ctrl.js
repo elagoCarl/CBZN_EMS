@@ -5,10 +5,90 @@ const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
+
+const uploadProfilePic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // New profile picture path (relative)
+        const newProfilePicture = `uploads/profile_pics/${req.file.filename}`;
+
+        // Get old profile picture path
+        const oldProfilePicture = user.profilePicture;
+
+        if (oldProfilePicture && oldProfilePicture.startsWith("uploads/")) {
+            const oldPicPath = path.join(__dirname, "..", "..", oldProfilePicture);
+
+            // Check if old file exists before deleting
+            if (fs.existsSync(oldPicPath)) {
+                fs.unlink(oldPicPath, (err) => {
+                    if (err) {
+                        console.error("Error deleting old profile picture:", err);
+                    } else {
+                        console.log("Successfully deleted old profile picture:", oldPicPath);
+                    }
+                });
+            } else {
+                console.log("Old profile picture not found:", oldPicPath);
+            }
+        }
+
+        // Update user profile picture in the database
+        await user.update({ profilePicture: newProfilePicture });
+
+        return res.status(200).json({
+            message: "Profile picture updated successfully",
+            profilePicture: `${newProfilePicture}`,
+        });
+
+    } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+const getProfilePic = async (req, res) => {
+    try {
+        const { id: userId } = req.params;
+
+        // Check if user ID is provided
+        if (!userId) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
+        // Fetch user from database
+        const user = await User.findByPk(userId);
+
+        // Check if user exists
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Return profile picture path
+        res.json({ profilePicture: user.profilePicture });
+    } catch (error) {
+        console.error("Error fetching profile picture:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
 
 
 // const nodemailer = require('nodemailer');
-const { USER,
+    const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET } = process.env
@@ -158,8 +238,8 @@ const addUser = async (req, res, next) => {
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
-        });
-    }
+        });
+    }
 };
 
 const updateUserEmail = async (req, res, next) => {
@@ -579,5 +659,7 @@ module.exports = {
     loginUser,
     logoutUser,
     forgotPass,
-    getAllUsers
+    getAllUsers,
+    uploadProfilePic,
+    getProfilePic
 }

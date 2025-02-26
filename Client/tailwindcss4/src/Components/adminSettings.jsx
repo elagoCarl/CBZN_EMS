@@ -15,7 +15,7 @@ const AccountSettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const userId = 23;
+  const userId = 9;
 
   // Update time every second
   useEffect(() => {
@@ -24,6 +24,28 @@ const AccountSettings = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchProfilePic = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/users/getProfilePic/${userId}`);
+  
+        console.log("Fetched Profile Pic Response:", response.data); // Debugging
+  
+        if (response.data.profilePicture) {
+          setProfilePic(`http://localhost:8080/${response.data.profilePicture}?timestamp=${new Date().getTime()}`);
+        } else {
+          setProfilePic(null);
+        }
+      } catch (error) {
+        console.error("Error fetching profile picture:", error);
+        setProfilePic(null); // Prevents 404 issues
+      }
+    };
+  
+    fetchProfilePic();
+  }, [userId]); // Added userId as a dependency
+  
 
   // Format date for display
   const formatDate = (date) => {
@@ -55,17 +77,37 @@ const AccountSettings = () => {
     );
   };
 
-  // Handle profile picture change
-  const handleProfilePicChange = (e) => {
+  const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    if (!file) return;
+
+    // Show a preview before uploading
+    const reader = new FileReader();
+    reader.onloadend = () => {
         setProfilePic(reader.result);
-      };
-      reader.readAsDataURL(file);
+    };
+    reader.readAsDataURL(file);
+
+    // Prepare form data for upload
+    const formData = new FormData();
+    formData.append("profilePic", file);
+
+    try {
+        const response = await axios.post(
+            `http://localhost:8080/users/uploadProfilePicture/${userId}`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        if (response.data.profilePicture) {
+            // Update the profile picture with the saved image path from the server
+            setProfilePic(`http://localhost:8080/${response.data.profilePicture}`);
+        }
+    } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        alert("Failed to upload profile picture. Please try again.");
     }
-  };
+};
 
       // Fetch User Data
     //   useEffect(() => {
@@ -203,7 +245,7 @@ const AccountSettings = () => {
                 <div className="flex flex-col items-center gap-8">
                   <div className="relative group">
                     <div className="w-32 h-32 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border-3 border-green-500/80 hover:bg-white/0 duration-300">
-                      {profilePic ? (
+                    {profilePic ? (
                         <img
                           src={profilePic}
                           alt="Profile"
@@ -336,7 +378,6 @@ const AccountSettings = () => {
         </div>
       </div>
 
-      {/* Mobile Nav Overlay */}
       {isNavOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"

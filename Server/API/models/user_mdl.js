@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM('Employee', 'Intern', 'Inactive'),
             allowNull: false,
             defaultValue: 'Employee'
+        },
+        profilePicture: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     }, {
         timestamps: true,
