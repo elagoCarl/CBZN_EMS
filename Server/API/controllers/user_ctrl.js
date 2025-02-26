@@ -22,34 +22,10 @@ const uploadProfilePic = async (req, res) => {
         }
 
         // New profile picture path (relative)
-        const newProfilePicture = `uploads/profile_pics/${req.file.filename}`;
-
-        // Get old profile picture path
-        const oldProfilePicture = user.profilePicture;
-
-        if (oldProfilePicture && oldProfilePicture.startsWith("uploads/")) {
-            const oldPicPath = path.join(__dirname, "..", "..", oldProfilePicture);
-
-            // Check if old file exists before deleting
-            if (fs.existsSync(oldPicPath)) {
-                fs.unlink(oldPicPath, (err) => {
-                    if (err) {
-                        console.error("Error deleting old profile picture:", err);
-                    } else {
-                        console.log("Successfully deleted old profile picture:", oldPicPath);
-                    }
-                });
-            } else {
-                console.log("Old profile picture not found:", oldPicPath);
-            }
-        }
-
-        // Update user profile picture in the database
-        await user.update({ profilePicture: newProfilePicture });
+        await user.update({ profilePicture: req.file.buffer });
 
         return res.status(200).json({
-            message: "Profile picture updated successfully",
-            profilePicture: `${newProfilePicture}`,
+            message: "Profile picture updated successfully"
         });
 
     } catch (error) {
@@ -62,28 +38,22 @@ const uploadProfilePic = async (req, res) => {
 
 const getProfilePic = async (req, res) => {
     try {
-        const { id: userId } = req.params;
+        const { id } = req.params;
+        const user = await User.findByPk(id);
 
-        // Check if user ID is provided
-        if (!userId) {
-            return res.status(400).json({ error: 'User ID is required' });
+        if (!user || !user.profilePicture) {
+            return res.status(404).json({ error: "Profile picture not found" });
         }
 
-        // Fetch user from database
-        const user = await User.findByPk(userId);
-
-        // Check if user exists
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Return profile picture path
-        res.json({ profilePicture: user.profilePicture });
+        // Set response headers for the correct image type
+        res.setHeader("Content-Type", "image/jpeg");
+        res.send(user.profilePicture);
     } catch (error) {
         console.error("Error fetching profile picture:", error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 
 

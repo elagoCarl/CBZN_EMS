@@ -14,14 +14,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Configure storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/profile_pics/'); // Save in an "uploads" folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
+const storage = multer.memoryStorage(); 
 
 //return the error to frontend (not implemented)
 const upload = multer({
@@ -29,10 +22,9 @@ const upload = multer({
     limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
     fileFilter: (req, file, cb) => {
         const fileTypes = /jpeg|jpg|png/;
-        const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimeType = fileTypes.test(file.mimetype);
+        const extName = fileTypes.test(file.originalname);
 
-        if (extName && mimeType) {
+        if (extName) {
             return cb(null, true);
         } else {
             return cb(new Error('Only .png, .jpg, and .jpeg format allowed!'));

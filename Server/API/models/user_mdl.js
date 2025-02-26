@@ -34,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'Employee'
         },
         profilePicture: {
-            type: DataTypes.STRING,
-            allowNull: true
+            type: DataTypes.BLOB('long'), // Use BLOB for binary image storage
+            allowNull: true 
         }
     }, {
         timestamps: true,

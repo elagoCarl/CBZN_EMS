@@ -15,7 +15,7 @@ const AccountSettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const userId = 9;
+  const userId = 4;
 
   // Update time every second
   useEffect(() => {
@@ -27,24 +27,25 @@ const AccountSettings = () => {
 
   useEffect(() => {
     const fetchProfilePic = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/users/getProfilePic/${userId}`);
-  
-        console.log("Fetched Profile Pic Response:", response.data); // Debugging
-  
-        if (response.data.profilePicture) {
-          setProfilePic(`http://localhost:8080/${response.data.profilePicture}?timestamp=${new Date().getTime()}`);
-        } else {
-          setProfilePic(null);
+        try {
+            const response = await axios.get(`http://localhost:8080/users/getProfilePic/${userId}`, {
+                responseType: 'arraybuffer' // Important: Fetch binary data
+            });
+
+            // Convert binary data to a base64 image URL
+            const base64Image = btoa(
+                new Uint8Array(response.data).reduce((data, byte) => data + String.fromCharCode(byte), '')
+            );
+            setProfilePic(`data:image/jpeg;base64,${base64Image}`);
+        } catch (error) {
+            console.error("Error fetching profile picture:", error);
+            setProfilePic(null); // Prevents 404 issues
         }
-      } catch (error) {
-        console.error("Error fetching profile picture:", error);
-        setProfilePic(null); // Prevents 404 issues
-      }
     };
-  
+
     fetchProfilePic();
-  }, [userId]); // Added userId as a dependency
+}, [userId]);
+
   
 
   // Format date for display
