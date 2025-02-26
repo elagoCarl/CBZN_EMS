@@ -7,7 +7,6 @@ import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
-import MyAttendance from "./Components/myAttendance.jsx";
 
 function App() {
   return (

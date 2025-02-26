@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "./callComponents/sidebar.jsx";
+import Sidebar from "../Components/callComponents/sidebar.jsx";
 import dayjs from "dayjs";
 
 const userId = 4; // This should ideally come from authentication

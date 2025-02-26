@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 import axios from 'axios';
+import Sidebar from '../Components/callComponents/sidebar.jsx'
 
 const AccountSettings = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
