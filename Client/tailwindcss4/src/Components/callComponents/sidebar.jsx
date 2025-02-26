@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../Img/CBZN-Logo.png';
 
 const Sidebar = () => {
@@ -6,6 +7,8 @@ const Sidebar = () => {
     const [expandedItem, setExpandedItem] = useState(null);
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     // Handle screen resize and close mobile menu on larger screens
     useEffect(() => {
@@ -41,16 +44,32 @@ const Sidebar = () => {
         setExpandedItem(expandedItem === itemName ? null : itemName);
     };
 
-    // Navigation items with icons
+    // Handle navigation
+    const handleNavigation = (path) => {
+        navigate(path);
+        closeMobileMenu();
+    };
+
+    // Check if a path is active
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
+
+    // Navigation items with icons and paths
     const navigationItems = [
-        { name: 'My Attendance', icon: '📅' },
-        { name: 'Attendance List', icon: '📋' },
-        { name: 'Manage Users', icon: '👥' },
-        { name: 'Account Settings', icon: '⚙️' },
+        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
+        { name: 'Attendance List', icon: '📋', path: '/adminAttendance' },
+        { name: 'Manage Users', icon: '👥', path: '/manageUsers' },
+        { name: 'Account Settings', icon: '⚙️', path: '/accountSettings' },
         {
             name: 'Requests',
             icon: '📝',
-            subItems: ['OT Request', 'Leave Request', 'Time Adjustments', 'Schedule Change']
+            subItems: [
+                { name: 'OT Request', path: '/requests/overtime' },
+                { name: 'Leave Request', path: '/requests/leave' }, 
+                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
+                { name: 'Schedule Change', path: '/requests/schedule-change' }
+            ]
         },
     ];
 
@@ -91,7 +110,7 @@ const Sidebar = () => {
                 >
                     {/* Logo Section */}
                     <div className="p-6 border-b border-[#363636]">
-                        <div className="w-full flex justify-baseline items-center">
+                        <div className="w-full flex justify-baseline items-center cursor-pointer" onClick={() => handleNavigation('/')}>
                             <img src={logo} alt="CBZN Logo" className="h-8 w-auto" />
                         </div>
                     </div>
@@ -102,18 +121,23 @@ const Sidebar = () => {
                             {navigationItems.map((item) => (
                                 <li key={item.name}>
                                     {!item.subItems ? (
-                                        <a
-                                            href="#"
-                                            className="flex items-center gap-3 px-3 py-2 text-white hover:text-green-500 hover:bg-gray-900 rounded-md transition-all duration-200"
-                                            onClick={closeMobileMenu}
+                                        <button
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
+                                                ${isActive(item.path) 
+                                                    ? 'text-green-500 bg-gray-900' 
+                                                    : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                            onClick={() => handleNavigation(item.path)}
                                         >
                                             <span className="text-lg">{item.icon}</span>
-                                            <span>{item.name}</span>
-                                        </a>
+                                            <span className="text-left">{item.name}</span>
+                                        </button>
                                     ) : (
                                         <div>
                                             <button
-                                                className="w-full flex items-center justify-between gap-3 px-3 py-2 text-white hover:text-green-500 hover:bg-gray-900 rounded-md transition-all duration-200"
+                                                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
+                                                    ${item.subItems.some(subItem => isActive(subItem.path))
+                                                        ? 'text-green-500 bg-gray-900'
+                                                        : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                                 onClick={() => toggleDropdown(item.name)}
                                                 aria-expanded={expandedItem === item.name}
                                                 aria-controls={`dropdown-${item.name}`}
@@ -142,14 +166,16 @@ const Sidebar = () => {
                                                 `}
                                             >
                                                 {item.subItems.map((subItem) => (
-                                                    <a
-                                                        key={subItem}
-                                                        href="#"
-                                                        className="block text-sm text-gray-300 hover:text-green-500 hover:bg-gray-900 px-3 py-2 rounded-md transition-all duration-200"
-                                                        onClick={closeMobileMenu}
+                                                    <button
+                                                        key={subItem.name}
+                                                        className={`w-full text-left text-sm px-3 py-2 rounded-md transition-all duration-200
+                                                            ${isActive(subItem.path) 
+                                                                ? 'text-green-500 bg-gray-900' 
+                                                                : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
+                                                        onClick={() => handleNavigation(subItem.path)}
                                                     >
-                                                        {subItem}
-                                                    </a>
+                                                        {subItem.name}
+                                                    </button>
                                                 ))}
                                             </div>
                                         </div>
@@ -184,6 +210,8 @@ const Sidebar = () => {
                                     onClick={() => {
                                         setIsProfileOpen(false);
                                         closeMobileMenu();
+                                        // Add logout logic here
+                                        handleNavigation('/login');
                                     }}
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
