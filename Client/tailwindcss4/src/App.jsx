@@ -2,12 +2,12 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from "./Components/manageUsers.jsx"; 
-import EmployeeDashboard from "./Components/employeeDashboard.jsx"
-import Sidebar from './Components/callComponents/sidebar.jsx';
+import EmployeeDashboard from "./Components/myAttendance.jsx"
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
+import MyAttendance from "./Components/myAttendance.jsx";
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
           <Route path="/adminSettings" element={<AdminSettings />} />
           <Route path="/adminAttendance" element={<AdminAttendance />} />
           <Route path="/deptPage" element={<DeptPage />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
       </Routes>
       </Router>
     </>
