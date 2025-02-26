@@ -1,5 +1,6 @@
-const { JobTitle, Department } = require('../models');
+const { JobTitle, Department, User } = require('../models');
 const util = require('../../utils');
+const { Op } = require('sequelize');
 
 // CREATE a new job title
 const addJobTitle = async (req, res) => {
@@ -137,6 +138,13 @@ const updateJobTitle = async (req, res) => {
             });
         }
 
+        if(!isActive && await User.findOne({ where: { JobTitleId: req.params.id } })) {
+            return res.status(400).json({
+                successful: false,
+                message: `Job Title is currently assigned to a user and cannot be deactivated.`,
+            });
+        }
+
         const existingJobTitle = await JobTitle.findOne({
             where: {
                 name,
@@ -152,7 +160,10 @@ const updateJobTitle = async (req, res) => {
             });
         }
 
-        await jobtitle.save({ name, isActive, DepartmentId})
+        jobtitle.name = name;
+        jobtitle.isActive = isActive;
+        jobtitle.DepartmentId = DepartmentId;
+        await jobtitle.save()
 
         return res.status(200).json({
             successful: true,

@@ -1,17 +1,51 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import axios from 'axios';
 
 // Add Department Modal
-const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
+const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
     const [name, setName] = useState('');
     const [isActive, setIsActive] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    // Add a timeout ref to clear the timeout when component unmounts
+    const errorTimeoutRef = useRef(null);
+    
+    // Clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (errorTimeoutRef.current) {
+                clearTimeout(errorTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit({ name, isActive });
-        setName('');
-        setIsActive(true);
-        onClose();
+        setLoading(true);
+        setError('');
+        
+        try {
+            await axios.post('http://localhost:8080/department/addDepartment', {
+                name,
+                isActive
+            });
+            
+            setName('');
+            setIsActive(true);
+            if (onSuccess) onSuccess();
+            onClose();
+        } catch (error) {
+            console.error('Error adding department:', error);
+            setError(`${error.response.data.message}`);
+            errorTimeoutRef.current = setTimeout(() => {
+                setError('');
+            }, 2000);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -26,6 +60,11 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {error && (
+                        <div className="bg-red-500/20 text-red-500 p-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">
                             Department Name
@@ -36,6 +75,7 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
                             onChange={(e) => setName(e.target.value)}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
+                            placeholder='Enter Department Name'
                         />
                     </div>
                     
@@ -44,38 +84,67 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-[#363636] rounded-md"
+                            disabled={loading}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                            className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md flex items-center"
+                            disabled={loading}
                         >
-                            Add Department
+                            {loading ? 'Adding...' : 'Add Department'}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     );
-};
+}
 
 // Edit Department Modal
-const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }) => {
+const EditDepartmentModal = ({ isOpen, onClose, onSuccess, department }) => {
     const [name, setName] = useState(department?.name || '');
     const [isActive, setIsActive] = useState(department?.isActive ?? true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    React.useEffect(() => {
+    const errorTimeoutRef = useRef(null);
+
+    useEffect(() => {
         if (department) {
             setName(department.name);
             setIsActive(department.isActive);
         }
+        if (errorTimeoutRef.current) {
+            clearTimeout(errorTimeoutRef.current);
+        }
     }, [department]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit({ ...department, name, isActive });
-        onClose();
+        if (!department?.id) return;
+        
+        setLoading(true);
+        setError('');
+        
+        try {
+            await axios.put(`http://localhost:8080/department/updateDepartment/${department.id}`, {
+                name,
+                isActive
+            });
+            
+            if (onSuccess) onSuccess();
+            onClose();
+        } catch (error) {
+            console.error('Error updating department:', error);
+            setError(`${error.response.data.message}`);
+            errorTimeoutRef.current = setTimeout(() => {
+                setError('');
+            }, 2000);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -90,6 +159,11 @@ const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }) => {
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {error && (
+                        <div className="bg-red-500/20 text-red-500 p-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">
                             Department Name
@@ -119,14 +193,16 @@ const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }) => {
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-[#363636] rounded-md"
+                            disabled={loading}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                            disabled={loading}
                         >
-                            Save Changes
+                            {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>
@@ -136,18 +212,50 @@ const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }) => {
 };
 
 // Add Job Title Modal
-const AddJobTitleModal = ({ isOpen, onClose, onSubmit, departments }) => {
+const AddJobTitleModal = ({ isOpen, onClose, onSuccess, departments }) => {
     const [name, setName] = useState('');
     const [deptId, setDeptId] = useState('');
     const [isActive, setIsActive] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    const errorTimeoutRef = useRef(null);
+    
+    // Clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (errorTimeoutRef.current) {
+                clearTimeout(errorTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit({ name, dept_id: parseInt(deptId), isActive });
-        setName('');
-        setDeptId('');
-        setIsActive(true);
-        onClose();
+        setLoading(true);
+        setError('');
+        
+        try {
+            await axios.post('http://localhost:8080/jobtitle/addJobTitle', {
+                name,
+                DepartmentId: parseInt(deptId),
+                isActive
+            });
+            
+            setName('');
+            setDeptId('');
+            setIsActive(true);
+            if (onSuccess) onSuccess();
+            onClose();
+        } catch (error) {
+            console.error('Error adding job title:', error);
+            setError(`${error.response.data.message}`);
+            errorTimeoutRef.current = setTimeout(() => {
+                setError('');
+            }, 2000);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -162,6 +270,11 @@ const AddJobTitleModal = ({ isOpen, onClose, onSubmit, departments }) => {
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {error && (
+                        <div className="bg-red-500/20 text-red-500 p-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">
                             Job Title
@@ -172,6 +285,7 @@ const AddJobTitleModal = ({ isOpen, onClose, onSubmit, departments }) => {
                             onChange={(e) => setName(e.target.value)}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
+                            placeholder='Enter Job Title Name'
                         />
                     </div>
                     <div>
@@ -195,14 +309,16 @@ const AddJobTitleModal = ({ isOpen, onClose, onSubmit, departments }) => {
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-[#363636] rounded-md"
+                            disabled={loading}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                            disabled={loading}
                         >
-                            Add Job Title
+                            {loading ? 'Adding...' : 'Add Job Title'}
                         </button>
                     </div>
                 </form>
@@ -212,23 +328,43 @@ const AddJobTitleModal = ({ isOpen, onClose, onSubmit, departments }) => {
 };
 
 // Edit Job Title Modal
-const EditJobTitleModal = ({ isOpen, onClose, onSubmit, jobTitle, departments }) => {
+const EditJobTitleModal = ({ isOpen, onClose, onSuccess, jobTitle, departments }) => {
     const [name, setName] = useState(jobTitle?.name || '');
-    const [deptId, setDeptId] = useState(jobTitle?.dept_id?.toString() || '');
+    const [deptId, setDeptId] = useState(jobTitle?.DepartmentId?.toString() || '');
     const [isActive, setIsActive] = useState(jobTitle?.isActive ?? true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (jobTitle) {
             setName(jobTitle.name);
-            setDeptId(jobTitle.dept_id.toString());
+            setDeptId(jobTitle.DepartmentId?.toString() || '');
             setIsActive(jobTitle.isActive);
         }
     }, [jobTitle]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit({ ...jobTitle, name, dept_id: parseInt(deptId), isActive });
-        onClose();
+        if (!jobTitle?.id) return;
+        
+        setLoading(true);
+        setError('');
+        
+        try {
+            await axios.put(`http://localhost:8080/jobtitle/updateJobTitle/${jobTitle.id}`, {
+                name,
+                DepartmentId: parseInt(deptId),
+                isActive
+            });
+            
+            if (onSuccess) onSuccess();
+            onClose();
+        } catch (error) {
+            console.error('Error updating job title:', error);
+            setError(`${error.response.data.message}`);
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -243,6 +379,11 @@ const EditJobTitleModal = ({ isOpen, onClose, onSubmit, jobTitle, departments })
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {error && (
+                        <div className="bg-red-500/20 text-red-500 p-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">
                             Job Title
@@ -288,14 +429,16 @@ const EditJobTitleModal = ({ isOpen, onClose, onSubmit, jobTitle, departments })
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-[#363636] rounded-md"
+                            disabled={loading}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md"
+                            disabled={loading}
                         >
-                            Save Changes
+                            {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>

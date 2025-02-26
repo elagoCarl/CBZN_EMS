@@ -1,5 +1,6 @@
-const { Department } = require('../models/');
+const { Department, JobTitle } = require('../models/');
 const util = require('../../utils');
+const { Op } = require('sequelize');
 
 
 // CREATE a new department
@@ -119,7 +120,16 @@ const updateDepartment = async (req, res) => {
             });
         }
 
-        await department.save({ name, isActive })
+        if(!isActive && await JobTitle.findOne({ where: { DepartmentId: req.params.id } })) {
+            return res.status(400).json({
+                successful: false,
+                message: `Department is currently assigned to a job and cannot be deactivated.`,
+            });
+        }
+
+        department.name = name;
+        department.isActive = isActive;
+        await department.save()
 
         return res.status(200).json({
             successful: true,
