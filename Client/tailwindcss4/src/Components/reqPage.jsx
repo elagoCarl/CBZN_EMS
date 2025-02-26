@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Search, Menu } from 'lucide-react';
+import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
+import AddReq  from './callComponents/addReq';
+import CancelReq from './callComponents/cancelReq';
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const ReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [isAddReqOpen, setIsAddReqOpen] = useState(false);
+    const [isCancelReqOpen, setIsCancelReqOpen] = useState(false);
     const [isNavOpen, setIsNavOpen] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
@@ -14,6 +19,18 @@ const ReqPage = () => {
         // Request data remains unchanged
         {
             id: 1,
+            type: 'overtime',
+            date: '2025-02-15',
+            status: 'pending',
+            details: {
+                overtimeDate: '2025-02-15',
+                overtimeStart: '18:00',
+                overtimeEnd: '21:00',
+                overtimeReason: 'Need to complete the quarterly report'
+            }
+        },
+        {
+            id: 2,
             type: 'overtime',
             date: '2025-02-15',
             status: 'pending',
@@ -41,6 +58,20 @@ const ReqPage = () => {
             clearTimeout(window.resizeTimer);
         };
     }, []);
+
+    const handleAddReqClick = () => {
+        setIsAddReqOpen(true);
+    };
+    const handleAddReqClose = () => {
+        setIsAddReqOpen(false);
+    };
+
+    const handleCancelReqClick = () => {
+        setIsCancelReqOpen(true);
+    };
+    const handleCancelReqClose = () => {
+        setIsCancelReqOpen(false);
+    };
 
     // Clock update
     useEffect(() => {
@@ -261,50 +292,7 @@ const ReqPage = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-            {/* Mobile Nav Toggle */}
-            <button
-                onClick={() => setIsNavOpen(!isNavOpen)}
-                className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-                aria-label={isNavOpen ? "Close menu" : "Open menu"}
-            >
-                {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Sidebar - Responsive implementation */}
-            <aside
-                className={`fixed md:sticky top-0 md:top-auto h-full w-64 md:w-1/4 lg:w-1/5 bg-black p-6 flex flex-col z-40
-                  transform ${isNavOpen ? 'translate-x-0' : '-translate-x-full'} 
-                  md:translate-x-0 transition-transform duration-300 ease-in-out`}
-                aria-hidden={!isNavOpen && windowWidth < 768}
-            >
-                {/* Sidebar content */}
-                <div className="mb-8">
-                    <div className="w-full text-white p-4 flex justify-center items-center">
-                        <img src={logo} alt="CBZN Logo" className="h-6 sm:h-8 w-auto" />
-                    </div>
-                </div>
-
-                <div className="flex flex-col flex-grow justify-center">
-                    <nav className="w-full space-y-3 text-center font-medium">
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Dashboard</div>
-                        <div className="text-white bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base">My Requests</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Attendance</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Calendar</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Settings</div>
-                        <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer text-sm sm:text-base transition-colors">Help</div>
-                    </nav>
-                </div>
-
-                <div className="mt-auto border-t border-gray-800 pt-4">
-                    <div className="flex items-center space-x-3 p-2">
-                        <div className="w-8 h-8 bg-gray-600 rounded-full flex-shrink-0" />
-                        <div className="overflow-hidden">
-                            <div className="text-white text-sm font-medium truncate">John Doe</div>
-                            <div className="text-gray-400 text-xs truncate">employee@cbzn.com</div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+            <Sidebar /> {/* Mobile Nav Toggle */}
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
@@ -376,7 +364,7 @@ const ReqPage = () => {
 
                     {/* Add request button */}
                     <div className="flex justify-end">
-                        <button className="bg-green-600 text-white px-3 py-1 sm:p-2 rounded text-xs sm:text-sm hover:bg-green-700 flex items-center transition-colors">
+                        <button className="bg-green-600 text-white px-3 py-1 sm:p-2 rounded text-xs sm:text-sm hover:bg-green-700 flex items-center transition-colors" onClick={handleAddReqClick}>
                             <Plus className="w-4 h-4 mr-1" /> Add Request
                         </button>
                     </div>
@@ -461,7 +449,7 @@ const ReqPage = () => {
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
                                                         {request.status === 'pending' && (
                                                             <button
-                                                                onClick={() => handleCancel(request.id)}
+                                                                onClick={handleCancelReqClick}
                                                                 className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors"
                                                             >
                                                                 Cancel
@@ -549,6 +537,8 @@ const ReqPage = () => {
                         </div>
                     )}
                 </div>
+                <AddReq isOpen={isAddReqOpen} onClose={handleAddReqClose} />
+                <CancelReq isOpen={isCancelReqOpen} onClose={handleCancelReqClose} />
             </main>
         </div>
     );

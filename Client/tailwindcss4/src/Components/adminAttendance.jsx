@@ -3,6 +3,7 @@ import { Search, Menu, X } from "lucide-react";
 import logo from "../Components/Img/CBZN-Logo.png";
 import axios from "axios";
 
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -116,58 +117,7 @@ function formatDateTime(isoString) {
 
   return (
     <div className="flex h-screen bg-black/90">
-      {/* Mobile Nav Toggle */}
-      <button
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-      >
-        {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Sidebar - Hidden on mobile by default */}
-      <div
-        className={`${
-          isNavOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}
-      >
-        {/* Your existing sidebar content */}
-        <div className="mb-8">
-          <div className="w-full text-white p-4 flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-8 w-auto" />
-          </div>
-        </div>
-
-        <div className="flex flex-col h-screen justify-center items-center space-y-4">
-          <nav className="w-full space-y-4 text-center font-semibold text-base">
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Home
-            </div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Attendance
-            </div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Manage Users
-            </div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Reports
-            </div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Settings
-            </div>
-            <div className="text-white hover:bg-gray-900 px-4 py-2 rounded cursor-pointer">
-              Help
-            </div>
-          </nav>
-        </div>
-
-        <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
-          <div className="w-6 h-6 bg-gray-600 rounded-full" />
-          <div>
-            <div className="text-white text-xs font-medium">ADMIN</div>
-            <div className="text-gray-400 text-xs">ADMIN@CBZN@GMAIL.COM</div>
-          </div>
-        </div>
-      </div>
+      < Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-6 flex flex-col">
