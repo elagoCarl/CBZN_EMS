@@ -3,9 +3,6 @@ import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from "./Components/manageUsers.jsx"; 
 import MyAttendance from "./Components/MyAttendance.jsx"
-import AdminDashboard from "./Components/adminDashboard.jsx"; 
-import EmployeeDashboard from "./Components/myAttendance.jsx"
-import Sidebar from './Components/callComponents/sidebar.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';

@@ -320,21 +320,30 @@ const LeaveReqPage = () => {
 
                         <button
                             onClick={() => setActiveFilter('accepted')}
-                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'leave'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'accepted'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
                         >
-                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" /> Approved
+                            Approved
                         </button>
                         <button
                             onClick={() => setActiveFilter('rejected')}
-                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'timeadjustment'
+                            className={`px-3 py-1 rounded-md text-xs sm:text-sm whitespace-nowrap flex items-center gap-1 flex-shrink-0 ${activeFilter === 'rejected'
                                     ? 'bg-green-600 text-white'
                                     : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
                         >
-                            <Clock className="w-3 h-3 sm:w-4 sm:h-4" /> Rejected
+                            Rejected
+                        </button>
+                        <button
+                            onClick={() => setActiveFilter('canceled')}
+                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'canceled'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                }`}
+                        >
+                            Canceled
                         </button>
 
                     </div>
