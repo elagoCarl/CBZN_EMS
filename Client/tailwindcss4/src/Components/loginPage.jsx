@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import icon from './Img/Icone.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 
+
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

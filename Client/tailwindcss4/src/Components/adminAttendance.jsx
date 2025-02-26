@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
 import logo from "../Components/Img/CBZN-Logo.png";
-import Sidebar from "./callComponents/sidebar";
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -164,10 +164,11 @@ const AdminAttendance = () => {
 
   return (
     <div className="flex h-screen bg-black/90">
-      <Sidebar />
+      < Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6  ">
+      <div className="flex-1 p-4 md:p-6 flex flex-col">
+        {/* Centered Header for mobile */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
             Attendance
