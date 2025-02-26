@@ -104,7 +104,7 @@ const DeptPage = () => {
                   <select
                     value={deptStatusFilter}
                     onChange={(e) => setDeptStatusFilter(e.target.value)}
-                    className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:ring-2 focus:ring-green-500"
+                    className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
@@ -119,7 +119,7 @@ const DeptPage = () => {
                   <div key={dept.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
                     <div>
                       <h3 className="font-medium text-white">{dept.name}</h3>
-                      <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium ${dept.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                      <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${dept.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                         {dept.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -146,7 +146,7 @@ const DeptPage = () => {
                     <select
                       value={deptFilter}
                       onChange={(e) => setDeptFilter(e.target.value)}
-                      className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:ring-2 focus:ring-green-500"
+                      className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
                     >
                       <option value="all">All Departments</option>
                       {departments.map(dept => (
@@ -159,7 +159,7 @@ const DeptPage = () => {
                     <select
                       value={jobStatusFilter}
                       onChange={(e) => setJobStatusFilter(e.target.value)}
-                      className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:ring-2 focus:ring-green-500"
+                      className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
                     >
                       <option value="all">All Status</option>
                       <option value="active">Active</option>
@@ -179,7 +179,7 @@ const DeptPage = () => {
                         <span className="inline-block text-sm text-gray-400 whitespace-nowrap">
                           {departments.find(d => d.id === job.dept_id)?.name}
                         </span>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${job.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium whitespace-nowrap ${job.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                           {job.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </div>

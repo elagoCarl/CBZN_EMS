@@ -3,7 +3,6 @@ import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import AdminDashboard from "./Components/adminDashboard.jsx"; 
 import EmployeeDashboard from "./Components/employeeDashboard.jsx"
-import EmployeeHome from './Components/employHome.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
 import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
@@ -15,7 +14,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/employeeHome" element={<EmployeeHome />} />
           <Route path="/deptPage" element={<DeptPage />} />
           <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/forgotPass" element={<ForgotPass />} />

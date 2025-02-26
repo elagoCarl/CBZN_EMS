@@ -1,6 +1,7 @@
 const { Department } = require('../models/');
 const util = require('../../utils');
 
+
 // CREATE a new department
 const addDepartment = async (req, res) => {
     const { name } = req.body;
@@ -8,17 +9,23 @@ const addDepartment = async (req, res) => {
     if (!util.checkMandatoryFields([name])) {
         return res.status(400).json({
             successful: false,
-            message: "Department name is required.",
+            message: "A mandatory field is missing.",
+        });
+    }
+
+    const existingDepartment = await Department.findOne({ where: { name } });
+    if (existingDepartment) {
+        return res.status(409).json({
+            successful: false,
+            message: `Department with name ${name} already exists.`,
         });
     }
 
     try {
-        const department = await Department.create({
-            name,
-        });
+        const department = await Department.create({name})
         return res.status(201).json({
             successful: true,
-            message: `Department ${name} has been added.`,
+            message: `${name} Department has been added.`,
             data: department,
         });
     } catch (error) {
@@ -82,16 +89,14 @@ const updateDepartment = async (req, res) => {
     try {
         const { name, isActive } = req.body;
 
-        if (!name) {
+        if (!util.checkMandatoryFields([name, isActive])) {
             return res.status(400).json({
                 successful: false,
-                message: "Department name is required.",
+                message: "A mandatory field is missing.",
             });
         }
 
-        const department_ID = req.params.id;
-        const department = await Department.findByPk(department_ID);
-
+        const department = await Department.findByPk(req.params.id);
         if (!department) {
             return res.status(404).json({
                 successful: false,
@@ -99,11 +104,26 @@ const updateDepartment = async (req, res) => {
             });
         }
 
-        await department.update({ name })
+        const existingDepartment = await Department.findOne({
+            where: {
+                name,
+                id: {
+                    [Op.ne]: req.params.id
+                }
+            }
+        })
+        if (existingDepartment) {
+            return res.status(409).json({
+                successful: false,
+                message: `Department with name ${name} already exists.`,
+            });
+        }
+
+        await department.save({ name, isActive })
 
         return res.status(200).json({
             successful: true,
-            message: `Department with ID ${department_ID} has been updated.`,
+            message: `Department has been updated.`,
             data: department,
         });
     } catch (error) {
