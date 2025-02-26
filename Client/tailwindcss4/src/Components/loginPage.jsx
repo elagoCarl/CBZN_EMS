@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import icon from './Img/Icone.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 
+
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +28,7 @@ const LoginPage = () => {
 
   return (
     <div
-      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/90"
+      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/95"
     >
       <div className="fixed top-0 left-0 w-full bg-black text-white p-8 flex justify-between items-center z-50">
         <img src={logo} alt="Logo" className="h-11 w-auto ml-8" />

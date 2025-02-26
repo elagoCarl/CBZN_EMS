@@ -5,33 +5,41 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
-  console.log("userId", userId);
+  // console.log("userId", userId);
 
   useEffect(() => {
     if (isOpen && userId) {
-      // Fetch user data
-      const fetchUserData = async () => {
+      (async () => {
         try {
-          const [userData, userInfo, emergencyContact] = await Promise.all([
-            axios.get(`http://localhost:8080/users/${userId}`),
-            axios.get(`http://localhost:8080/userInfo/${userId}`),
-            axios.get(`http://localhost:8080/emgncyContact/${userId}`)
+          const [
+            userDataResponse,
+            userInfoResponse,
+            emergencyContactResponse
+          ] = await Promise.all([
+            axios.get(`http://localhost:8080/users/getUser/${userId}`),
+            axios.get(`http://localhost:8080/userInfo/getUserInfoById/${userId}`),
+            axios.get(`http://localhost:8080/emgncyContact/getEmgncyContactById/${userId}`)
           ]);
 
-          setFormData({
-            ...userData.data,
-            ...userInfo.data,
-            emergency_name: emergencyContact.data.name,
-            emergency_relationship: emergencyContact.data.relationship,
-            emergency_contact: emergencyContact.data.contact_number
-          });
+          const fetchedData = {
+            // Spread the user account data (assumed to be nested under 'data')
+            ...userDataResponse.data.data,
+            // Spread the user info data from its nested property
+            ...userInfoResponse.data.userInfo,
+            // Spread emergency contact data from its nested property
+            emergency_name: emergencyContactResponse.data.emgncyContact.name,
+            emergency_relationship: emergencyContactResponse.data.emgncyContact.relationship,
+            emergency_contact: emergencyContactResponse.data.emgncyContact.contact_number
+          };
+
+          setFormData(fetchedData);
+          // console.log("Fetched formData:", fetchedData);
+          // console.log("Fetched formData:", fetchedData);
         } catch (error) {
           console.error('Error fetching user data:', error);
           alert('Failed to load user data.');
         }
-      };
-
-      fetchUserData();
+      })();
     }
   }, [isOpen, userId]);
 
@@ -43,7 +51,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     e.preventDefault();
     try {
       // Update main user
-      await axios.put(`http://localhost:8080/users/update/${userId}`, {
+      await axios.put(`http://localhost:8080/users/updateUser/${userId}`, {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -52,7 +60,8 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // Update user info
-      await axios.put(`http://localhost:8080/userInfo/update/${userId}`, {
+      await axios.put(`http://localhost:8080/userInfo/updateUserInfo`, {
+        UserId: userId,
         age: parseInt(formData.age),
         city_add: formData.city_add,
         provincial_add: formData.provincial_add,
@@ -75,7 +84,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // Update emergency contact
-      await axios.put(`http://localhost:8080/emgncyContact/update/${userId}`, {
+      await axios.put(`http://localhost:8080/emgncyContact/updateEmgncyContact/${userId}`, {
         name: formData.emergency_name,
         relationship: formData.emergency_relationship,
         contact_number: formData.emergency_contact
@@ -151,7 +160,8 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   ];
 
   const renderField = (field) => {
-    const baseClass = "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
+    const baseClass =
+      "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
     if (field.type === 'select') {
       return (
@@ -197,10 +207,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       <div className="bg-gray-900/95 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
         <div className="p-6 flex justify-between items-center border-b border-gray-800">
           <h2 className="text-2xl font-bold text-white">Edit User</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -243,7 +250,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
 EditUserModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired,
+  userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onUserUpdated: PropTypes.func.isRequired,
 };
 

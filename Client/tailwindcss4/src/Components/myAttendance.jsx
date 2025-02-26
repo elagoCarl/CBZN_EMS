@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../Components/Img/CBZN-Logo.png";
 import axios from "axios";
+import Sidebar from "./callComponents/sidebar.jsx";
 
 const userId = 1;
-const EmployeeDashboard = () => {
+const MyAttendance = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -169,43 +170,9 @@ const handleTimeOut = () => {
 
   return (
     <div className="flex h-screen bg-black/90">
-      <button
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="md:hidden fixed top-2 left-2 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-      >
-        {isNavOpen ? <X size={16} /> : <Menu size={16} />}
-      </button>
-
-      <div
-        className={`${
-          isNavOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative w-48 sm:w-64 bg-black p-4 sm:p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}
-      >
-        <div className="mb-4 sm:mb-8">
-          <div className="w-full text-white p-2 sm:p-4 flex justify-center items-center">
-            <img src={logo} alt="Logo" className="h-6 sm:h-8 w-auto" />
-          </div>
-        </div>
-        <nav className="w-full space-y-2 sm:space-y-4 text-center font-semibold text-sm sm:text-base items-center justify-center flex-1 flex flex-col mb-10 sm:mb-20">
-          <div className="text-white hover:text-green-500 duration-300 px-3 sm:px-4 py-1 sm:py-2 rounded cursor-pointer">
-            Home
-          </div>
-          <div className="text-white hover:text-green-500 duration-300 px-3 sm:px-4 py-1 sm:py-2 rounded cursor-pointer">
-            Attendance
-          </div>
-          <div className="text-white hover:text-green-500 duration-300 px-3 sm:px-4 py-1 sm:py-2 rounded cursor-pointer">
-            Reports
-          </div>
-        </nav>
-
-        <div className="mt-auto flex items-center space-x-2 p-2 sm:p-4 border-t border-gray-800">
-          <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-600 rounded-full" />
-          <div>
-            <div className="text-white text-xs">EMPLOYEE</div>
-            <div className="text-gray-400 text-xs truncate">Employee@CBZN@GMAIL.COM</div>
-          </div>
-        </div>
-      </div>
+      <Sidebar />
+      
+      
 
       <div className="flex-1 p-2 sm:p-4 md:p-6 flex flex-col">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
@@ -312,4 +279,4 @@ const handleTimeOut = () => {
   );
 };
 
-export default EmployeeDashboard;
+export default MyAttendance;
