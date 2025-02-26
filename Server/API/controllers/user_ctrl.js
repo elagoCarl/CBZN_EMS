@@ -362,14 +362,6 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
-        // Check if the department exists
-        const existingDepartment = await Department.findByPk(  DepartmentId);
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
         // Update user data
         await user.update({
             name,
@@ -387,7 +379,7 @@ const updateUserById = async (req, res, next) => {
         console.error(err);
         return res.status(500).json({
             successful: false,
-            message: err.message || "An unexpected error occurred."
+            message: err
         });
     }
 };

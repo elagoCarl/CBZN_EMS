@@ -122,8 +122,7 @@ const addAttendance = async (req, res) => {
       }
 
       // If the site is Onsite, enforce a 15-minute grace period around the scheduled "In" time.
-      let finalSite = site;
-      if (finalSite === "Onsite") {
+      if (site === "Onsite") {
         const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
         const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
 
@@ -137,12 +136,25 @@ const addAttendance = async (req, res) => {
           });
         }
       }
+      if (site === "Remote") {
+        const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
+        const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
 
+        const lowerBound = scheduledTime.subtract(15, "minute");
+        const upperBound = scheduledTime.add(1, "minute");
+
+        if (clockInTime.isBefore(lowerBound) || clockInTime.isAfter(upperBound)) {
+          return res.status(400).json({
+            successful: false,
+            message: `For Remote attendance, clock-in time must be within 15 minutes of the scheduled start time (${scheduleForDay.In}). Allowed window is from ${lowerBound.format("HH:mm")} to ${upperBound.format("HH:mm")}.`
+          });
+        }
+      }
       // Create non-rest day attendance.
       const attendanceData = {
         weekday,
         isRestDay: false,
-        site: finalSite,
+        site: site,
         date,
         time_in,
         time_out: null,

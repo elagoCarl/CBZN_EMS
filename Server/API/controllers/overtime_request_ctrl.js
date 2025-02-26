@@ -103,48 +103,6 @@ const getOvertimeRequest = async (req, res) => {
 
 
 
-// const getOvertimeRequestByUID = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const overtimeRequests = await OvertimeRequest.findAll({
-//             where: { user_id: id },
-//             attributes: [
-//                 'id',
-//                 'user_id',
-//                 'date',
-//                 'start_time',
-//                 'end_time',
-//                 'reason',
-//                 'status',
-//                 'reviewer_id',
-//                 'review_date'
-//             ]
-//         });
-
-//         // If no overtime requests exist for the user, return a 404 error
-//         if (!overtimeRequests || overtimeRequests.length === 0) {
-//             return res.status(404).json({
-//                 error: `No overtime request found for user ID: ${user_id}`
-//             });
-//         }
-
-//         return res.status(200).json({
-//             successful: true,
-//             message: `Retrieved all overtime requests for user ID: ${id}`,
-//             data: overtimeRequests
-//         });
-
-//     } catch (error) {
-//         return res.status(500).json({
-//             successful: false,
-//             message: "Internal server error",
-//             error: error.message
-//         });
-//     }
-// };
-
-
-
 // Update Overtime Request
 const updateOvertimeRequest = async (req, res) => {
     try {

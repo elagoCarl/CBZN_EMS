@@ -22,13 +22,13 @@ const addEmgncyContact = async (req, res, next) => {
             });
         }
 
-        // Validate contact number format (basic example)
-        if (!/^\+?\d{10,14}$/.test(contact_number)) {
-            return res.status(400).json({
-                successful: false,
-                message: "Invalid contact number format. It should be between 10-14 digits."
-            });
-        }
+        // // Validate contact number format (basic example)
+        // if (!/^\+?\d{10,14}$/.test(contact_number)) {
+        //     return res.status(400).json({
+        //         successful: false,
+        //         message: "Invalid contact number format. It should be between 10-14 digits." + error
+        //     });
+        // }
 
         // Create emergency contact
         await EmgncyContact.create({
@@ -51,7 +51,7 @@ const addEmgncyContact = async (req, res, next) => {
 
 const getEmgncyContactById = async (req, res, next) => {
     try {
-        const userId  = req.params.id; // Get userId from URL parameters
+        const userId = req.params.id; // Get userId from URL parameters
 
         // Validate if userId is provided
         if (!userId) {
@@ -91,8 +91,8 @@ const getEmgncyContactById = async (req, res, next) => {
 
 const updateEmgncyContact = async (req, res, next) => {
     try {
-        const userId = req.params.id; // Get userId from URL parameters
-        const { name, relationship, contact_number } = req.body; // Updated fields
+        const userId = req.params.id;
+        const { name, relationship, contact_number } = req.body;
 
         // Validate if userId is provided
         if (!userId) {
@@ -115,11 +115,11 @@ const updateEmgncyContact = async (req, res, next) => {
             });
         }
 
-        // Validate contact number format (basic example)
-        if (contact_number && !/^\+?\d{10,14}$/.test(contact_number)) {
+        // Less restrictive validation - just check if there are at least some digits
+        if (contact_number && !/\d/.test(contact_number)) {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid contact number format. It should be between 10-14 digits."
+                message: "Contact number must contain digits."
             });
         }
 

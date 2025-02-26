@@ -85,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
             onUpdate: 'CASCADE'
         });
-        
+
 
         // Other existing associations
         User.belongsTo(models.Schedule);
