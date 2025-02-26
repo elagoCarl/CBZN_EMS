@@ -1,14 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
-import AdminDashboard from "./Components/adminDashboard.jsx"; 
-import EmployeeDashboard from "./Components/employeeDashboard.jsx";
-import Req from './Components/callComponents/Req.jsx';
-// import EmployeeHome from './Components/employHome.jsx';
-// import AdminEms from './Components/admin_Ems.jsx'
-import AddUser from './Components/callComponents/addUser.jsx';
-import AdminSettings from './Components/adminSettings.jsx';
+import ManageUsers from "./Components/manageUsers.jsx"; 
+import MyAttendance from "./Components/myAttendance.jsx"
+import AccSettings from './Components/accSettings.jsx';
+import AdminAttendance from './Components/adminAttendance.jsx';
 import ReqPage from './Components/reqPage.jsx';
+import DeptPage from "./Components/departmentPage.jsx";
+import MyAttendance from "./Components/myAttendance.jsx";
 
 function App() {
   return (
@@ -16,17 +15,14 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/addUser" element={<AddUser />} />
-          {/* <Route path="/employeeHome" element={<EmployeeHome />} /> */}
-          {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
-          {/* <Route path="/adminEms" element={<AdminEms />} /> */}
-          <Route path="/req" element={<Req />} />
-          <Route path="/request" element={<ForgotPass />} />
-          <Route path="/" element={<LoginPage />} />
           <Route path="/reqPage" element={<ReqPage />} />
-          <Route path="/adminDashboard" element={<AdminDashboard />} />
-          <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
-          <Route path="/adminSettings" element={<AdminSettings />} />
+          <Route path="/forgotPass" element={<ForgotPass />} />
+          <Route path="/manageUsers" element={<ManageUsers />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
+          <Route path="/accSettings" element={<AccSettings />} />
+          <Route path="/adminAttendance" element={<AdminAttendance />} />
+          <Route path="/deptPage" element={<DeptPage />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
       </Routes>
       </Router>
     </>
