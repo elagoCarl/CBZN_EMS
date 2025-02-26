@@ -5,10 +5,11 @@ import AdminDashboard from "./Components/adminDashboard.jsx";
 import EmployeeDashboard from "./Components/myAttendance.jsx"
 import Sidebar from './Components/callComponents/sidebar.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
-import AdminAttendance from './Components/adminAttendance.jsx';
+import AdminAttendance from './Components/attendanceList.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import SideBar from "./Components/callComponents/sidebar.jsx";
+
 
 function App() {
   return (
