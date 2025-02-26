@@ -36,7 +36,7 @@ const Sidebar = () => {
         'Account Settings',
         {
             name: 'Requests',
-            subItems: ['OT Reqs', 'Leave Reqs', 'Time Adjustments', 'Schedule Change']
+            subItems: ['OT Request', 'Leave Request', 'Time Adjustments', 'Schedule Change']
         },
         
     ];

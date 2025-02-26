@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "../Components/Img/CBZN-Logo.png";
 import axios from "axios";
-import Sidebar from "../Components/callComponents/sidebar.jsx";
+import Sidebar from "./callComponents/sidebar.jsx";
 
 const userId = 1;
-const EmployeeDashboard = () => {
+const MyAttendance = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -279,4 +279,4 @@ const handleTimeOut = () => {
   );
 };
 
-export default EmployeeDashboard;
+export default MyAttendance;
