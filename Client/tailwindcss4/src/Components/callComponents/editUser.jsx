@@ -34,6 +34,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
 
           setFormData(fetchedData);
           // console.log("Fetched formData:", fetchedData);
+          // console.log("Fetched formData:", fetchedData);
         } catch (error) {
           console.error('Error fetching user data:', error);
           alert('Failed to load user data.');
@@ -50,7 +51,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     e.preventDefault();
     try {
       // Update main user
-      await axios.put(`http://localhost:8080/users/update/${userId}`, {
+      await axios.put(`http://localhost:8080/users/updateUser/${userId}`, {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -59,7 +60,8 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // Update user info
-      await axios.put(`http://localhost:8080/userInfo/update/${userId}`, {
+      await axios.put(`http://localhost:8080/userInfo/updateUserInfo`, {
+        UserId: userId,
         age: parseInt(formData.age),
         city_add: formData.city_add,
         provincial_add: formData.provincial_add,
@@ -82,7 +84,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // Update emergency contact
-      await axios.put(`http://localhost:8080/emgncyContact/update/${userId}`, {
+      await axios.put(`http://localhost:8080/emgncyContact/updateEmgncyContact/${userId}`, {
         name: formData.emergency_name,
         relationship: formData.emergency_relationship,
         contact_number: formData.emergency_contact
