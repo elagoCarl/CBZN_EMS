@@ -60,7 +60,7 @@ const Sidebar = () => {
         { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
         { name: 'Attendance List', icon: '📋', path: '/adminAttendance' },
         { name: 'Manage Users', icon: '👥', path: '/manageUsers' },
-        { name: 'Account Settings', icon: '⚙️', path: '/accountSettings' },
+        { name: 'Account Settings', icon: '⚙️', path: '/accSettings' },
         {
             name: 'Requests',
             icon: '📝',
@@ -122,14 +122,14 @@ const Sidebar = () => {
                                 <li key={item.name}>
                                     {!item.subItems ? (
                                         <button
-                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-300 cursor-pointer
                                                 ${isActive(item.path) 
-                                                    ? 'text-green-500 bg-gray-900' 
-                                                    : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                                    ? 'text-green-500 ' 
+                                                    : 'text-white hover:text-green-500'}`}
                                             onClick={() => handleNavigation(item.path)}
                                         >
-                                            <span className="text-lg">{item.icon}</span>
-                                            <span className="text-left">{item.name}</span>
+                                            <span className="text-xl">{item.icon}</span>
+                                            <span >{item.name}</span>
                                         </button>
                                     ) : (
                                         <div>
