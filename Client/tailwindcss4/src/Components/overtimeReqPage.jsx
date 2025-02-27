@@ -23,11 +23,11 @@ const OvertimeReqPage = () => {
             date: '2025-02-15',
             status: 'pending',
             details: {
-                currentDate: '2025-02-15',
-                currentShift: '09:00 - 17:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '12:00 - 20:00',
-                changeReason: 'Medical appointment conflicts with current schedule'
+                date: '2025-02-15',
+                start_time: '10:00AM',
+                end_time: '22:00PM',
+                review_date: '',
+                reason: 'Money is important'
             }
         },
         {
@@ -37,11 +37,11 @@ const OvertimeReqPage = () => {
             date: '2025-02-16',
             status: 'pending',
             details: {
-                currentDate: '2025-02-16',
-                currentShift: '12:00 - 20:00',
-                requestedDate: '2025-02-18',
-                requestedShift: '09:00 - 17:00',
-                changeReason: 'Personal commitment requires morning shift on original day'
+                date: '2025-02-15',
+                start_time: '10:00AM',
+                end_time: '22:00PM',
+                review_date: '',
+                reason: 'Money is important'
             }
         },
         {
@@ -55,7 +55,7 @@ const OvertimeReqPage = () => {
                 currentShift: '08:00 - 16:00',
                 requestedDate: '2025-02-17',
                 requestedShift: '14:00 - 22:00',
-                changeReason: 'Need to swap to afternoon shift for coursework'
+                reason: 'Need to swap to afternoon shift for coursework'
             }
         }
     ]);
@@ -204,24 +204,21 @@ const OvertimeReqPage = () => {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Date</p>
-                    <p className="text-white">{request.details.currentDate}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">Date of Overtime Shift</p>
+                    <p className="text-white">{request.details.date}</p>
                 </div>
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Shift</p>
-                    <p className="text-white">{request.details.currentShift}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">Start of Overtime</p>
+                    <p className="text-white">{request.details.start_time}</p>
                 </div>
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Date</p>
-                    <p className="text-white">{request.details.requestedDate}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">End of Overtime</p>
+                    <p className="text-white">{request.details.end_time}</p>
                 </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Overtime</p>
-                    <p className="text-white">{request.details.requestedShift}</p>
-                </div>
+                
                 <div className="sm:col-span-2">
                     <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
-                    <p className="text-white">{request.details.changeReason}</p>
+                    <p className="text-white">{request.details.reason}</p>
                 </div>
             </div>
         );
