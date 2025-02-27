@@ -5,7 +5,7 @@ import AdminDashboard from "./Components/adminDashboard.jsx";
 import EmployeeDashboard from "./Components/myAttendance.jsx"
 import Sidebar from './Components/callComponents/sidebar.jsx';
 import AdminSettings from './Components/adminSettings.jsx';
-import AdminAttendance from './Components/attendanceList.jsx';
+import AttendanceList from './Components/attendanceList.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import SideBar from "./Components/callComponents/sidebar.jsx";
@@ -23,7 +23,7 @@ function App() {
           <Route path="/adminDashboard" element={<AdminDashboard />} />
           <Route path="/employeeDashboard" element={<EmployeeDashboard />} />
           <Route path="/adminSettings" element={<AdminSettings />} />
-          <Route path="/adminAttendance" element={<AdminAttendance />} />
+          <Route path="/attendanceList" element={<AttendanceList />} />
           <Route path="/deptPage" element={<DeptPage />} />
           <Route path="/sideBar" element={<SideBar />} />
       </Routes>
