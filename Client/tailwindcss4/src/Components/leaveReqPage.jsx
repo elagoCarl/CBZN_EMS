@@ -140,8 +140,8 @@ const LeaveReqPage = () => {
     // Actual approve action after confirmation
     const handleApprove = () => {
         setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { 
-                ...req, 
+            req.id === selectedRequestId ? {
+                ...req,
                 status: 'approved',
                 details: {
                     ...req.details,
@@ -156,8 +156,8 @@ const LeaveReqPage = () => {
     // Actual reject action after confirmation
     const handleReject = () => {
         setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { 
-                ...req, 
+            req.id === selectedRequestId ? {
+                ...req,
                 status: 'rejected',
                 details: {
                     ...req.details,
@@ -438,7 +438,7 @@ const LeaveReqPage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            
+
                                         </th>
                                     </tr>
                                 </thead>
@@ -491,27 +491,27 @@ const LeaveReqPage = () => {
                                                         </button>
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
-                                                    <div className="flex justify-end gap-2">
+                                                        <div className="flex justify-end gap-2">
                                                             {/* Admin actions for pending requests */}
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
                                                                         onClick={() => handleApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
                                                                         onClick={() => handleReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
                                                                     </button>
                                                                 </>
                                                             )}
-                                                
                                                         </div>
                                                     </td>
+
                                                 </tr>
                                                 {expandedRow === request.id && (
                                                     <tr>
