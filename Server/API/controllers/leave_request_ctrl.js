@@ -67,10 +67,8 @@ const addLeaveRequest = async (req, res) => {
 
 // Get all leave requests
 const getAllLeaveRequests = async (req, res) => {
-    try {
-        const leaveRequests = await LeaveRequest.findAll({
-            include: [{ model: User, as: 'employee', attributes: ['name', 'email'] }]
-        });
+    try{
+        const leaveRequests = await LeaveRequest.findAll();
 
         if (leaveRequests.length > 0) {
             return res.status(200).json({
@@ -148,6 +146,31 @@ const updateLeaveRequest = async (req, res) => {
             successful: false,
             message: err.message || "An unexpected error occurred."
         });
+    }
+};
+
+// Delete Leave Request
+const deleteLeaveRequest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const leaveRequest = await LeaveRequest.findByPk(id);
+        if (!leaveRequest) {
+            return res.status(404).json({ error: 'Leave request not found.' });
+        }
+
+
+        // Dont allow deletion of approved leave requests
+        if(leaveRequest.status !== 'pending'){
+            return res.status(400).json({ error: 'Approved leave requests cannot be deleted.' });
+        }
+
+        await leaveRequest.destroy();
+        return res.status(200).json({
+            successful: true,
+            message: 'Deleted successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };
 
