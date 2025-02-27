@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
+import axios from 'axios';
 
 const LeaveReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
@@ -8,57 +9,15 @@ const LeaveReqPage = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+    const [currentUser, setCurrentUser] = useState("John Doe");
+    const [requestData, setRequestData] = useState([]);
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
 
-    const [requestData, setRequestData] = useState([
-        {
-            id: 1,
-            name: "John Doe",
-            type: 'leave',
-            date: '2025-02-15',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-15',
-                currentShift: '09:00 - 17:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '12:00 - 20:00',
-                changeReason: 'Medical appointment conflicts with current schedule'
-            }
-        },
-        {
-            id: 2,
-            name: "Jane Smith",
-            type: 'leave',
-            date: '2025-02-16',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-16',
-                currentShift: '12:00 - 20:00',
-                requestedDate: '2025-02-18',
-                requestedShift: '09:00 - 17:00',
-                changeReason: 'Personal commitment requires morning shift on original day'
-            }
-        },
-        {
-            id: 3,
-            name: "Mike Johnson",
-            type: 'leave',
-            date: '2025-02-17',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-17',
-                currentShift: '08:00 - 16:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '14:00 - 22:00',
-                changeReason: 'Need to swap to afternoon shift for coursework'
-            }
-        }
-    ]);
+
 
     // Handle window resize with debounce for better performance
     useEffect(() => {
@@ -82,6 +41,20 @@ const LeaveReqPage = () => {
             setCurrentTime(new Date());
         }, 1000);
         return () => clearInterval(timer);
+    }, []);
+
+    // Fetch leave requests
+    useEffect(() => {
+        const fetchLeaveRequests = async()=>{
+            try{ 
+                const response = await axios.get('http://localhost:8080/leaveRequest/getAllLeaveRequests')
+                console.log("Data:", response.data)
+                setRequestData(response.data.data);
+            }catch{
+                console.error("Error fetching leave requests:", error);
+            }
+        };
+        fetchLeaveRequests();
     }, []);
 
     // Format date and time
@@ -204,7 +177,7 @@ const LeaveReqPage = () => {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Date</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">Currentasdasd ASDAS ASd asd  Date</p>
                     <p className="text-white">{request.details.currentDate}</p>
                 </div>
                 <div>
@@ -447,7 +420,7 @@ const LeaveReqPage = () => {
                                                         <div className="flex items-center">
                                                             {renderTypeIcon(request.type)}
                                                             <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
-                                                                {request.name}
+                                                                {request.name}  
                                                             </span>
                                                         </div>
                                                     </td>

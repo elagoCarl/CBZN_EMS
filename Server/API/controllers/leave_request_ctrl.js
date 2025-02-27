@@ -4,8 +4,6 @@ const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
-
-
 const addLeaveRequest = async (req, res) => {
     try {
         const { user_id, type, start_date, end_date, reason } = req.body;
@@ -67,21 +65,18 @@ const addLeaveRequest = async (req, res) => {
 
 // Get all leave requests
 const getAllLeaveRequests = async (req, res) => {
-    try{
-        const leaveRequests = await LeaveRequest.findAll();
+    try {
+        const leaveRequests = await LeaveRequest.findAll({
+            include: [{ model: User, attributes: ['name'] }]
+        });
 
-        if (leaveRequests.length > 0) {
-            return res.status(200).json({
-                successful: true,
-                data: leaveRequests
-            });
-        }
-        return res.status(404).json({ successful: false, error: 'No leave request found' });
-
+        
+        return res.status(200).json({ successful: true, data: leaveRequests });
     } catch (error) {
         return res.status(500).json({ successful: false, error: error.message });
     }
-}
+};
+
 
 // Get a single leave request by ID
 const getLeaveRequest = async (req, res) => {

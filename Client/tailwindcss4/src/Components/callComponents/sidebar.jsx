@@ -24,7 +24,7 @@ const Sidebar = () => {
 
 
     useEffect(() => {
-    const userId = 7; // Replace with actual user ID from auth context or localStorage
+    const userId = 1; // Replace with actual user ID from auth context or localStorage
 
     const fetchUserData = async () => {
         try {
