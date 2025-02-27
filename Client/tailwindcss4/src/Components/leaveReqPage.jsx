@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import AddReq  from './callComponents/addReq';
-import CancelReq from './callComponents/cancelReq';
+import RejectReq from './callComponents/rejectReq';
 import Sidebar from './callComponents/sidebar';
 
 
@@ -10,7 +10,7 @@ const LeaveReqPage = () => {
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isAddReqOpen, setIsAddReqOpen] = useState(false);
-    const [isCancelReqOpen, setIsCancelReqOpen] = useState(false)
+    const [isRejectReqOpen, setIsRejectReqOpen] = useState(false)
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -65,11 +65,11 @@ const LeaveReqPage = () => {
         setIsAddReqOpen(false);
     };
 
-    const handleCancelReqClick = () => {
-        setIsCancelReqOpen(true);
+    const handleRejectReqClick = () => {
+        setIsRejectReqOpen(true);
     };
-    const handleCancelReqClose = () => {
-        setIsCancelReqOpen(false);
+    const handleRejectReqClose = () => {
+        setIsRejectReqOpen(false);
     };
 
     // Clock update
@@ -432,7 +432,7 @@ const LeaveReqPage = () => {
                                                         {request.status === 'pending' && (
                                                             
                                                             <button
-                                                                onClick={handleCancelReqClick}
+                                                                onClick={handleRejectReqClick}
                                                                 className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors"
                                                             >
                                                                 Reject
@@ -522,7 +522,7 @@ const LeaveReqPage = () => {
                     )}
                 </div>
                 <AddReq isOpen={isAddReqOpen} onClose={handleAddReqClose} />
-                <CancelReq isOpen={isCancelReqOpen} onClose={handleCancelReqClose} message="Are you sure you want to cancel your request?" />
+                <RejectReq isOpen={isRejectReqOpen} onClose={handleRejectReqClose} message="Are you sure you want to reject this request?" />
             </main>
         </div>
     );
