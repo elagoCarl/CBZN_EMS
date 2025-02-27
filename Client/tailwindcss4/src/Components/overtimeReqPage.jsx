@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import { History, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 
-const OTReqPage = () => {
+const OvertimeReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -175,7 +175,7 @@ const OTReqPage = () => {
     const renderTypeIcon = (type) => {
         switch (type) {
             case 'overtime':
-                return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+                return <History className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
         }
@@ -585,4 +585,4 @@ const OTReqPage = () => {
     );
 };
 
-export default OTReqPage;
+export default OvertimeReqPage;
