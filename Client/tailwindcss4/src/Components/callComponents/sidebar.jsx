@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../Img/CBZN-Logo.png';
+import {
+    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X } from 'lucide-react';
 
 const Sidebar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [expandedItem, setExpandedItem] = useState(null);
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [userRole, setUserRole] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -35,13 +36,6 @@ const Sidebar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    useEffect(() => {   
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            setUserRole(user.role);
-        }   
-    }, []);
-
     // Close mobile menu when clicking on overlay
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -63,58 +57,37 @@ const Sidebar = () => {
         return location.pathname === path;
     };
 
-    // Navigation items with icons and paths
-    const adminNavigation = [
-        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
-        { name: 'Attendance List', icon: '📋', path: '/adminAttendance' },
-        { name: 'Manage Users', icon: '👥', path: '/manageUsers' },
-        { name: 'Account Settings', icon: '⚙️', path: '/accountSettings' },
+    // Neutral icon color
+    const iconColor = "#9ca3af"; // Gray-400
+
+    // Navigation items with Lucide icons and paths
+    const navigationItems = [
+        { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
+        { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/adminAttendance' },
+        { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accountSettings' },
         {
             name: 'Requests',
-            icon: '📝',
+            icon: <FileText size={20} color={iconColor} />,
             subItems: [
-                { name: 'OT Request', path: '/requests/overtime' },
-                { name: 'Leave Request', path: '/requests/leave' }, 
-                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
-                { name: 'Schedule Change', path: '/requests/schedule-change' }
+                { name: 'OT Request', path: '/requests/overtime', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/requests/leave', icon: <CalendarDays size={18} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/requests/time-adjustments', icon: <CalendarClock size={18} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/requests/schedule-change', icon: <CalendarRange size={18} color={iconColor} /> }
             ]
         },
     ];
-
-    const employeeNavigation = [
-        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
-        { name: 'Account Settings', icon: '⚙️', path: '/accSettings' },
-        {
-            name: 'Requests',
-            icon: '📝',
-            subItems: [
-                { name: 'OT Request', path: '/requests/overtime' },
-                { name: 'Leave Request', path: '/requests/leave' },
-                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
-                { name: 'Schedule Change', path: '/requests/schedule-change' }
-            ]
-        }
-    ];
-
-     const navigationItems = userRole === 'admin' ? adminNavigation : employeeNavigation;
-
-        localStorage.setItem("user", JSON.stringify({ role: "employee" }));
-         // Or for admin
-        localStorage.setItem("user", JSON.stringify({ role: "admin" }));
-
 
     return (
         <>
             {/* Mobile Menu Button */}
             <button
-                className={`md:hidden fixed top-5 ${isMobileMenuOpen ? 'left-44' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex flex-col justify-center items-center gap-1.5 transition-all duration-300 cursor-pointer bg-gray-800`}
+                className={`md:hidden fixed top-5 ${isMobileMenuOpen ? 'left-44' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex justify-center items-center transition-all duration-300 cursor-pointer bg-gray-800`}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen}
             >
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                {isMobileMenuOpen ? <X size={24} color="white" /> : <Menu size={24} color="white" />}
             </button>
 
             {/* Overlay for mobile */}
@@ -153,12 +126,12 @@ const Sidebar = () => {
                                     {!item.subItems ? (
                                         <button
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
-                                                ${isActive(item.path) 
-                                                    ? 'text-green-500 bg-gray-900' 
+                                                ${isActive(item.path)
+                                                    ? 'text-green-500 bg-gray-900'
                                                     : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                             onClick={() => handleNavigation(item.path)}
                                         >
-                                            <span className="text-lg">{item.icon}</span>
+                                            {item.icon}
                                             <span className="text-left">{item.name}</span>
                                         </button>
                                     ) : (
@@ -173,18 +146,14 @@ const Sidebar = () => {
                                                 aria-controls={`dropdown-${item.name}`}
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-lg">{item.icon}</span>
+                                                    {item.icon}
                                                     <span>{item.name}</span>
                                                 </div>
-                                                <svg
-                                                    className={`w-4 h-4 transition-transform duration-200 ${expandedItem === item.name ? 'rotate-180' : ''}`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
+                                                <ChevronDown
+                                                    size={16}
+                                                    color={iconColor}
+                                                    className={`transition-transform duration-200 ${expandedItem === item.name ? 'rotate-180' : ''}`}
+                                                />
                                             </button>
 
                                             {/* Dropdown Menu */}
@@ -198,13 +167,14 @@ const Sidebar = () => {
                                                 {item.subItems.map((subItem) => (
                                                     <button
                                                         key={subItem.name}
-                                                        className={`w-full text-left text-sm px-3 py-2 rounded-md transition-all duration-200
-                                                            ${isActive(subItem.path) 
-                                                                ? 'text-green-500 bg-gray-900' 
+                                                        className={`w-full text-left flex items-center gap-2 text-sm px-3 py-2 rounded-md transition-all duration-200
+                                                            ${isActive(subItem.path)
+                                                                ? 'text-green-500 bg-gray-900'
                                                                 : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
                                                         onClick={() => handleNavigation(subItem.path)}
                                                     >
-                                                        {subItem.name}
+                                                        {subItem.icon}
+                                                        <span>{subItem.name}</span>
                                                     </button>
                                                 ))}
                                             </div>
@@ -244,9 +214,7 @@ const Sidebar = () => {
                                         handleNavigation('/login');
                                     }}
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
+                                    <LogOut size={16} color={iconColor} />
                                     Log Out
                                 </button>
                             </div>
