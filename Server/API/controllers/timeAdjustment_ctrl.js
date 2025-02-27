@@ -88,16 +88,16 @@ const getAllTimeAdjustments = async (req, res) => {
         });
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
-              successful: true,
-              message: "No attendance found.",
-              count: 0,
-              data: [],
+                successful: true,
+                message: "No attendance found.",
+                count: 0,
+                data: [],
             });
-          }
+        }
 
-        return res.status(200).json({ 
-            successful: true, 
-            data: adjustments 
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
         });
     } catch (err) {
         console.error(err);
@@ -135,7 +135,7 @@ const updateTimeAdjustment = async (req, res) => {
             });
         }
 
-        if (status === 'Approved' || status === 'Rejected') {
+        if (status === 'approved' || status === 'rejected') {
             adjustment.reviewer_id = reviewer_id;
             adjustment.status = status;
             adjustment.review_date = dayjs().format('YYYY-MM-DD');
@@ -149,7 +149,6 @@ const updateTimeAdjustment = async (req, res) => {
             });
         }
     } catch (err) {
-        console.error(err);
         return res.status(500).json({
             successful: false,
             message: err.message || "An unexpected error occurred."
@@ -179,16 +178,16 @@ const getAllTimeAdjustmentsByUser = async (req, res) => {
         });
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
-              successful: true,
-              message: "No attendance found.",
-              count: 0,
-              data: [],
+                successful: true,
+                message: "No attendance found.",
+                count: 0,
+                data: [],
             });
-          }
+        }
 
-        return res.status(200).json({ 
-            successful: true, 
-            data: adjustments 
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
         });
     } catch (err) {
         console.error(err);
@@ -208,8 +207,8 @@ const cancelTimeAdjustment = async (req, res) => {
                 message: "Time adjustment not found."
             });
         }
-
-        await adjustment.destroy();
+        adjustment.status = 'cancelled';
+        await adjustment.save();
         return res.status(200).json({ message: "Time adjustment canceled." });
     } catch (err) {
         console.error(err);
