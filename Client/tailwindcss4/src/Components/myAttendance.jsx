@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "./callComponents/sidebar.jsx";
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 
 const userId = 4; // This should ideally come from authentication
 
@@ -57,6 +57,32 @@ const MyAttendance = () => {
       console.error("Error fetching user data:", error);
     }
   };
+
+  useEffect(() => {
+    // Retrieve the logged-in user's data
+    const fetchAuthenticatedUser = async () => {
+      try {
+        const token = localStorage.getItem("authToken"); // Example: token-based auth
+        const response = await axios.get("http://localhost:8080/auth/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.successful) {
+          setUserData(response.data.user); 
+        }
+      } catch (error) {
+        console.error("Error fetching authenticated user:", error);
+      }
+    };
+
+    fetchAuthenticatedUser();
+  }, []);
+
+  useEffect(() => {
+    if (userData?.userId) {
+      fetchAttendanceRecords(userData.userId);
+    }
+  }, [userData]);
 
   // Function to fetch attendance records
   const fetchAttendanceRecords = async () => {

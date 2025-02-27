@@ -316,7 +316,7 @@ const AccountSettings = () => {
                         onMouseUp={() => setShowOldPassword(false)}
                         onMouseLeave={() => setShowOldPassword(false)}
                       >
-                        {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showOldPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>
                     </div>
                   </div>
@@ -338,7 +338,7 @@ const AccountSettings = () => {
                         onMouseUp={() => setShowNewPassword(false)}
                         onMouseLeave={() => setShowNewPassword(false)}
                       >
-                        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showNewPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>
                     </div>
                   </div>
@@ -360,7 +360,7 @@ const AccountSettings = () => {
                         onMouseUp={() => setShowConfirmPassword(false)}
                         onMouseLeave={() => setShowConfirmPassword(false)}
                       >
-                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                       </button>
                     </div>
                   </div>

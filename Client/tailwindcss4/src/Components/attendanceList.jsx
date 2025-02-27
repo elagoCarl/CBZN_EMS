@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Search} from "lucide-react";
-
-
-import Sidebar from "./callComponents/sidebar.jsx"
+import { Search, Menu, X } from "lucide-react";
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,7 +113,7 @@ function formatDateTime(isoString) {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex h-screen bg-black/90">
+    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       < Sidebar />
 
       {/* Main Content */}
