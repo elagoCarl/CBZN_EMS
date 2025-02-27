@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, Clock, UserCheck } from 'lucide-react';
+import { Calendar, Clock, UserCheck, X } from 'lucide-react';
 
 export const AddReq = ({ isOpen, onClose }) => {
   const [activeRequest, setActiveRequest] = useState(null);
@@ -249,22 +249,20 @@ export const AddReq = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/10 z-50 flex items-center justify-center overflow-y-auto p-4"
       onClick={onClose}
     >
-      <div 
-        className="relative w-full max-w-3xl bg-[#292929] rounded-lg shadow-xl"
+      <div
+        className="relative w-full max-w-3xl bg-[#2b2b2b] rounded-lg shadow-xl"
         onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="absolute right-2 top-2 text-gray-400 hover:text-white z-50"
-        >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <div className="flex justify-between items-center p-6 border-b border-white/10">
+          <h2 className="text-xl font-semibold text-white">Add Request</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         <div className="p-4 sm:p-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6">
@@ -277,9 +275,8 @@ export const AddReq = ({ isOpen, onClose }) => {
               <button
                 key={id}
                 onClick={() => setActiveRequest(id)}
-                className={`p-3 sm:p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${
-                  activeRequest === id ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-                }`}
+                className={`p-3 sm:p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === id ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
+                  }`}
               >
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 <span className="text-white text-xs sm:text-sm">{label}</span>
