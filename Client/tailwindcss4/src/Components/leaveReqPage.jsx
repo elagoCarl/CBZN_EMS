@@ -496,13 +496,13 @@ const LeaveReqPage = () => {
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => handleApprove(request.id)}
+                                                                        onClick={() => initiateApprove(request.id)}
                                                                         className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => handleReject(request.id)}
+                                                                        onClick={() => initiateReject(request.id)}
                                                                         className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <XCircle className="w-4 h-4 mr-2" /> Reject

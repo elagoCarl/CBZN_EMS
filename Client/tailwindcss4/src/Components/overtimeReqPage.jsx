@@ -416,7 +416,7 @@ const OvertimeReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Request Date
+                                            Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -425,7 +425,7 @@ const OvertimeReqPage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            
+                                           
                                         </th>
                                     </tr>
                                 </thead>
@@ -483,13 +483,13 @@ const OvertimeReqPage = () => {
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => handleApprove(request.id)}
+                                                                        onClick={() => initiateApprove(request.id)}
                                                                         className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => handleReject(request.id)}
+                                                                        onClick={() => initiateReject(request.id)}
                                                                         className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <XCircle className="w-4 h-4 mr-2" /> Reject
@@ -498,7 +498,6 @@ const OvertimeReqPage = () => {
                                                             )}
                                                         </div>
                                                     </td>
-
                                                 </tr>
                                                 {expandedRow === request.id && (
                                                     <tr>
