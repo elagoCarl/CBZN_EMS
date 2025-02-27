@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu, Check, XCircle } from 'lucide-react';
+import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
-import AddReq  from './callComponents/addReq';
-import RejectReq from './callComponents/rejectReq';
 
 const OTReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [isAddReqOpen, setIsAddReqOpen] = useState(false);
-    const [isRejectReqOpen, setIsRejectReqOpen] = useState(false)
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+
+    // Add states for confirmation modals
+    const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
 
     const [requestData, setRequestData] = useState([
         {
             id: 1,
             name: "John Doe",
-            type: 'otreq',
+            type: 'overtime',
             date: '2025-02-15',
             status: 'pending',
             details: {
@@ -32,7 +33,7 @@ const OTReqPage = () => {
         {
             id: 2,
             name: "Jane Smith",
-            type: 'otreq',
+            type: 'overtime',
             date: '2025-02-16',
             status: 'pending',
             details: {
@@ -46,7 +47,7 @@ const OTReqPage = () => {
         {
             id: 3,
             name: "Mike Johnson",
-            type: 'otreq',
+            type: 'overtime',
             date: '2025-02-17',
             status: 'pending',
             details: {
@@ -75,63 +76,49 @@ const OTReqPage = () => {
         };
     }, []);
 
-    const handleAddReqClick = () => {
-        setIsAddReqOpen(true);
-    };
-    const handleAddReqClose = () => {
-        setIsAddReqOpen(false);
-    };
-
-    const handleRejectReqClick = () => {
-        setIsRejectReqOpen(true);
-    };
-    const handleRejectReqClose = () => {
-        setIsRejectReqOpen(false);
-    };
-
     // Clock update
     useEffect(() => {
         const timer = setInterval(() => {
-          setCurrentTime(new Date());
+            setCurrentTime(new Date());
         }, 1000);
         return () => clearInterval(timer);
-      }, []);
-    
-      // Format date and time
-      const formatDate = (date) => {
+    }, []);
+
+    // Format date and time
+    const formatDate = (date) => {
         const parts = date
-          .toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          })
-          .split("/");
+            .toLocaleDateString("en-US", {
+                month: "2-digit",
+                day: "2-digit",
+                year: "numeric",
+            })
+            .split("/");
         return (
-          <div className="text-center">
-            {parts[0]}
-            <span className="text-green-500">/</span>
-            {parts[1]}
-            <span className="text-green-500">/</span>
-            {parts[2]}
-          </div>
+            <div className="text-center">
+                {parts[0]}
+                <span className="text-green-500">/</span>
+                {parts[1]}
+                <span className="text-green-500">/</span>
+                {parts[2]}
+            </div>
         );
-      };
-    
-      const formatTime = (date) => {
+    };
+
+    const formatTime = (date) => {
         const timeString = date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
         });
-    
+
         const [time, period] = timeString.split(" ");
         return (
-          <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
-            {time} <span className="text-green-500 ml-2">{period}</span>
-          </span>
+            <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
+                {time} <span className="text-green-500 ml-2">{period}</span>
+            </span>
         );
-      };
+    };
 
     const toggleRow = (id) => {
         if (expandedRow === id) {
@@ -141,16 +128,34 @@ const OTReqPage = () => {
         }
     };
 
-    const handleApprove = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'approved' } : req
-        ));
+    // Modified to show confirmation modal
+    const initiateApprove = (id) => {
+        setSelectedRequestId(id);
+        setShowApproveConfirm(true);
     };
 
-    const handleReject = (id) => {
+    // Modified to show confirmation modal
+    const initiateReject = (id) => {
+        setSelectedRequestId(id);
+        setShowRejectConfirm(true);
+    };
+
+    // Actual approve action after confirmation
+    const handleApprove = () => {
         setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'rejected' } : req
+            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
         ));
+        setShowApproveConfirm(false);
+        setSelectedRequestId(null);
+    };
+
+    // Actual reject action after confirmation
+    const handleReject = () => {
+        setRequestData(requestData.map(req =>
+            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+        ));
+        setShowRejectConfirm(false);
+        setSelectedRequestId(null);
     };
 
     // Function to handle cancellation of a request
@@ -160,9 +165,16 @@ const OTReqPage = () => {
         ));
     };
 
+    // Function to close any open modals
+    const closeModals = () => {
+        setShowApproveConfirm(false);
+        setShowRejectConfirm(false);
+        setSelectedRequestId(null);
+    };
+
     const renderTypeIcon = (type) => {
         switch (type) {
-            case 'otreq':
+            case 'overtime':
                 return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
@@ -263,9 +275,63 @@ const OTReqPage = () => {
         return buttons;
     };
 
+    // Helper to get the request name for the confirmation modal
+    const getRequestName = (id) => {
+        const request = requestData.find(req => req.id === id);
+        return request ? request.name : '';
+    };
+
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
             <Sidebar /> {/* Mobile Nav Toggle */}
+
+            {/* Approve Confirmation Modal */}
+            {showApproveConfirm && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
+                        <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to approve the overtime request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={handleApprove}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center">
+                                <Check className="w-4 h-4 mr-2" /> Yes, Approve
+                            </button>
+                            <button
+                                onClick={closeModals}
+                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reject Confirmation Modal */}
+            {showRejectConfirm && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
+                        <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to reject the overtime request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={handleReject}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors flex items-center">
+                                <XCircle className="w-4 h-4 mr-2" /> Yes, Reject
+                            </button>
+                            <button
+                                onClick={closeModals}
+                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
@@ -362,7 +428,7 @@ const OTReqPage = () => {
                                             Actions
                                         </th>
                                     </tr>
-                                </thead>    
+                                </thead>
                                 <tbody className="divide-y divide-black-700">
                                     {currentRequests.length === 0 ? (
                                         <tr>
@@ -417,20 +483,20 @@ const OTReqPage = () => {
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => handleApprove(request.id)}
+                                                                        onClick={() => initiateApprove(request.id)}
                                                                         className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
                                                                     >
                                                                         <Check className="w-3 h-3 mr-1" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => handleReject(request.id)}
+                                                                        onClick={() => initiateReject(request.id)}
                                                                         className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
                                                                     >
                                                                         <XCircle className="w-3 h-3 mr-1" /> Reject
                                                                     </button>
                                                                 </>
                                                             )}
-                                                
+
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -514,8 +580,6 @@ const OTReqPage = () => {
                         </div>
                     )}
                 </div>
-                <AddReq isOpen={isAddReqOpen} onClose={handleAddReqClose} />
-                <RejectReq isOpen={isRejectReqOpen} onClose={handleRejectReqClose} message="Are you sure you want to reject this request?" />
             </main>
         </div>
     );
