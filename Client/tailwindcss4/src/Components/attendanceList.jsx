@@ -115,7 +115,7 @@ function formatDateTime(isoString) {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex h-screen bg-black/90">
+    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       < Sidebar />
 
       {/* Main Content */}
