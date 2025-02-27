@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
     const OvertimeRequest = sequelize.define('OvertimeRequest', {
         date: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false
         },
         start_time: {

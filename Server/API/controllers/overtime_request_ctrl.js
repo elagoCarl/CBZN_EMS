@@ -27,11 +27,11 @@ const addOvertimeRequest = async (req, res) => {
             where: {
                 user_id,
                 [Op.or]: [
-                    { start_date: { [Op.between]: [start_time, end_time] } },
-                    { end_date: { [Op.between]: [start_time, end_time] } },
+                    { start_time: { [Op.between]: [start_time, end_time] } },
+                    { end_time: { [Op.between]: [start_time, end_time] } },
                     {
-                        start_date: { [Op.lte]: start_time },
-                        end_date: { [Op.gte]: end_time }
+                        start_time: { [Op.lte]: start_time },
+                        end_time: { [Op.gte]: end_time }
                     }
                 ]
             }
@@ -47,6 +47,7 @@ const addOvertimeRequest = async (req, res) => {
         const newOvertimeRequest = await OvertimeRequest.create({ user_id, date, start_time, end_time, reason });
         return res.status(201).json({
             successful: true,
+            message: ("Successfully created overtime request"),
             data: newOvertimeRequest
         });
 
@@ -58,40 +59,60 @@ const addOvertimeRequest = async (req, res) => {
 // Get all overtime requests
 const getAllOvertimeRequests = async (req, res) => {
     try {
-        const overtimeRequests = await OvertimeRequest.findAll({
-           
-        });
+        const overtimeRequests = await OvertimeRequest.findAll();
 
         if (overtimeRequests.length > 0) {
+            // Ensure correct data format
+            const formattedRequests = overtimeRequests.map(request => {
+                return {
+                    ...request.toJSON(),
+                    start_time: request.start_time ? dayjs(request.start_time, "HH:mm:ss").format("HH:mmA") : null,
+                    end_time: request.end_time ? dayjs(request.end_time, "HH:mm:ss").format("HH:mmA") : null,
+                };
+            });
+
             return res.status(200).json({
                 successful: true,
-                data: overtimeRequests
+                data: formattedRequests
             });
         }
+
         return res.status(404).json({ error: 'No overtime request found' });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Error in getAllOvertimeRequests:", error); // Debugging: Catch errors
+        return res.status(500).json({ error: error });
     }
-}
+};
+
 
 // Get a single overtime request by ID
 const getOvertimeRequest = async (req, res) => {
     try {
         const { id } = req.params;
         const overtimeRequest = await OvertimeRequest.findByPk(id);
-        console.log(overtimeRequest)
-        if (!overtimeRequest) return res.status(404).json({ error: 'Overtime request not found' });
 
+        if (!overtimeRequest) {
+            return res.status(404).json({ error: 'Overtime request not found' });
+        }
+
+        // Format start_time and end_time
+        const formattedOvertimeRequest = {
+            ...overtimeRequest.toJSON(),
+            start_time: overtimeRequest.start_time ? dayjs(overtimeRequest.start_time, "HH:mm:ss").format("HH:mmA") : null,
+            end_time: overtimeRequest.end_time ? dayjs(overtimeRequest.end_time, "HH:mm:ss").format("HH:mmA") : null,
+        };
 
         return res.status(200).json({
             successful: true,
-            data: overtimeRequest
+            data: formattedOvertimeRequest
         });
+
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: error });
     }
-}
+};
+
 
 
 
@@ -202,5 +223,5 @@ module.exports = {
     getOvertimeRequest,
     getAllOvertimeRequests,
     updateOvertimeRequest,
-    cancelOvertimeRequest
+    cancelOvertimeRequest,
 };
