@@ -163,7 +163,7 @@ const OTReqPage = () => {
     const renderTypeIcon = (type) => {
         switch (type) {
             case 'otreq':
-                return <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+                return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
         }
