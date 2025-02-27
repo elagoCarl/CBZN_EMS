@@ -6,7 +6,7 @@ router.post('/addLeaveRequest', leaveRequest.addLeaveRequest);
 router.get('/getLeaveRequest/:id', leaveRequest.getLeaveRequest);
 router.get('/getAllLeaveRequests', leaveRequest.getAllLeaveRequests);
 router.put('/updateLeaveRequest/:id', leaveRequest.updateLeaveRequest);
-router.delete('/deleteLeaveRequest/:id', leaveRequest.deleteLeaveRequest);
+// router.delete('/deleteLeaveRequest/:id', leaveRequest.deleteLeaveRequest);
 
 
 module.exports = router;
