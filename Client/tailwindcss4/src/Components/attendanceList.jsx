@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Search, Menu, X } from "lucide-react";
-import Sidebar from "../Components/callComponents/sidebar.jsx"
+import { Search} from "lucide-react";
+
+
+import Sidebar from "./callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");

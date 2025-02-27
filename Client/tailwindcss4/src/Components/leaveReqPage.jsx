@@ -17,7 +17,47 @@ const LeaveReqPage = () => {
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
 
-
+    const [requestData, setRequestData] = useState([
+        {
+            id: 1,
+            name: "John Doe",
+            type: 'leave',
+            date: '2025-02-15',
+            status: 'pending',
+            details: {
+                startDate: '2025-02-15',
+                endDate: '2025-02-17',
+                leaveReason: 'Medical appointment with Albularyo',
+                approvedBy: null // Initially null since it's pending
+            }
+        },
+        {
+            id: 2,
+            name: "Jane Smith",
+            type: 'leave',
+            date: '2025-02-16',
+            status: 'pending',
+            details: {
+                startDate: '2025-02-15',
+                endDate: '2025-02-17',
+                leaveReason: 'Libre tuli sa barangay',
+                approvedBy: null
+            }
+        },
+        {
+            id: 3,
+            name: "Mike Johnson",
+            type: 'leave',
+            date: '2025-02-17',
+            status: 'pending',
+            details: {
+                startDate: '2025-02-15',
+                endDate: '2025-02-17',
+                leaveReason: 'Mam Flo final exam',
+                approvedBy: null
+            }
+        }
+    ]);
 
     // Handle window resize with debounce for better performance
     useEffect(() => {
@@ -116,7 +156,14 @@ const LeaveReqPage = () => {
     // Actual approve action after confirmation
     const handleApprove = () => {
         setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
+            req.id === selectedRequestId ? {
+                ...req,
+                status: 'approved',
+                details: {
+                    ...req.details,
+                    approvedBy: currentUser // Set the current user as the approver
+                }
+            } : req
         ));
         setShowApproveConfirm(false);
         setSelectedRequestId(null);
@@ -125,7 +172,14 @@ const LeaveReqPage = () => {
     // Actual reject action after confirmation
     const handleReject = () => {
         setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+            req.id === selectedRequestId ? {
+                ...req,
+                status: 'rejected',
+                details: {
+                    ...req.details,
+                    approvedBy: currentUser // Set the current user as the rejector
+                }
+            } : req
         ));
         setShowRejectConfirm(false);
         setSelectedRequestId(null);
@@ -177,25 +231,27 @@ const LeaveReqPage = () => {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Currentasdasd ASDAS ASd asd  Date</p>
-                    <p className="text-white">{request.details.currentDate}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">Start Date</p>
+                    <p className="text-white">{request.details.startDate}</p>
                 </div>
+
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Shift</p>
-                    <p className="text-white">{request.details.currentShift}</p>
-                </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Date</p>
-                    <p className="text-white">{request.details.requestedDate}</p>
-                </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Shift</p>
-                    <p className="text-white">{request.details.requestedShift}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">End Date</p>
+                    <p className="text-white">{request.details.endDate}</p>
                 </div>
                 <div className="sm:col-span-2">
                     <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
-                    <p className="text-white">{request.details.changeReason}</p>
+                    <p className="text-white">{request.details.leaveReason}</p>
                 </div>
+                {/* Only show who approved/rejected if status is 'approved' or 'rejected' */}
+                {(request.status === 'approved' || request.status === 'rejected') && request.details.approvedBy && (
+                    <div className="sm:col-span-2">
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">
+                            {request.status === 'approved' ? 'Approved By' : 'Rejected By'}
+                        </p>
+                        <p className="text-white">{request.details.approvedBy}</p>
+                    </div>
+                )}
             </div>
         );
     };
@@ -389,7 +445,7 @@ const LeaveReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Request Date
+                                            Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -398,7 +454,7 @@ const LeaveReqPage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Actions
+
                                         </th>
                                     </tr>
                                 </thead>
@@ -450,28 +506,28 @@ const LeaveReqPage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
-                                                        <div className="flex items-center justify-end gap-2">
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
                                                             {/* Admin actions for pending requests */}
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => initiateApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                        onClick={() => handleApprove(request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => initiateReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                        onClick={() => handleReject(request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
                                                                     </button>
                                                                 </>
                                                             )}
-
                                                         </div>
                                                     </td>
+
                                                 </tr>
                                                 {expandedRow === request.id && (
                                                     <tr>

@@ -123,7 +123,7 @@ const ScheduleChangePage = () => {
     const toggleRow = (id) => {
         if (expandedRow === id) {
             setExpandedRow(null);
-        } else {
+        } else {    
             setExpandedRow(id);
         }
     };
@@ -402,7 +402,7 @@ const ScheduleChangePage = () => {
                 </div>
 
                 {/* Table Container */}
-                <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col">
+                <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col justify-center">
                     {/* Responsive Table - Scrollable on all devices */}
                     <div className="overflow-x-auto">
                         <div className="overflow-y-auto max-h-[calc(100vh-500px)] md:max-h-[calc(100vh-400px)]">
@@ -477,27 +477,24 @@ const ScheduleChangePage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            {/* Admin actions for pending requests */}
-                                                            {request.status === 'pending' && (
-                                                                <>
-                                                                    <button
-                                                                        onClick={() => initiateApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-                                                                    >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => initiateReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
-                                                                    >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                
-                                                        </div>
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                                                        {/* Admin actions for pending requests */}
+                                                        {request.status === 'pending' && (
+                                                            <div className="flex items-center space-x-2">
+                                                                <button
+                                                                    onClick={() => initiateApprove(request.id)}
+                                                                    className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                >
+                                                                    <Check className="w-3 h-3 mr-1" /> Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => initiateReject(request.id)}
+                                                                    className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                >
+                                                                    <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </tr>
                                                 {expandedRow === request.id && (

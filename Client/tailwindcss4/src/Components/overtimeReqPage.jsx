@@ -8,7 +8,7 @@ const OvertimeReqPage = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+    const [currentUser, setCurrentUser] = useState("Carl Kulangot"); // Simulating current logged-in user
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -216,7 +216,7 @@ const OvertimeReqPage = () => {
                     <p className="text-white">{request.details.requestedDate}</p>
                 </div>
                 <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Shift</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Overtime</p>
                     <p className="text-white">{request.details.requestedShift}</p>
                 </div>
                 <div className="sm:col-span-2">
@@ -402,7 +402,7 @@ const OvertimeReqPage = () => {
                 </div>
 
                 {/* Table Container */}
-                <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col">
+                <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col justify-center">
                     {/* Responsive Table - Scrollable on all devices */}
                     <div className="overflow-x-auto">
                         <div className="overflow-y-auto max-h-[calc(100vh-500px)] md:max-h-[calc(100vh-400px)]">
@@ -425,7 +425,7 @@ const OvertimeReqPage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Actions
+                                            
                                         </th>
                                     </tr>
                                 </thead>
@@ -477,28 +477,28 @@ const OvertimeReqPage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
-                                                        <div className="flex items-center justify-end gap-2">
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
                                                             {/* Admin actions for pending requests */}
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => initiateApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                        onClick={() => handleApprove(request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => initiateReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                        onClick={() => handleReject(request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
                                                                     </button>
                                                                 </>
                                                             )}
-
                                                         </div>
                                                     </td>
+
                                                 </tr>
                                                 {expandedRow === request.id && (
                                                     <tr>
