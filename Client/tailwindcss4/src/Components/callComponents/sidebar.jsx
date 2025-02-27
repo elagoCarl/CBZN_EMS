@@ -7,6 +7,7 @@ const Sidebar = () => {
     const [expandedItem, setExpandedItem] = useState(null);
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -34,6 +35,13 @@ const Sidebar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    useEffect(() => {   
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            setUserRole(user.role);
+        }   
+    }, []);
+
     // Close mobile menu when clicking on overlay
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -56,7 +64,7 @@ const Sidebar = () => {
     };
 
     // Navigation items with icons and paths
-    const navigationItems = [
+    const adminNavigation = [
         { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
         { name: 'Attendance List', icon: '📋', path: '/adminAttendance' },
         { name: 'Manage Users', icon: '👥', path: '/manageUsers' },
@@ -72,6 +80,28 @@ const Sidebar = () => {
             ]
         },
     ];
+
+    const employeeNavigation = [
+        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
+        { name: 'Account Settings', icon: '⚙️', path: '/accSettings' },
+        {
+            name: 'Requests',
+            icon: '📝',
+            subItems: [
+                { name: 'OT Request', path: '/requests/overtime' },
+                { name: 'Leave Request', path: '/requests/leave' },
+                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
+                { name: 'Schedule Change', path: '/requests/schedule-change' }
+            ]
+        }
+    ];
+
+     const navigationItems = userRole === 'admin' ? adminNavigation : employeeNavigation;
+
+        localStorage.setItem("user", JSON.stringify({ role: "employee" }));
+         // Or for admin
+        localStorage.setItem("user", JSON.stringify({ role: "admin" }));
+
 
     return (
         <>
