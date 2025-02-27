@@ -1,6 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../Img/CBZN-Logo.png';
+import axios from 'axios';
+import { 
+  LogOut, 
+  Calendar, 
+  ClipboardList, 
+  Users, 
+  Settings, 
+  FileText,
+  ChevronRight
+} from 'lucide-react'; 
 
 const Sidebar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -8,10 +18,37 @@ const Sidebar = () => {
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userRole, setUserRole] = useState(null);
+    const [userData, setUserData] = useState(null); // Store user details
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Handle screen resize and close mobile menu on larger screens
+    // Retrieve user from localStorage
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) {
+            setUserRole(user.role);
+        }
+    }, []);
+
+    // Fetch user data (Ensure userId is properly set)
+    useEffect(() => {
+        const userId = "PLACEHOLDER_USER_ID"; // Get from localStorage or auth context
+
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+                if (response.data && response.data.successful) {
+                    setUserData(response.data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        if (userId) fetchUserData();
+    }, []);
+
+    // Close mobile menu when clicking outside or resizing
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
@@ -35,58 +72,53 @@ const Sidebar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    useEffect(() => {   
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
-            setUserRole(user.role);
-        }   
-    }, []);
-
-    // Close mobile menu when clicking on overlay
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
     };
 
-    // Toggle dropdown menu
     const toggleDropdown = (itemName) => {
         setExpandedItem(expandedItem === itemName ? null : itemName);
     };
 
-    // Handle navigation
     const handleNavigation = (path) => {
         navigate(path);
         closeMobileMenu();
     };
 
-    // Check if a path is active
-    const isActive = (path) => {
-        return location.pathname === path;
+    const handleLogout = () => {
+        localStorage.removeItem("user"); // Clear user data
+        setIsProfileOpen(false);
+        navigate('/'); // Redirect to login
     };
 
-    // Navigation items with icons and paths
-    const adminNavigation = [
-        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
-        { name: 'Attendance List', icon: '📋', path: '/adminAttendance' },
-        { name: 'Manage Users', icon: '👥', path: '/manageUsers' },
-        { name: 'Account Settings', icon: '⚙️', path: '/accountSettings' },
-        {
-            name: 'Requests',
-            icon: '📝',
-            subItems: [
-                { name: 'OT Request', path: '/requests/overtime' },
-                { name: 'Leave Request', path: '/requests/leave' }, 
-                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
-                { name: 'Schedule Change', path: '/requests/schedule-change' }
-            ]
-        },
-    ];
+    const isActive = (path) => location.pathname.startsWith(path);
 
-    const employeeNavigation = [
-        { name: 'My Attendance', icon: '📅', path: '/myAttendance' },
-        { name: 'Account Settings', icon: '⚙️', path: '/accSettings' },
+    // Get the icon component based on name
+    const getIcon = (name) => {
+        switch (name) {
+            case 'My Attendance':
+                return <Calendar size={18} />;
+            case 'Attendance List':
+                return <ClipboardList size={18} />;
+            case 'Manage Users':
+                return <Users size={18} />;
+            case 'Account Settings':
+                return <Settings size={18} />;
+            case 'Requests':
+                return <FileText size={18} />;
+            default:
+                return <FileText size={18} />;
+        }
+    };
+
+    // Navigation Items
+    const adminNavigation = [
+        { name: 'My Attendance', path: '/myAttendance' },
+        { name: 'Attendance List', path: '/adminAttendance' },
+        { name: 'Manage Users', path: '/manageUsers' },
+        { name: 'Account Settings', path: '/accSettings' },
         {
             name: 'Requests',
-            icon: '📝',
             subItems: [
                 { name: 'OT Request', path: '/requests/overtime' },
                 { name: 'Leave Request', path: '/requests/leave' },
@@ -96,18 +128,27 @@ const Sidebar = () => {
         }
     ];
 
-     const navigationItems = userRole === 'admin' ? adminNavigation : employeeNavigation;
+    const employeeNavigation = [
+        { name: 'My Attendance', path: '/myAttendance' },
+        { name: 'Account Settings', path: '/accSettings' },
+        {
+            name: 'Requests',
+            subItems: [
+                { name: 'OT Request', path: '/requests/overtime' },
+                { name: 'Leave Request', path: '/requests/leave' },
+                { name: 'Time Adjustments', path: '/requests/time-adjustments' },
+                { name: 'Schedule Change', path: '/requests/schedule-change' }
+            ]
+        }
+    ];
 
-        localStorage.setItem("user", JSON.stringify({ role: "employee" }));
-         // Or for admin
-        localStorage.setItem("user", JSON.stringify({ role: "admin" }));
-
+    const navigationItems = userRole === 'admin' ? adminNavigation : employeeNavigation;
 
     return (
         <>
             {/* Mobile Menu Button */}
             <button
-                className={`md:hidden fixed top-5 ${isMobileMenuOpen ? 'left-44' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex flex-col justify-center items-center gap-1.5 transition-all duration-300 cursor-pointer bg-gray-800`}
+                className={`md:hidden fixed top-8 ${isMobileMenuOpen ? 'left-50' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex flex-col justify-center items-center gap-1.5 transition-all duration-300 cursor-pointer`}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen}
@@ -117,143 +158,87 @@ const Sidebar = () => {
                 <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
             </button>
 
-            {/* Overlay for mobile */}
-            {isMobileMenuOpen && (
-                <div
-                    className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-                    onClick={closeMobileMenu}
-                    aria-hidden="true"
-                />
-            )}
-
             {/* Sidebar Container */}
-            <div className="md:block">
-                <aside
-                    className={`
-                        fixed md:relative w-64 bg-black flex flex-col min-h-screen 
-                        transition-all duration-300 ease-in-out z-45
-                        md:translate-x-0 
-                        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-                        shadow-lg
-                    `}
-                    aria-label="Sidebar navigation"
-                >
-                    {/* Logo Section */}
-                    <div className="p-6 border-b border-[#363636]">
-                        <div className="w-full flex justify-baseline items-center cursor-pointer" onClick={() => handleNavigation('/')}>
-                            <img src={logo} alt="CBZN Logo" className="h-8 w-auto" />
-                        </div>
-                    </div>
+            <aside
+                className={`fixed md:relative w-64 bg-black flex flex-col min-h-screen transition-all duration-300 ease-in-out z-45 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg`}
+                aria-label="Sidebar navigation"
+            >
+                {/* Logo Section */}
+                <div className="p-8 border-b border-[#363636]">
+                    <img src={logo} alt="CBZN Logo" className="h-8 w-auto cursor-pointer" onClick={() => handleNavigation('/')} />
+                </div>
 
-                    {/* Navigation Links */}
-                    <nav className="flex-1 px-4 py-6 overflow-y-auto">
-                        <ul className="space-y-4 text-sm font-semibold">
-                            {navigationItems.map((item) => (
-                                <li key={item.name}>
-                                    {!item.subItems ? (
-                                        <button
-                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
-                                                ${isActive(item.path) 
-                                                    ? 'text-green-500 bg-gray-900' 
-                                                    : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
-                                            onClick={() => handleNavigation(item.path)}
-                                        >
-                                            <span className="text-lg">{item.icon}</span>
-                                            <span className="text-left">{item.name}</span>
-                                        </button>
-                                    ) : (
-                                        <div>
+                {/* Navigation Links */}
+                <nav className="flex-1 px-4 py-6 overflow-y-auto">
+                    <ul className="space-y-4 text-sm font-semibold">
+                    {navigationItems.map((item) => (
+                        <li key={item.name} className="relative">
+                            <button
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-md transition-all duration-300 ${isActive(item.path) ? 'text-green-500' : 'text-white hover:text-green-500 cursor-pointer'}`}
+                                onClick={() => item.subItems ? toggleDropdown(item.name) : handleNavigation(item.path)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    {getIcon(item.name)}
+                                    <span className="text-left">{item.name}</span>
+                                </div>
+                                {item.subItems && (
+                                    <ChevronRight 
+                                        size={16} 
+                                        className={`text-white transition-transform duration-300 ${expandedItem === item.name ? 'rotate-90' : ''}`} 
+                                    />
+                                )}
+                            </button>
+
+                            {item.subItems && expandedItem === item.name && (
+                                <ul className="ml-8 mt-2 space-y-2">
+                                    {item.subItems.map((subItem) => (
+                                        <li key={subItem.name}>
                                             <button
-                                                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
-                                                    ${item.subItems.some(subItem => isActive(subItem.path))
-                                                        ? 'text-green-500 bg-gray-900'
-                                                        : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
-                                                onClick={() => toggleDropdown(item.name)}
-                                                aria-expanded={expandedItem === item.name}
-                                                aria-controls={`dropdown-${item.name}`}
+                                                className="w-full flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-green-500 transition-all duration-300 cursor-pointer"
+                                                onClick={() => handleNavigation(subItem.path)}
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-lg">{item.icon}</span>
-                                                    <span>{item.name}</span>
-                                                </div>
-                                                <svg
-                                                    className={`w-4 h-4 transition-transform duration-200 ${expandedItem === item.name ? 'rotate-180' : ''}`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
+                                                - {subItem.name}
                                             </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+                </nav>
 
-                                            {/* Dropdown Menu */}
-                                            <div
-                                                id={`dropdown-${item.name}`}
-                                                className={`
-                                                    mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
-                                                    ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
-                                                `}
-                                            >
-                                                {item.subItems.map((subItem) => (
-                                                    <button
-                                                        key={subItem.name}
-                                                        className={`w-full text-left text-sm px-3 py-2 rounded-md transition-all duration-200
-                                                            ${isActive(subItem.path) 
-                                                                ? 'text-green-500 bg-gray-900' 
-                                                                : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
-                                                        onClick={() => handleNavigation(subItem.path)}
-                                                    >
-                                                        {subItem.name}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
+                {/* Profile Section */}
+                <div className="p-4 border-t border-[#363636] relative" ref={profileRef}>
+                    <button
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-md transition-all duration-300 cursor-pointer"
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        aria-expanded={isProfileOpen}
+                        aria-haspopup="true"
+                    >
+                        <div className="w-10 h-10 bg-[#363636] rounded-full flex items-center justify-center text-white">
+                            {userData ? userData.name[0].toUpperCase() : 'A'}
+                        </div>
+                        <div className="flex flex-col text-left">
+                            <span className="text-white font-medium">{userData ? userData.name : 'ADMIN'}</span>
+                            <span className="text-gray-400 text-xs">{userData ? userData.email : 'ADMIN@CBZN.COM'}</span>
+                        </div>
+                    </button>
 
-                    {/* Profile Section */}
-                    <div className="p-4 border-t border-[#363636] relative" ref={profileRef}>
+                    {/* Profile Dropdown */}
+                {isProfileOpen && (
+                    <div className="absolute left-4 right-4 bottom-full mb-2 text-white rounded-lg shadow-lg cursor-pointer">
                         <button
-                            className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-900 transition-all duration-200"
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            aria-expanded={isProfileOpen}
-                            aria-haspopup="true"
+                            className="w-full flex items-center gap-2 px-4 py-3 hover:bg-red-600 rounded-lg cursor-pointer duration-300"
+                            onClick={handleLogout}
                         >
-                            <div className="w-10 h-10 bg-[#363636] rounded-full flex items-center justify-center text-white">
-                                A
-                            </div>
-                            <div className="flex flex-col text-left">
-                                <span className="text-white font-medium">ADMIN</span>
-                                <span className="text-gray-400 text-xs">ADMIN@CBZN.COM</span>
-                            </div>
+                            <LogOut size={16} />
+                            Log Out
                         </button>
-
-                        {/* Profile Dropdown */}
-                        {isProfileOpen && (
-                            <div className="absolute left-4 right-4 bottom-full mb-2 bg-[#2b2b2b] text-white rounded-lg shadow-lg overflow-hidden">
-                                <button
-                                    className="w-full text-left px-4 py-3 hover:bg-red-600 transition-colors duration-200 flex items-center gap-2"
-                                    onClick={() => {
-                                        setIsProfileOpen(false);
-                                        closeMobileMenu();
-                                        // Add logout logic here
-                                        handleNavigation('/login');
-                                    }}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    Log Out
-                                </button>
-                            </div>
-                        )}
                     </div>
-                </aside>
-            </div>
+                )}
+                </div>
+            </aside>
         </>
     );
 };

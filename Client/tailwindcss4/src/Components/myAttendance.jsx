@@ -58,6 +58,32 @@ const MyAttendance = () => {
     }
   };
 
+  useEffect(() => {
+    // Retrieve the logged-in user's data
+    const fetchAuthenticatedUser = async () => {
+      try {
+        const token = localStorage.getItem("authToken"); // Example: token-based auth
+        const response = await axios.get("http://localhost:8080/auth/me", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data && response.data.successful) {
+          setUserData(response.data.user); 
+        }
+      } catch (error) {
+        console.error("Error fetching authenticated user:", error);
+      }
+    };
+
+    fetchAuthenticatedUser();
+  }, []);
+
+  useEffect(() => {
+    if (userData?.userId) {
+      fetchAttendanceRecords(userData.userId);
+    }
+  }, [userData]);
+
   // Function to fetch attendance records
   const fetchAttendanceRecords = async () => {
     try {
