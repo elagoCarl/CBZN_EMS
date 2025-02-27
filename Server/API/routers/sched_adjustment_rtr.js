@@ -4,6 +4,7 @@ const router = express.Router();
 
 router.post('/addSchedAdjustment', SchedAdjustment.addSchedAdjustment);
 router.get('/getAllSchedAdjustments', SchedAdjustment.getAllSchedAdjustments);
+router.get('/getAllSchedAdjustmentByUser/:id', SchedAdjustment.getAllSchedAdjustmentByUser);
 router.get('/getSchedAdjustmentById/:id', SchedAdjustment.getSchedAdjustmentById);
 router.put('/updateSchedAdjustment/:id', SchedAdjustment.updateSchedAdjustment);
 

@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
     const OvertimeRequest = sequelize.define('OvertimeRequest', {
         date: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false
         },
         start_time: {
@@ -22,28 +22,26 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'pending'
         },
         review_date: {
-        type: DataTypes.DATEONLY,
-        allowNull: true
+            type: DataTypes.DATEONLY,
+            allowNull: true
         }
     },
-    {
-        timepstamps: true
-
-    });
-     
+        {
+            timestamps: true
+        });
 
     OvertimeRequest.associate = (models) => {
+        // Admin reviewing the overtime request
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'reviewer_id',
-           
-        }),
-
+            as: 'reviewer'
+        });
+        // Employee who submitted the overtime request
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
-           
-
+            as: 'user'
         });
-    }
-    return OvertimeRequest;
+    };
 
-}
+    return OvertimeRequest;
+};

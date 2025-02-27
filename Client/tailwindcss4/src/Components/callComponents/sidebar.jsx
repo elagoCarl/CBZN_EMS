@@ -211,7 +211,7 @@ const Sidebar = () => {
                                         setIsProfileOpen(false);
                                         closeMobileMenu();
                                         // Add logout logic here
-                                        handleNavigation('/login');
+                                        handleNavigation('/');
                                     }}
                                 >
                                     <LogOut size={16} color={iconColor} />

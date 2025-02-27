@@ -6,7 +6,7 @@ const addLeaveRequest = async (req, res) => {
     try {
         const { user_id, type, start_date, end_date, reason } = req.body;
 
-        
+
         // Check mandatory fields
         if (!util.improvedCheckMandatoryFields({ user_id, type, start_date, end_date, reason })) {
             return res.status(400).json({ error: 'A mandatory field is missing.' });
@@ -63,10 +63,10 @@ const addLeaveRequest = async (req, res) => {
 
 // Get all leave requests
 const getAllLeaveRequests = async (req, res) => {
-    try{
+    try {
         const leaveRequests = await LeaveRequest.findAll();
 
-        if(leaveRequests.length > 0){
+        if (leaveRequests.length > 0) {
             return res.status(200).json({
                 successful: true,
                 data: leaveRequests
@@ -74,24 +74,24 @@ const getAllLeaveRequests = async (req, res) => {
         }
         return res.status(404).json({ error: 'No leave request found' });
 
-    } catch(error){
+    } catch (error) {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
 // Get a single leave request by ID
 const getLeaveRequest = async (req, res) => {
-    try{
+    try {
         const { id } = req.params;
         const leaveRequest = await LeaveRequest.findByPk(id);
 
         if (!leaveRequest) return res.status(404).json({ error: 'Leave request not found' });
-        
+
         return res.status(200).json({
             successful: true,
             data: leaveRequest
         });
-    } catch(error){
+    } catch (error) {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
@@ -153,7 +153,7 @@ const deleteLeaveRequest = async (req, res) => {
 
 
         // Dont allow deletion of approved leave requests
-        if(leaveRequest.status !== 'pending'){
+        if (leaveRequest.status !== 'pending') {
             return res.status(400).json({ error: 'Approved leave requests cannot be deleted.' });
         }
 
@@ -177,11 +177,11 @@ const validateDate = (req, res, start_date, end_date) => {
     }
     return true;
 }
-  
-  // Check if the start date is before the end date
-  const validateStartEndDates = (req, res, start_date, end_date) => {
+
+// Check if the start date is before the end date
+const validateStartEndDates = (req, res, start_date, end_date) => {
     if (!validateDate(req, res, start_date, end_date)) return false;
-  
+
     if (start_date > end_date) {
         res.status(400).json({ error: 'Start date must be before or equal to end date.' });
         return false;
@@ -190,11 +190,55 @@ const validateDate = (req, res, start_date, end_date) => {
 }
 
 
+const getAllLeaveReqsByUser = async (req, res) => {
+    try {
+        const reqs = await LeaveRequest.findAll({
+            where: {
+                user_id: req.params.id
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+        if (!reqs || reqs.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No adjustments found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: reqs
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
+
 // Export the functions
 module.exports = {
     addLeaveRequest,
     getLeaveRequest,
     getAllLeaveRequests,
     updateLeaveRequest,
-    deleteLeaveRequest
+    deleteLeaveRequest,
+    getAllLeaveReqsByUser
 };

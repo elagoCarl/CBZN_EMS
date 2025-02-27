@@ -1,4 +1,4 @@
-const { ScheduleAdjustment } = require('../models');
+const { ScheduleAdjustment, User } = require('../models');
 const util = require('../../utils');
 
 const addSchedAdjustment = async (req, res) => {
@@ -88,10 +88,14 @@ const updateSchedAdjustment = async (req, res) => {
 const getAllSchedAdjustments = async (req, res) => {
     try {
         const adjustments = await ScheduleAdjustment.findAll();
-        return res.status(200).json({ successful: true, data: adjustments });
+        return res.status(200).json({ 
+            successful: true, 
+            data: adjustments });
     } catch (error) {
         console.error("Error fetching schedule adjustments:", error);
-        return res.status(500).json({ message: "Internal server error." });
+        return res.status(500).json({ 
+            successful: false,
+            message: error.message });
     }
 };
 
@@ -114,9 +118,52 @@ const getSchedAdjustmentById = async (req, res) => {
     }
 };
 
+const getAllSchedAdjustmentByUser = async (req, res) => {
+    try {
+        const adjustments = await ScheduleAdjustment.findAll({
+            where: {
+                user_id: req.params.id
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                }
+            ],
+            order: [['date', 'DESC']]
+        });
+        if (!adjustments || adjustments.length === 0) {
+            return res.status(200).json({
+              successful: true,
+              message: "No adjustments found.",
+              count: 0,
+              data: [],
+            });
+          }
+
+        return res.status(200).json({ 
+            successful: true, 
+            data: adjustments 
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+}
+
 module.exports = {
     addSchedAdjustment,
     updateSchedAdjustment,
     getAllSchedAdjustments,
-    getSchedAdjustmentById
+    getSchedAdjustmentById,
+    getAllSchedAdjustmentByUser
 };

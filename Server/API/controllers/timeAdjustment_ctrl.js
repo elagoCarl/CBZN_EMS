@@ -180,7 +180,7 @@ const getAllTimeAdjustmentsByUser = async (req, res) => {
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
               successful: true,
-              message: "No attendance found.",
+              message: "No adjustments found.",
               count: 0,
               data: [],
             });
