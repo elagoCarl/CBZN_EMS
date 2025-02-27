@@ -17,36 +17,42 @@ const Sidebar = () => {
     const [expandedItem, setExpandedItem] = useState(null);
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [userRole, setUserRole] = useState(null);
+    const [userRole, setUserRole] = useState(false);
     const [userData, setUserData] = useState(null); // Store user details
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Retrieve user from localStorage
+
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user) {
-            setUserRole(user.role);
+    const userId = 7; // Replace with actual user ID from auth context or localStorage
+
+    const fetchUserData = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+            if (response.data && response.data.successful) {
+                const user = response.data.data;
+                setUserData(user);
+
+                // Ensure isAdmin is a boolean
+                setUserRole(user.isAdmin === "true" || user.isAdmin === true);
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
         }
-    }, []);
+    };
+
+    if (userId) fetchUserData();
+}, []);
+
+    // // Retrieve user from localStorage
+    // useEffect(() => {
+    //     const user = JSON.parse(localStorage.getItem("user"));
+    //     if (user) {
+    //         setUserRole(user.isAdmin);
+    //     }
+    // }, []);
 
     // Fetch user data (Ensure userId is properly set)
-    useEffect(() => {
-        const userId = "PLACEHOLDER_USER_ID"; // Get from localStorage or auth context
-
-        const fetchUserData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
-                if (response.data && response.data.successful) {
-                    setUserData(response.data.data);
-                }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-
-        if (userId) fetchUserData();
-    }, []);
 
     // Close mobile menu when clicking outside or resizing
     useEffect(() => {
@@ -142,7 +148,8 @@ const Sidebar = () => {
         }
     ];
 
-    const navigationItems = userRole === 'admin' ? adminNavigation : employeeNavigation;
+   const navigationItems = userRole ? adminNavigation : employeeNavigation;
+
 
     return (
         <>
