@@ -9,6 +9,53 @@ const AdminAttendance = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+<<<<<<< Updated upstream:Client/tailwindcss4/src/Components/adminAttendance.jsx
+=======
+  const [data, setData] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("All", "Employee", "Intern"); // Default: show all
+
+  
+  useEffect(() => {
+    fetch("http://localhost:8080/attendance/getAllAttendances")
+      .then((res) => res.json())
+      .then((result) => {
+        console.log("API Data:", result);
+  
+        // Format time_in and time_out
+        const formattedData = (Array.isArray(result.data) ? result.data : []).map((item) => ({
+          ...item,
+          name: item.User?.name,
+          time_in: item.time_in ? formatDateTime(item.time_in) : null,
+          time_out: item.time_out ? formatDateTime(item.time_out) : null
+        }));
+  
+        console.log("Formatted Data:", formattedData);
+        setData(formattedData);
+
+      })
+      .catch((error) => console.error("Fetch error:", error));
+  }, []); // Empty dependency array ensures this runs only once
+
+  
+
+  
+
+// Function to format time as HH:mm (exclude date)
+function formatDateTime(isoString) {
+  const date = new Date(isoString);
+  
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const amPm = hours >= 12 ? 'PM' : 'AM';
+
+  // Convert hours to 12-hour format
+  hours = hours % 12 || 12; // Converts 0 (midnight) to 12 AM
+
+  return `${hours}:${minutes} ${amPm}`;
+}
+
+
+>>>>>>> Stashed changes:Client/tailwindcss4/src/Components/attendanceList.jsx
 
   // Handle window resize
   useEffect(() => {
@@ -228,6 +275,7 @@ const AdminAttendance = () => {
                   </tr>
                 </thead>
                 <tbody>
+<<<<<<< Updated upstream:Client/tailwindcss4/src/Components/adminAttendance.jsx
                   {currentEntries
                     .filter((entry) => entry.id.includes(searchQuery))
                     .map((entry) => (
@@ -244,6 +292,48 @@ const AdminAttendance = () => {
                         </td>
                       </tr>
                     ))}
+=======
+                {currentEntries
+  .filter((entry) => 
+    entry.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (selectedFilter === "Intern" || entry.employment_status === selectedFilter )// Filter based on role
+  )
+  .map((entry) => (
+
+
+  <tr
+    key={entry.id}
+    className="border-b border-[#2b2b2b] hover:bg-[#404040]"
+  >
+    <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-md md:text- text-center">
+      {entry.UserId}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.name}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.date}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.weekday}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.site ? entry.site : "—"}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.time_in ? entry.time_in : "—" }
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+      {entry.time_out ? entry.time_out : "—"}
+    </td>
+    <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
+    {entry.isRestDay ? "Rest Day" : "Work"}
+    </td>
+  </tr>
+))}
+                    
+          
+>>>>>>> Stashed changes:Client/tailwindcss4/src/Components/attendanceList.jsx
                 </tbody>
               </table>
             </div>
