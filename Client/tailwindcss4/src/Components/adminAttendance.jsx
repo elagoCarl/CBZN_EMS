@@ -9,8 +9,6 @@ const AdminAttendance = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-<<<<<<< Updated upstream:Client/tailwindcss4/src/Components/adminAttendance.jsx
-=======
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("All", "Employee", "Intern"); // Default: show all
 
@@ -55,7 +53,6 @@ function formatDateTime(isoString) {
 }
 
 
->>>>>>> Stashed changes:Client/tailwindcss4/src/Components/attendanceList.jsx
 
   // Handle window resize
   useEffect(() => {
@@ -275,24 +272,6 @@ function formatDateTime(isoString) {
                   </tr>
                 </thead>
                 <tbody>
-<<<<<<< Updated upstream:Client/tailwindcss4/src/Components/adminAttendance.jsx
-                  {currentEntries
-                    .filter((entry) => entry.id.includes(searchQuery))
-                    .map((entry) => (
-                      <tr
-                        key={entry.id}
-                        className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                        <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.id}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.date}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.day}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.type}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.timeIn}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.timeOut}</td>
-                        <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">{entry.status}
-                        </td>
-                      </tr>
-                    ))}
-=======
                 {currentEntries
   .filter((entry) => 
     entry.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -330,10 +309,7 @@ function formatDateTime(isoString) {
     {entry.isRestDay ? "Rest Day" : "Work"}
     </td>
   </tr>
-))}
-                    
-          
->>>>>>> Stashed changes:Client/tailwindcss4/src/Components/attendanceList.jsx
+))}  
                 </tbody>
               </table>
             </div>
