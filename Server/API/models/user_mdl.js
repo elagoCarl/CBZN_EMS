@@ -85,6 +85,21 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
             onUpdate: 'CASCADE'
         });
+        // A User has many time adjustments (as an employee requesting time adjustments)
+        User.hasMany(models.ScheduleAdjustment, {
+            foreignKey: 'user_id',
+            as: 'user',  // Alias for clarity
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+
+        // A User (admin) can review many leave requests
+        User.hasMany(models.ScheduleAdjustment, {
+            foreignKey: 'reviewer_id',
+            as: 'reviewer',
+            onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
+            onUpdate: 'CASCADE'
+        });
 
 
         // Other existing associations
