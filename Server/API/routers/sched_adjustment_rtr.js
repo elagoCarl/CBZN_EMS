@@ -6,5 +6,6 @@ router.post('/addSchedAdjustment', SchedAdjustment.addSchedAdjustment);
 router.get('/getAllSchedAdjustments', SchedAdjustment.getAllSchedAdjustments);
 router.get('/getSchedAdjustmentById/:id', SchedAdjustment.getSchedAdjustmentById);
 router.put('/updateSchedAdjustment/:id', SchedAdjustment.updateSchedAdjustment);
+router.put('/cancelSchedAdjustment/:id', SchedAdjustment.cancelSchedAdjustment);
 
 module.exports = router;

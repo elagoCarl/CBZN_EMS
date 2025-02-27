@@ -1,4 +1,4 @@
-const { ScheduleAdjustment, User } = require('../models');
+const { ScheduleAdjustment, User, Department, JobTitle, Schedule } = require('../models');
 const util = require('../../utils');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
@@ -109,11 +109,36 @@ const updateSchedAdjustment = async (req, res) => {
 
 const getAllSchedAdjustments = async (req, res) => {
     try {
-        const adjustments = await ScheduleAdjustment.findAll();
+        const adjustments = await ScheduleAdjustment.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'user', // User who requested the adjustment
+                    attributes: ['name'],
+                    include: [
+                        {
+                            model: JobTitle,
+                            attributes: ['name'],
+                            include: [
+                                {
+                                    model: Department,
+                                    attributes: ['name']
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    model: User,
+                    as: 'reviewer', // User who reviewed the adjustment
+                    attributes: ['name']
+                }
+            ],
+            order: [['createdAt', 'DESC']] // Order from latest to oldest
+        });
         return res.status(200).json({ successful: true, data: adjustments });
-    } catch (error) {
-        console.error("Error fetching schedule adjustments:", error);
-        return res.status(500).json({ message: "Internal server error." });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
 };
 
