@@ -10,7 +10,7 @@ import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjusmentPAge.jsx";
-import OTReqPage from "./Components/otReqPage.jsx";
+import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
           <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
           <Route path="/sidebar" element={<Sidebar />} />
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
-          <Route path="/otReqPage" element={<OTReqPage />} />
+          <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
       </Routes>
       </Router>
