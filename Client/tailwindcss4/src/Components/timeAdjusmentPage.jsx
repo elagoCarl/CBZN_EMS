@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu, Check, XCircle } from 'lucide-react';
+import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 
 const TimeAdjustmentPage = () => {
@@ -9,6 +9,10 @@ const TimeAdjustmentPage = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+    // Add state for confirmation popups
+    const [showApproveConfirmation, setShowApproveConfirmation] = useState(false);
+    const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
 
     const [requestData, setRequestData] = useState([
         {
@@ -120,19 +124,44 @@ const TimeAdjustmentPage = () => {
         }
     };
 
-    const handleApprove = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'approved' } : req
-        ));
+    // Modified to show confirmation popup instead of immediate approval
+    const initiateApprove = (id) => {
+        setSelectedRequestId(id);
+        setShowApproveConfirmation(true);
     };
 
-    const handleReject = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'rejected' } : req
-        ));
+    // Modified to show confirmation popup instead of immediate rejection
+    const initiateReject = (id) => {
+        setSelectedRequestId(id);
+        setShowRejectConfirmation(true);
     };
 
-    // New function to handle cancellation of a request
+    // Confirm approval after confirmation
+    const confirmApprove = () => {
+        setRequestData(requestData.map(req =>
+            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
+        ));
+        setShowApproveConfirmation(false);
+        setSelectedRequestId(null);
+    };
+
+    // Confirm rejection after confirmation
+    const confirmReject = () => {
+        setRequestData(requestData.map(req =>
+            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+        ));
+        setShowRejectConfirmation(false);
+        setSelectedRequestId(null);
+    };
+
+    // Cancel confirmation
+    const cancelConfirmation = () => {
+        setShowApproveConfirmation(false);
+        setShowRejectConfirmation(false);
+        setSelectedRequestId(null);
+    };
+
+    // Handle cancellation of a request
     const handleCancel = (id) => {
         setRequestData(requestData.map(req =>
             req.id === id ? { ...req, status: 'canceled' } : req
@@ -234,6 +263,11 @@ const TimeAdjustmentPage = () => {
         return buttons;
     };
 
+    // Find request details for the confirmation modal
+    const getRequestDetails = (id) => {
+        return requestData.find(req => req.id === id);
+    };
+
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
             <Sidebar /> {/* Mobile Nav Toggle */}
@@ -321,7 +355,7 @@ const TimeAdjustmentPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Date
+                                           Request Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -388,13 +422,13 @@ const TimeAdjustmentPage = () => {
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => handleApprove(request.id)}
+                                                                        onClick={() => initiateApprove(request.id)}
                                                                         className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
                                                                     >
                                                                         <Check className="w-3 h-3 mr-1" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => handleReject(request.id)}
+                                                                        onClick={() => initiateReject(request.id)}
                                                                         className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
                                                                     >
                                                                         <XCircle className="w-3 h-3 mr-1" /> Reject
@@ -486,6 +520,90 @@ const TimeAdjustmentPage = () => {
                     )}
                 </div>
             </main>
+
+            {/* Approve Confirmation Modal */}
+            {showApproveConfirmation && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
+                        {selectedRequestId && (
+                            <div className="mb-6">
+                                <p className="text-white mb-2">Are you sure you want to approve this time adjustment request?</p>
+                                <div className="bg-[#363636] p-3 rounded-md text-sm">
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Request ID:</span> {selectedRequestId}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Name:</span> {getRequestDetails(selectedRequestId)?.name}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Date:</span> {getRequestDetails(selectedRequestId)?.details.timeAdjustDate}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Time:</span> {getRequestDetails(selectedRequestId)?.details.timeAdjustFrom} to {getRequestDetails(selectedRequestId)?.details.timeAdjustTo}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={cancelConfirmation}
+                                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmApprove}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center"
+                            >
+                                <Check className="w-4 h-4 mr-2" /> Approve
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reject Confirmation Modal */}
+            {showRejectConfirmation && (
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full">
+                        <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
+                        {selectedRequestId && (
+                            <div className="mb-6">
+                                <p className="text-white mb-2">Are you sure you want to reject this time adjustment request?</p>
+                                <div className="bg-[#363636] p-3 rounded-md text-sm">
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Request ID:</span> {selectedRequestId}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Name:</span> {getRequestDetails(selectedRequestId)?.name}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Date:</span> {getRequestDetails(selectedRequestId)?.details.timeAdjustDate}
+                                    </p>
+                                    <p className="text-gray-300">
+                                        <span className="text-gray-400">Time:</span> {getRequestDetails(selectedRequestId)?.details.timeAdjustFrom} to {getRequestDetails(selectedRequestId)?.details.timeAdjustTo}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={cancelConfirmation}
+                                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmReject}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center"
+                            >
+                                <XCircle className="w-4 h-4 mr-2" /> Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

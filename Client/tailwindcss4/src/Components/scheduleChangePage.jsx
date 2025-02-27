@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu, Check, XCircle } from 'lucide-react';
+import { Calendar, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 
 const ScheduleChangePage = () => {
