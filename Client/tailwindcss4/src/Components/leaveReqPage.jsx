@@ -19,7 +19,7 @@ const LeaveReqPage = () => {
         {
             id: 1,
             name: "John Doe",
-            type: 'overtime',
+            type: 'leave',
             date: '2025-02-15',
             status: 'pending',
             details: {
@@ -33,7 +33,7 @@ const LeaveReqPage = () => {
         {
             id: 2,
             name: "Jane Smith",
-            type: 'overtime',
+            type: 'leave',
             date: '2025-02-16',
             status: 'pending',
             details: {
@@ -47,7 +47,7 @@ const LeaveReqPage = () => {
         {
             id: 3,
             name: "Mike Johnson",
-            type: 'overtime',
+            type: 'leave',
             date: '2025-02-17',
             status: 'pending',
             details: {
@@ -174,8 +174,8 @@ const LeaveReqPage = () => {
 
     const renderTypeIcon = (type) => {
         switch (type) {
-            case 'overtime':
-                return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+            case 'leave':
+                return <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
         }
@@ -291,7 +291,7 @@ const LeaveReqPage = () => {
                     <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
                         <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
                         <p className="text-gray-300 mb-6">
-                            Are you sure you want to approve the overtime request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                            Are you sure you want to approve the leave request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -315,7 +315,7 @@ const LeaveReqPage = () => {
                     <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
                         <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
                         <p className="text-gray-300 mb-6">
-                            Are you sure you want to reject the overtime request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                            Are you sure you want to reject the leave request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -338,7 +338,7 @@ const LeaveReqPage = () => {
                 {/* Page header with responsive layout */}
                 <header className="flex flex-col md:flex-row justify-between items-center mb-6">
                     <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
-                        Overtime <span className="text-white"> Requests </span>
+                        Leave <span className="text-white"> Requests </span>
                     </h1>
                     <div className="flex flex-col items-center">
                         <div className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-white">
@@ -433,7 +433,7 @@ const LeaveReqPage = () => {
                                     {currentRequests.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
-                                                No overtime requests found
+                                                No leave requests found
                                             </td>
                                         </tr>
                                     ) : (
