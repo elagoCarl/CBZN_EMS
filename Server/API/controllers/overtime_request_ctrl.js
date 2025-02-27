@@ -1,6 +1,10 @@
 const { OvertimeRequest, User } = require('../models');
 const util = require('../../utils');
 const { Op } = require('sequelize');
+const dayjs = require('dayjs');
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+dayjs.extend(customParseFormat);
+
 
 const addOvertimeRequest = async (req, res) => {
 
@@ -18,34 +22,25 @@ const addOvertimeRequest = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        // Check if reviewer exists (if provided)
-        // if (reviewer_id) {
-        //     const reviewerExists = await User.findByPk(reviewer_id);
-        //     if (!reviewerExists) {
-        //         return res.status(404).json({ error: 'Reviewer not found.' });
-        //     }
-        // }
+        const overlappingLeave = await OvertimeRequest.findOne({
+            where: {
+                user_id,
+                [Op.or]: [
+                    { start_date: { [Op.between]: [start_time, end_time] } },
+                    { end_date: { [Op.between]: [start_time, end_time] } },
+                    {
+                        start_date: { [Op.lte]: start_time },
+                        end_date: { [Op.gte]: end_time }
+                    }
+                ]
+            }
+        });
 
-        // Check for overlapping leave dates for the same user
-        // const overlappingLeave = await OvertimeRequest.findOne({
-        //     where: {
-        //         user_id,
-        //         [Op.or]: [
-        //             { start_date: { [Op.between]: [start_date, end_date] } },
-        //             { end_date: { [Op.between]: [start_date, end_date] } },
-        //             {
-        //                 start_date: { [Op.lte]: start_date },
-        //                 end_date: { [Op.gte]: end_date }
-        //             }
-        //         ]
-        //     }
-        // });
-
-        // if (overlappingLeave) {
-        //     return res.status(400).json({
-        //         error: 'Leave request dates overlap with an existing request.'
-        //     });
-        // }
+        if (overlappingLeave) {
+            return res.status(400).json({
+                error: 'Overtime request dates overlap with an existing request.'
+            });
+        }
 
         // Create overtime request
         const newOvertimeRequest = await OvertimeRequest.create({ user_id, date, start_time, end_time, reason });
@@ -55,22 +50,18 @@ const addOvertimeRequest = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("ERROR ATTACK: ", error);
-        if (error.name === 'SequelizeValidationError') {
-            return res.status(400).json({ error: error.errors[0].message });
-        }
         return res.status(500).json({ error: error.message });
     }
 };
 
 // Get all leave requests
 const getAllOvertimeRequests = async (req, res) => {
-    try{
+    try {
         const overtimeRequests = await OvertimeRequest.findAll({
             include: [{ model: User, as: 'employee', attributes: ['name', 'email'] }]
         });
 
-        if(overtimeRequests.length > 0){
+        if (overtimeRequests.length > 0) {
             return res.status(200).json({
                 successful: true,
                 data: overtimeRequests
@@ -78,25 +69,25 @@ const getAllOvertimeRequests = async (req, res) => {
         }
         return res.status(404).json({ error: 'No overtime request found' });
 
-    } catch(error){
+    } catch (error) {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
 
 // Get a single leave request by ID
 const getOvertimeRequest = async (req, res) => {
-    try{
+    try {
         const { id } = req.params;
         const overtimeRequest = await OvertimeRequest.findByPk(id);
-        console.log(overtimeRequest) 
+        console.log(overtimeRequest)
         if (!overtimeRequest) return res.status(404).json({ error: 'Overtime request not found' });
-        
-        
+
+
         return res.status(200).json({
             successful: true,
             data: overtimeRequest
         });
-    } catch(error){
+    } catch (error) {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
@@ -106,76 +97,78 @@ const getOvertimeRequest = async (req, res) => {
 // Update Overtime Request
 const updateOvertimeRequest = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { user_id, date, start_time, end_time, reason, reviewer_id, status, review_date } = req.body;
+        const { status, reviewer_id } = req.body;
 
-        // Check mandatory fields
-        if (!util.improvedCheckMandatoryFields({ user_id, date, start_time, end_time, reason, reviewer_id, status, review_date })) {
-            return res.status(400).json({ error: 'A mandatory field is missing.' });
-        }
-
-        // Check if user exists
-        const userExists = await User.findByPk(user_id);
-        if (!userExists) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
-
-        // Check if reviewer exists (if provided)
-        if (reviewer_id) {
-            const reviewerExists = await User.findByPk(reviewer_id);
-            if (!reviewerExists) {
-                return res.status(404).json({ error: 'Reviewer not found.' });
-            }
-        }
-
-        // Check for overlapping overtime dates for the same user (excluding current request)
-        const overlappingOTRequest = await OvertimeRequest.findOne({
-            where: {
-                user_id,
-                id: { [Op.ne]: id },
-                [Op.or]: [
-                    { start_date: { [Op.between]: [start_date, end_date] } },
-                    { end_date: { [Op.between]: [start_date, end_date] } },
-                    {
-                        start_date: { [Op.lte]: start_date },
-                        end_date: { [Op.gte]: end_date }
-                    }
-                ]
-            }
-        });
-
-        if (overlappingOTRequest) {
+        // Validate required fields
+        if (!util.checkMandatoryFields([status, reviewer_id])) {
             return res.status(400).json({
-                error: 'Overtime request dates overlap with an existing request.'
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+        const reviewer = await User.findByPk(reviewer_id);
+        if (!reviewer) {
+            return res.status(404).json({
+                successful: false,
+                message: "Reviewer not found."
             });
         }
 
-        // Update overtime request
-        const updatedovertimeRequest = await overtimRequest.update({ user_id, date, start_time, end_time, reason, reviewer_id, status, review_date }, { where: { id } });
-
-        if (updatedovertimeRequest[0] > 0) {
-            return res.status(200).json({
-                successful: true,
-                message: 'Overtime Request has been updated successfully'
+        const adjustment = await OvertimeRequest.findByPk(req.params.id);
+        if (!adjustment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Overtime request not found."
             });
         }
-        return res.status(404).json({ error: 'Overtime request not found.' });
 
-    } catch (error) {
-        console.log("ERROR ATTACK: ", error);
-        if (error.name === 'SequelizeValidationError') {
-            return res.status(400).json({ error: error.errors[0].message });
+        if (status === 'approved' || status === 'rejected') {
+            adjustment.reviewer_id = reviewer_id;
+            adjustment.status = status;
+            adjustment.review_date = dayjs().format('YYYY-MM-DD');
+            await adjustment.save();
+
+            return res.status(200).json({ message: "Overtime request updated.", data: adjustment });
+        } else {
+            return res.status(400).json({
+                successful: false,
+                message: "Invalid status. Status should be either 'Approved' or 'Rejected'."
+            });
         }
-        return res.status(500).json({ error: 'Internal server error' });
+    } catch (err) {
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
     }
 };
 
+const cancelOvertimeRequest = async (req, res) => {
+    try {
+        const adjustment = await OvertimeRequest.findByPk(req.params.id);
+        if (!adjustment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Overtime request not found."
+            });
+        }
+        adjustment.status = 'cancelled';
+        await adjustment.save();
+        return res.status(200).json({ message: "Overtime request canceled." });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+}
 
 // Export the functions
 module.exports = {
     addOvertimeRequest,
     getOvertimeRequest,
     getAllOvertimeRequests,
-    // getOvertimeRequestByUID,
-    updateOvertimeRequest
+    updateOvertimeRequest,
+    cancelOvertimeRequest
 };
