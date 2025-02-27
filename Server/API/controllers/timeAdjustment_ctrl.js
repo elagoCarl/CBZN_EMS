@@ -135,7 +135,7 @@ const updateTimeAdjustment = async (req, res) => {
             });
         }
 
-        if (status === 'Approved' || status === 'Rejected') {
+        if (status === 'approved' || status === 'rejected') {
             adjustment.reviewer_id = reviewer_id;
             adjustment.status = status;
             adjustment.review_date = dayjs().format('YYYY-MM-DD');
@@ -208,8 +208,8 @@ const cancelTimeAdjustment = async (req, res) => {
                 message: "Time adjustment not found."
             });
         }
-
-        await adjustment.destroy();
+        adjustment.status = 'cancelled';
+        await adjustment.save();
         return res.status(200).json({ message: "Time adjustment canceled." });
     } catch (err) {
         console.error(err);

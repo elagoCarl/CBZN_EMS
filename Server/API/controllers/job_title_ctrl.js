@@ -1,21 +1,41 @@
-const { JobTitle } = require('../models');
+const { JobTitle, Department, User } = require('../models');
 const util = require('../../utils');
+const { Op } = require('sequelize');
 
 // CREATE a new job title
 const addJobTitle = async (req, res) => {
-    const { name, isActive } = req.body;
-
-    if (!util.checkMandatoryFields([name, isActive])) {
-        return res.status(400).json({
-            successful: false,
-            message: "Job Title name is required.",
-        });
-    }
-
     try {
-        const jobtitle = await JobTitle.create({
-            name,
-        });
+        const { name, DepartmentId } = req.body;
+
+        if (!util.checkMandatoryFields([name, DepartmentId])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing..",
+            });
+        }
+        const existingJobTitle = await JobTitle.findOne({ where: { name } });
+        if (existingJobTitle) {
+            return res.status(409).json({
+                successful: false,
+                message: `Job Title with name ${name} already exists.`,
+            });
+        }
+
+        const dept = await Department.findByPk(DepartmentId);
+        if (!dept) {
+            return res.status(404).json({
+                successful: false,
+                message: `Department with ID ${DepartmentId} not found.`,
+            });
+        }
+        if (!dept.isActive) {
+            return res.status(400).json({
+                successful: false,
+                message: `${dept.name} is inactive and cannot have job titles.`,
+            });
+        }
+
+        const jobtitle = await JobTitle.create({ name, DepartmentId })
         return res.status(201).json({
             successful: true,
             message: `Job Title: ${name} has been added.`,
@@ -34,6 +54,14 @@ const addJobTitle = async (req, res) => {
 const getAllJobTitles = async (req, res) => {
     try {
         const jobtitles = await JobTitle.findAll();
+        if (!jobtitles || jobtitles.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No attendance found.",
+                count: 0,
+                data: [],
+            });
+        }
         return res.status(200).json({
             successful: true,
             message: "Successfully retrieved all job titles.",
@@ -80,29 +108,67 @@ const getJobTitle = async (req, res) => {
 const updateJobTitle = async (req, res) => {
 
     try {
-        const { name, isActive } = req.body;
+        const { name, isActive, DepartmentId } = req.body;
 
-        if (!name) {
+        if (!util.checkMandatoryFields([name, isActive, DepartmentId])) {
             return res.status(400).json({
                 successful: false,
-                message: "Job Title is required.",
+                message: "A mandatory field is missing.",
             });
         }
 
         const jobtitle = await JobTitle.findByPk(req.params.id);
-
         if (!jobtitle) {
             return res.status(404).json({
                 successful: false,
                 message: "Job Title not found.",
             });
         }
+        const dept = await Department.findByPk(DepartmentId);
+        if (!dept) {
+            return res.status(404).json({
+                successful: false,
+                message: `Department with ID ${DepartmentId} not found.`,
+            });
+        }
+        if (!dept.isActive) {
+            return res.status(400).json({
+                successful: false,
+                message: `${dept.name} is inactive and cannot have job titles.`,
+            });
+        }
 
-        await jobtitle.update({ name, isActive })
+        if(!isActive && await User.findOne({ where: { JobTitleId: req.params.id } })) {
+            return res.status(400).json({
+                successful: false,
+                message: `Job Title is currently assigned to a user and cannot be deactivated.`,
+            });
+        }
+
+        const existingJobTitle = await JobTitle.findOne({
+            where: {
+                name,
+                id: {
+                    [Op.ne]: req.params.id
+                }
+            }
+        });
+        if (existingJobTitle) {
+            return res.status(409).json({
+                successful: false,
+                message: `Job Title with name ${name} already exists.`,
+            });
+        }
+
+        jobtitle.name = name;
+        jobtitle.isActive = isActive;
+        jobtitle.DepartmentId = DepartmentId;
+        await jobtitle.save()
 
         return res.status(200).json({
             successful: true,
-            message: `Job Title with ID ${req.params.id} has been updated.`,        });
+            message: `Job Title with ID ${req.params.id} has been updated.`,
+        });
 
     } catch (error) {
         return res.status(500).json({
