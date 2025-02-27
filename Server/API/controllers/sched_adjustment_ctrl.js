@@ -1,5 +1,9 @@
-const { ScheduleAdjustment } = require('../models');
+const { ScheduleAdjustment, User } = require('../models');
 const util = require('../../utils');
+const dayjs = require('dayjs');
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+dayjs.extend(customParseFormat);
+
 
 const addSchedAdjustment = async (req, res) => {
     try {
@@ -56,17 +60,24 @@ const addSchedAdjustment = async (req, res) => {
 
 const updateSchedAdjustment = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { status } = req.body;
+        const { status, reviewer_id } = req.body;
 
-        if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
+        // Validate required fields
+        if (!util.checkMandatoryFields([status, reviewer_id])) {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid or missing status. Allowed values: Pending, Approved, Rejected."
+                message: "A mandatory field is missing."
+            });
+        }
+        const reviewer = await User.findByPk(reviewer_id);
+        if (!reviewer) {
+            return res.status(404).json({
+                successful: false,
+                message: "Reviewer not found."
             });
         }
 
-        const adjustment = await ScheduleAdjustment.findByPk(id);
+        const adjustment = await ScheduleAdjustment.findByPk(req.params.id);
         if (!adjustment) {
             return res.status(404).json({
                 successful: false,
@@ -74,13 +85,24 @@ const updateSchedAdjustment = async (req, res) => {
             });
         }
 
-        // Update status only
-        await adjustment.update({ status });
+        if (status === 'approved' || status === 'rejected') {
+            adjustment.reviewer_id = reviewer_id;
+            adjustment.status = status;
+            adjustment.review_date = dayjs().format('YYYY-MM-DD');
+            await adjustment.save();
 
-        return res.status(200).json({ message: "Schedule adjustment status updated successfully.", data: adjustment });
-    } catch (error) {
-        console.error("Error updating schedule adjustment status:", error);
-        return res.status(500).json({ message: "Internal server error." });
+            return res.status(200).json({ message: "Schedule adjustment updated.", data: adjustment });
+        } else {
+            return res.status(400).json({
+                successful: false,
+                message: "Invalid status. Status should be either 'Approved' or 'Rejected'."
+            });
+        }
+    } catch (err) {
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
     }
 };
 
@@ -99,24 +121,47 @@ const getSchedAdjustmentById = async (req, res) => {
     try {
         const id = req.params.id;
         const adjustment = await ScheduleAdjustment.findByPk(id);
-        
+
         if (!adjustment) {
             return res.status(404).json({
                 successful: false,
                 message: "Schedule adjustment not found."
             });
         }
-        
+
         return res.status(200).json({ successful: true, data: adjustment });
     } catch (error) {
         console.error("Error fetching schedule adjustment by ID:", error);
         return res.status(500).json({ message: "Internal server error." });
     }
-};
+}
+
+
+const cancelSchedAdjustment = async (req, res) => {
+    try {
+        const adjustment = await ScheduleAdjustment.findByPk(req.params.id);
+        if (!adjustment) {
+            return res.status(404).json({
+                successful: false,
+                message: "Schedule adjustment not found."
+            });
+        }
+        adjustment.status = 'cancelled';
+        await adjustment.save();
+        return res.status(200).json({ message: "Schedule adjustment canceled." });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+}
 
 module.exports = {
     addSchedAdjustment,
     updateSchedAdjustment,
     getAllSchedAdjustments,
-    getSchedAdjustmentById
+    getSchedAdjustmentById,
+    cancelSchedAdjustment
 };
