@@ -19,7 +19,7 @@ const LoginPage = () => {
       const response = await axios.post('http://localhost:8080/users/loginUser', { email, password }, { withCredentials: true });
 
       if (response.data.successful) {
-        navigate('/employeeHome'); // Redirect on successful login
+        navigate('/myAttendance'); // Redirect on successful login
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');

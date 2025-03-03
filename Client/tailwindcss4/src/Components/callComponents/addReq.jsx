@@ -4,20 +4,25 @@ import axios from 'axios';
 
 export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
   const [activeRequest, setActiveRequest] = useState(null);
+  const [backendMessage, setBackendMessage] = useState('');
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
-    overtimeDate: '',
+    // Overtime fields
+    overtimeDate: '',         // Date-only (YYYY-MM-DD)
+    overtimeStart: '',        // Datetime-local (date and time)
+    overtimeEnd: '',          // Datetime-local (date and time)
     overtimeReason: '',
-    overtimeStart: '',
-    overtimeEnd: '',
+    // Leave fields
     leaveStartDate: '',
     leaveEndDate: '',
     leaveType: '',
     leaveReason: '',
-    timeAdjustDate: '',
-    timeAdjustFrom: '',
-    timeAdjustTo: '',
+    // Time Adjustment fields
+    timeAdjustDate: '',       // Date-only (YYYY-MM-DD)
+    timeAdjustFrom: '',       // Datetime-local (date and time)
+    timeAdjustTo: '',         // Datetime-local (date and time)
     timeAdjustReason: '',
+    // Schedule Change fields
     scheduleDate: '',
     schedule: '',
     scheduleReason: ''
@@ -29,7 +34,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         setActiveRequest(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -45,9 +49,9 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
   const resetForm = () => {
     setFormData({
       overtimeDate: '',
-      overtimeReason: '',
       overtimeStart: '',
       overtimeEnd: '',
+      overtimeReason: '',
       leaveStartDate: '',
       leaveEndDate: '',
       leaveType: '',
@@ -60,13 +64,15 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       schedule: '',
       scheduleReason: ''
     });
+    setBackendMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setBackendMessage('');
 
-    // For schedule change request
     if (activeRequest === 'schedule') {
+      // Schedule Change Request
       const { scheduleDate, schedule, scheduleReason } = formData;
       const scheduleMapping = {
         "9AM-6PM": { time_in: "09:00", time_out: "18:00" },
@@ -74,7 +80,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       };
       const times = scheduleMapping[schedule];
       if (!times) {
-        console.error("Invalid schedule selected");
+        setBackendMessage("Invalid schedule selected");
         return;
       }
       try {
@@ -85,42 +91,104 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           time_out: times.time_out,
           reason: scheduleReason,
         });
-        console.log("Schedule change request submitted:", response.data);
-        // Notify parent component of the new request
+        setBackendMessage(response.data.message || "Schedule change request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
-        onClose(); // Close modal on success
+        onClose();
       } catch (error) {
         console.error("Error submitting schedule change request:", error);
+        setBackendMessage(error.response?.data?.message);
       }
     } else if (activeRequest === 'timeadjustment') {
-      // For time adjustment request
+      // Time Adjustment Request with separate date and datetime fields
       const { timeAdjustDate, timeAdjustFrom, timeAdjustTo, timeAdjustReason } = formData;
+
+      // Ensure all mandatory fields are provided
+      if (!timeAdjustDate || !timeAdjustFrom || !timeAdjustTo || !timeAdjustReason) {
+        setBackendMessage("All fields (date, start datetime, end datetime, and reason) are required.");
+        return;
+      }
+
+      // Split the datetime-local strings into date and time parts
+      const [fromDate, fromTime] = timeAdjustFrom.split('T');
+      const [toDate, toTime] = timeAdjustTo.split('T');
+
+      // Validate that both datetime inputs match the selected adjustment date
+      if (fromDate !== timeAdjustDate || toDate !== timeAdjustDate) {
+        setBackendMessage("Start and end datetime must match the selected adjustment date.");
+        return;
+      }
+
       try {
         const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
-          user_id: 1, // Replace with actual user id
-          date: timeAdjustDate,
-          time_in: timeAdjustFrom,
-          time_out: timeAdjustTo,
-          reason: timeAdjustReason,
+          user_id: 1,               // Replace with actual user id
+          date: timeAdjustDate,     // e.g., "2025-03-03"
+          from_time: fromTime,      // e.g., "08:00"
+          to_time: toTime,          // e.g., "17:00"
+          reason: timeAdjustReason, // Reason must be non-empty
         });
-        console.log("Time adjustment request submitted:", response.data);
-        // Notify parent component of the new request
+        setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
-        onClose(); // Close modal on success
+        onClose();
       } catch (error) {
         console.error("Error submitting time adjustment request:", error);
+        setBackendMessage(error.response?.data?.message);
       }
-    } else {
-      // For other types (overtime, leave, etc.)
-      console.log(`Submitting ${activeRequest} request:`, formData);
-      // You can integrate similar axios requests here if needed.
-      resetForm();
-      setActiveRequest(null);
-      onClose();
+    }
+
+    else if (activeRequest === 'leave') {
+      // Leave Request
+      const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
+      try {
+        const response = await axios.post('http://localhost:8080/leaveRequest/addLeaveRequest', {
+          user_id: 1, // Replace with actual user id
+          type: leaveType,
+          start_date: leaveStartDate,
+          end_date: leaveEndDate,
+          reason: leaveReason,
+        });
+        setBackendMessage(response.data.message || "Leave request submitted successfully.");
+        if (onRequestAdded) onRequestAdded(response.data);
+        resetForm();
+        setActiveRequest(null);
+        onClose();
+      } catch (error) {
+        console.error("Error submitting leave request:", error);
+        setBackendMessage(error.response?.data?.message);
+      }
+    } else if (activeRequest === 'overtime') {
+      // Overtime Request with separate date and datetime fields
+      const { overtimeDate, overtimeStart, overtimeEnd, overtimeReason } = formData;
+      if (!overtimeDate || !overtimeStart || !overtimeEnd) {
+        setBackendMessage("All fields (date, start, and end datetime) are required.");
+        return;
+      }
+      const [startDate, startTime] = overtimeStart.split('T');
+      const [endDate, endTime] = overtimeEnd.split('T');
+      if (startDate !== overtimeDate || endDate !== overtimeDate) {
+        setBackendMessage("Start and end datetime must match the selected overtime date.");
+        return;
+      }
+      try {
+        const response = await axios.post('http://localhost:8080/overtime/addOvertime', {
+          user_id: 1, // Replace with actual user id
+          date: overtimeDate,    // 'YYYY-MM-DD'
+          start_time: startTime,   // 'HH:mm'
+          end_time: endTime,       // 'HH:mm'
+          reason: overtimeReason,
+        });
+        setBackendMessage(response.data.message || "Overtime request submitted successfully.");
+        if (onRequestAdded) onRequestAdded(response.data);
+        resetForm();
+        setActiveRequest(null);
+        onClose();
+      } catch (error) {
+        console.error("Error submitting overtime request:", error);
+        setBackendMessage(error.response?.data?.message);
+      }
     }
   };
 
@@ -143,27 +211,37 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Overtime Request</h2>
-            <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 gap-4">
+            {backendMessage && (
+              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
+            )}
+            {/* Overtime Date */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">Overtime Date</label>
               <InputField
                 type="date"
                 name="overtimeDate"
                 value={formData.overtimeDate}
                 onChange={handleInputChange}
-                className="md:col-span-3"
               />
+            </div>
+            {/* Overtime Start Date & Time */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">Start Date & Time</label>
               <InputField
-                type="time"
+                type="datetime-local"
                 name="overtimeStart"
                 value={formData.overtimeStart}
                 onChange={handleInputChange}
-                placeholder="Start Time"
               />
+            </div>
+            {/* Overtime End Date & Time */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">End Date & Time</label>
               <InputField
-                type="time"
+                type="datetime-local"
                 name="overtimeEnd"
                 value={formData.overtimeEnd}
                 onChange={handleInputChange}
-                placeholder="End Time"
               />
             </div>
             <textarea
@@ -184,6 +262,9 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Leave Request</h2>
+            {backendMessage && (
+              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
+            )}
             <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 gap-4">
               <InputField
                 type="date"
@@ -227,27 +308,37 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Time Adjustment Request</h2>
-            <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 gap-4">
+            {backendMessage && (
+              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
+            )}
+            {/* Time Adjustment Date */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">Adjustment Date</label>
               <InputField
                 type="date"
                 name="timeAdjustDate"
                 value={formData.timeAdjustDate}
                 onChange={handleInputChange}
-                className="md:col-span-3"
               />
+            </div>
+            {/* Original Date & Time */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">Original Date & Time</label>
               <InputField
-                type="time"
+                type="datetime-local"
                 name="timeAdjustFrom"
                 value={formData.timeAdjustFrom}
                 onChange={handleInputChange}
-                placeholder="Original Time"
               />
+            </div>
+            {/* Adjusted Date & Time */}
+            <div className="space-y-2">
+              <label className="block text-sm text-gray-300">Adjusted Date & Time</label>
               <InputField
-                type="time"
+                type="datetime-local"
                 name="timeAdjustTo"
                 value={formData.timeAdjustTo}
                 onChange={handleInputChange}
-                placeholder="Adjusted Time"
               />
             </div>
             <textarea
@@ -268,6 +359,9 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Schedule Change Request</h2>
+            {backendMessage && (
+              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
+            )}
             <div className="space-y-4">
               <InputField
                 type="date"
@@ -320,7 +414,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
-
         <div className="p-4 sm:p-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-6">
             {[
@@ -339,7 +432,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
               </button>
             ))}
           </div>
-
           <div className="bg-[#363636] rounded-lg p-4 sm:p-6">
             {renderForm()}
           </div>
