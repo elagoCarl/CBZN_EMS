@@ -12,6 +12,7 @@ import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjusmentPAge.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
+import MockAttendance from "./Components/mockAttendance.jsx";
 
 
 function App() {
@@ -33,6 +34,8 @@ function App() {
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+          <Route path="/mockAttendance" element={<MockAttendance />} />
+
       </Routes>
       </Router>
     </>
