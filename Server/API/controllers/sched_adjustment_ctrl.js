@@ -1,5 +1,8 @@
 const { ScheduleAdjustment, User, JobTitle, Department } = require('../models');
 const util = require('../../utils');
+const dayjs = require('dayjs');
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+dayjs.extend(customParseFormat);
 
 const addSchedAdjustment = async (req, res) => {
     try {

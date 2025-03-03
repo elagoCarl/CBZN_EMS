@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../Img/CBZN-Logo.png';
 import {
-    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X } from 'lucide-react';
+    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X
+} from 'lucide-react';
 
 const Sidebar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -63,9 +64,9 @@ const Sidebar = () => {
     // Navigation items with Lucide icons and paths
     const navigationItems = [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
-        { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/adminAttendance' },
+        { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
         { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
-        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accountSettings' },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
         {
             name: 'Requests',
             icon: <FileText size={20} color={iconColor} />,

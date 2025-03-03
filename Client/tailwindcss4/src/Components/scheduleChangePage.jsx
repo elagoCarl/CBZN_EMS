@@ -11,7 +11,7 @@ const ScheduleChangePage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentUser] = useState("John Doe");
+  const [currentUser] = useState("null");
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
