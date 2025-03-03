@@ -9,7 +9,7 @@ import AttendanceList from './Components/attendanceList.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
-import TimeAdjustmentPage from "./Components/timeAdjusmentPAge.jsx";
+import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 

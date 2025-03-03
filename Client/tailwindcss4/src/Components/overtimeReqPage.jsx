@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import { CalendarClock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 
 const OvertimeReqPage = () => {
@@ -8,7 +8,7 @@ const OvertimeReqPage = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("Carl Kulangot"); // Simulating current logged-in user
+    const [currentUser, setCurrentUser] = useState("Carl Elago"); // Simulating current logged-in user
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -175,7 +175,7 @@ const OvertimeReqPage = () => {
     const renderTypeIcon = (type) => {
         switch (type) {
             case 'overtime':
-                return <History className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+                return <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
         }
@@ -413,7 +413,7 @@ const OvertimeReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Date
+                                            Request Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -436,7 +436,7 @@ const OvertimeReqPage = () => {
                                     ) : (
                                         currentRequests.map((request) => (
                                             <React.Fragment key={request.id}>
-                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
+                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b]  h-16"}>
                                                     <td className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                                         {request.id}
                                                     </td>

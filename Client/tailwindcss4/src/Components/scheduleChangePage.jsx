@@ -9,7 +9,7 @@ const ScheduleChangePage = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
-    
+
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
@@ -79,51 +79,51 @@ const ScheduleChangePage = () => {
     // Clock update
     useEffect(() => {
         const timer = setInterval(() => {
-          setCurrentTime(new Date());
+            setCurrentTime(new Date());
         }, 1000);
         return () => clearInterval(timer);
-      }, []);
-    
-      // Format date and time
-      const formatDate = (date) => {
+    }, []);
+
+    // Format date and time
+    const formatDate = (date) => {
         const parts = date
-          .toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          })
-          .split("/");
+            .toLocaleDateString("en-US", {
+                month: "2-digit",
+                day: "2-digit",
+                year: "numeric",
+            })
+            .split("/");
         return (
-          <div className="text-center">
-            {parts[0]}
-            <span className="text-green-500">/</span>
-            {parts[1]}
-            <span className="text-green-500">/</span>
-            {parts[2]}
-          </div>
+            <div className="text-center">
+                {parts[0]}
+                <span className="text-green-500">/</span>
+                {parts[1]}
+                <span className="text-green-500">/</span>
+                {parts[2]}
+            </div>
         );
-      };
-    
-      const formatTime = (date) => {
+    };
+
+    const formatTime = (date) => {
         const timeString = date.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
         });
-    
+
         const [time, period] = timeString.split(" ");
         return (
-          <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
-            {time} <span className="text-green-500 ml-2">{period}</span>
-          </span>
+            <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
+                {time} <span className="text-green-500 ml-2">{period}</span>
+            </span>
         );
-      };
+    };
 
     const toggleRow = (id) => {
         if (expandedRow === id) {
             setExpandedRow(null);
-        } else {    
+        } else {
             setExpandedRow(id);
         }
     };
@@ -294,12 +294,12 @@ const ScheduleChangePage = () => {
                             Are you sure you want to approve the schedule change request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
-                            <button 
+                            <button
                                 onClick={handleApprove}
                                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center">
                                 <Check className="w-4 h-4 mr-2" /> Yes, Approve
                             </button>
-                            <button 
+                            <button
                                 onClick={closeModals}
                                 className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
                                 Cancel
@@ -318,12 +318,12 @@ const ScheduleChangePage = () => {
                             Are you sure you want to reject the schedule change request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
-                            <button 
+                            <button
                                 onClick={handleReject}
                                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors flex items-center">
                                 <XCircle className="w-4 h-4 mr-2" /> Yes, Reject
                             </button>
-                            <button 
+                            <button
                                 onClick={closeModals}
                                 className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
                                 Cancel
@@ -425,10 +425,10 @@ const ScheduleChangePage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Actions
+
                                         </th>
                                     </tr>
-                                </thead>    
+                                </thead>
                                 <tbody className="divide-y divide-black-700">
                                     {currentRequests.length === 0 ? (
                                         <tr>
@@ -439,7 +439,7 @@ const ScheduleChangePage = () => {
                                     ) : (
                                         currentRequests.map((request) => (
                                             <React.Fragment key={request.id}>
-                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
+                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors h-16"}>
                                                     <td className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                                         {request.id}
                                                     </td>
@@ -477,24 +477,26 @@ const ScheduleChangePage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
-                                                        {/* Admin actions for pending requests */}
-                                                        {request.status === 'pending' && (
-                                                            <div className="flex items-center space-x-2">
-                                                                <button
-                                                                    onClick={() => initiateApprove(request.id)}
-                                                                    className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-                                                                >
-                                                                    <Check className="w-3 h-3 mr-1" /> Approve
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => initiateReject(request.id)}
-                                                                    className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
-                                                                >
-                                                                    <XCircle className="w-3 h-3 mr-1" /> Reject
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
+                                                            {/* Admin actions for pending requests */}
+                                                            {request.status === 'pending' && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => initiateApprove(request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => initiateReject(request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 {expandedRow === request.id && (

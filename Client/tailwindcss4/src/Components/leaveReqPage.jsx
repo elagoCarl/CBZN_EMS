@@ -429,7 +429,7 @@ const LeaveReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Date
+                                            Request Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -452,7 +452,7 @@ const LeaveReqPage = () => {
                                     ) : (
                                         currentRequests.map((request) => (
                                             <React.Fragment key={request.id}>
-                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
+                                                <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors h-16"}>
                                                     <td className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                                         {request.id}
                                                     </td>
