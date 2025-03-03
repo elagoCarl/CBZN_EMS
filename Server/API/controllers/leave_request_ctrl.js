@@ -4,8 +4,6 @@ const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
-
-
 const addLeaveRequest = async (req, res) => {
     try {
         const { user_id, type, start_date, end_date, reason } = req.body;
@@ -19,7 +17,7 @@ const addLeaveRequest = async (req, res) => {
         // Check if user exists
         const userExists = await User.findByPk(user_id);
         if (!userExists) {
-            return res.status(404).json({ error: 'User not found.' });
+            return res.status(404).json({ successful: false, error: 'User not found.' });
         }
 
         // Validate date format and start/end date order
@@ -57,31 +55,34 @@ const addLeaveRequest = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("ERROR ATTACK: ", error);
+        console.log(error);
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({ error: error.errors[0].message });
         }
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ successful: false, error: error.message });
     }
 };
 
 // Get all leave requests
 const getAllLeaveRequests = async (req, res) => {
-    try{
-        const leaveRequests = await LeaveRequest.findAll();
+    try {
+        const leaveRequests = await LeaveRequest.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'User', // Match the alias in the model
+                    attributes: ['name'] // Fetch only the 'name' field
+                }
+            ]
+        });
 
-        if (leaveRequests.length > 0) {
-            return res.status(200).json({
-                successful: true,
-                data: leaveRequests
-            });
-        }
-        return res.status(404).json({ error: 'No leave request found' });
-
+        return res.status(200).json({ successful: true, data: leaveRequests });
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ successful: false, error: error.message });
     }
-}
+};
+
+
 
 // Get a single leave request by ID
 const getLeaveRequest = async (req, res) => {
@@ -89,14 +90,14 @@ const getLeaveRequest = async (req, res) => {
         const { id } = req.params;
         const leaveRequest = await LeaveRequest.findByPk(id);
 
-        if (!leaveRequest) return res.status(404).json({ error: 'Leave request not found' });
+        if (!leaveRequest) return res.status(404).json({ successful: false, error: 'Leave request not found' });
 
         return res.status(200).json({
             successful: true,
             data: leaveRequest
         });
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ successful: false, error: error.message });
     }
 }
 
@@ -161,7 +162,7 @@ const deleteLeaveRequest = async (req, res) => {
 
         // Dont allow deletion of approved leave requests
         if(leaveRequest.status !== 'pending'){
-            return res.status(400).json({ error: 'Approved leave requests cannot be deleted.' });
+            return res.status(400).json({ successful: false, error: 'Approved leave requests cannot be deleted.' });
         }
 
         await leaveRequest.destroy();
@@ -170,7 +171,7 @@ const deleteLeaveRequest = async (req, res) => {
             message: 'Deleted successfully'
         });
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ successful: false, error: error.message });
     }
 };
 

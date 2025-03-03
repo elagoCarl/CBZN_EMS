@@ -45,15 +45,16 @@ module.exports = (sequelize, DataTypes) => {
         // Employee submitting the request
         LeaveRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
-            as: 'user'
+            as: 'User' // Alias for the requester
         });
-
+    
         // Admin approving/rejecting the request
         LeaveRequest.belongsTo(models.User, {
             foreignKey: 'reviewer_id',
-            as: 'reviewer'
+            as: 'Reviewer' // Alias for the reviewer
         });
     };
+    
 
     return LeaveRequest;
 };

@@ -117,7 +117,7 @@ app.use('/schedAdjustment', sched_adjustment_rtr)
 app.use('/jobtitle', job_title_rtr)
 app.use('/OTrequests', overtime_request_rtr)
 app.use('/timeAdjustment', time_adjustment_rtr);
-app.use('/leaveRequest', leave_request_rtr);
+app.use('/leaveRequest', leave_request_rtr)
 
 
 
