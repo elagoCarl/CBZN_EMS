@@ -1,4 +1,4 @@
-const { OvertimeRequest, User } = require('../models');
+const { OvertimeRequest, User, Schedule } = require('../models');
 const util = require('../../utils');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
@@ -24,7 +24,7 @@ const addOvertimeRequest = async (req, res) => {
     
 
 
-        const overlappingLeave = await OvertimeRequest.findOne({
+        const overlappingOvertime = await OvertimeRequest.findOne({
             where: {
                 user_id,
                 [Op.or]: [
@@ -38,7 +38,7 @@ const addOvertimeRequest = async (req, res) => {
             }
         });
 
-        if (overlappingLeave) {
+        if (overlappingOvertime) {
             return res.status(400).json({
                 error: 'Overtime request dates overlap with an existing request.'
             });
@@ -234,7 +234,14 @@ const getAllOTReqsByUser = async (req, res) => {
                     model: User,
                     as: 'reviewer',
                     attributes: ['id', 'name']
+                },
+
+                {
+                    model: Schedule,
+                    as: 'schedule',
+                    attributes: ['id', 'title', 'In', 'Out']
                 }
+
             ],
             order: [['createdAt', 'DESC']]
         });

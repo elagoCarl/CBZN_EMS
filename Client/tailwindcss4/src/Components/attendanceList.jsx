@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import axios from 'axios';
+import dayjs from 'dayjs';
 import Sidebar from "./callComponents/sidebar.jsx";
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [attendances, setAttendances] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("Employee"); // Default
@@ -80,6 +80,8 @@ const AdminAttendance = () => {
 
   });
 
+    const formatDate = d => d ? dayjs(d).format('MMM D, YYYY') : 'N/A';
+  
 
   // Pagination logic
   const totalPages = Math.ceil(filteredAttendances.length / entriesPerPage)
@@ -149,7 +151,7 @@ const AdminAttendance = () => {
                         {attendance.User?.name || "Unknown"} {/* Use User.name */}
                       </td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
-                        {attendance.date}
+                        {formatDate(attendance.date)}
                       </td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
                         {attendance.weekday}
