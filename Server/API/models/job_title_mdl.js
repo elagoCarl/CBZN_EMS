@@ -15,14 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     {
         timestamps: true
     });
-
     JobTitle.associate = (models) => {
-        JobTitle.belongsTo(models.Department, {
-            foreignKey: 'dept_id',
-        });
-    }
-
-    JobTitle.associate = (models) => {
+        JobTitle.belongsTo(models.Department),
         JobTitle.hasMany(models.User, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'

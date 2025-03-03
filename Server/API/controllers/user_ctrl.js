@@ -1,4 +1,4 @@
-const { User, Session, Department } = require('../models'); // Ensure model name matches exported model
+const { User, Session } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')

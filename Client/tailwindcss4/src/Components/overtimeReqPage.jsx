@@ -413,7 +413,7 @@ const OvertimeReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Request Date
+                                            Requested Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -494,7 +494,7 @@ const OvertimeReqPage = () => {
                                                                 </>
                                                             )}
                                                         </div>
-                                                    </td>
+                                                    </td>
                                                 </tr>
                                                 {expandedRow === request.id && (
                                                     <tr>
