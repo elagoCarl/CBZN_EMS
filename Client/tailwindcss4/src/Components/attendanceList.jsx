@@ -11,7 +11,7 @@ const AdminAttendance = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [data, setData] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("All"); // Default: show all
+  const [selectedFilter, setSelectedFilter] = useState("Employee"); // Default: show all
 
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const AdminAttendance = () => {
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
             >
-              <option className="bg-white text-black" value="All">All</option>
+           
               <option className="bg-white text-black" value="Employee">Employee</option>
               <option className="bg-white text-black" value="Intern">Intern</option>
             </select>
@@ -184,8 +184,7 @@ const AdminAttendance = () => {
                 <tbody>
                   {currentEntries
                     .filter((entry) =>
-                      entry.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                      (selectedFilter === "All" || entry.employment_status === selectedFilter) // Filter based on role
+                      entry.name.toLowerCase().includes(searchQuery.toLowerCase())// Filter based on role
                     )
                     .map((entry) => (
 
@@ -236,8 +235,8 @@ const AdminAttendance = () => {
                 key={index}
                 onClick={() => paginate(index + 1)}
                 className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${currentPage === index + 1
-                    ? "bg-green-600 text-white"
-                    : "bg-[#363636] text-white hover:bg-[#404040]"
+                  ? "bg-green-600 text-white"
+                  : "bg-[#363636] text-white hover:bg-[#404040]"
                   }`}>
                 {index + 1}
               </button>
