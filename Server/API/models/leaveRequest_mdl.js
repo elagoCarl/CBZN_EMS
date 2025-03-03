@@ -44,12 +44,14 @@ module.exports = (sequelize, DataTypes) => {
     LeaveRequest.associate = (models) => {
         // Employee submitting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'user_id'
+            foreignKey: 'user_id',
+            as: 'user'
         });
 
         // Admin approving/rejecting the request
         LeaveRequest.belongsTo(models.User, {
-            foreignKey: 'reviewer_id'
+            foreignKey: 'reviewer_id',
+            as: 'reviewer'
         });
     };
 

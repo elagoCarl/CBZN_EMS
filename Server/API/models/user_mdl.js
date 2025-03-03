@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
         // A User has many leave requests (as an employee requesting leave)
         User.hasMany(models.LeaveRequest, {
             foreignKey: 'user_id',
-            as: 'leaveRequests',  // Alias for clarity
+            as: 'user',  // Alias for clarity
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });
@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
         // A User (admin) can review many leave requests
         User.hasMany(models.LeaveRequest, {
             foreignKey: 'reviewer_id',
-            as: 'reviewedLeaves',
+            as: 'reviewer',
             onDelete: 'SET NULL', // If the admin is deleted, keep leave requests but remove reviewer
             onUpdate: 'CASCADE'
         });

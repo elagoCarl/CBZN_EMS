@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Search} from "lucide-react";
-
-
-import Sidebar from "./callComponents/sidebar.jsx"
+import { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import logo from "../Components/Img/CBZN-Logo.png";
+import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -11,7 +10,7 @@ const AdminAttendance = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [data, setData] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("All"); // Default: show all
+  const [selectedFilter, setSelectedFilter] = useState("All", "Employee", "Intern"); // Default: show all
 
   
   useEffect(() => {
@@ -63,7 +62,7 @@ function formatDateTime(isoString) {
   }, []);
 
   // Determine number of entries per page based on screen size
-  const entriesPerPage = windowWidth < 780 ? 5 : 10;
+  const entriesPerPage = windowWidth < 768 ? 5 : 10;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -108,14 +107,107 @@ function formatDateTime(isoString) {
     );
   };
 
+  // Sample attendance data
+  const attendanceData = [
+    {
+      id: "212236",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "08:00 AM",
+      timeOut: "05:00 PM",
+      status: "Work",
+    },
+    {
+      id: "212546",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Remote",
+      timeIn: "08:30 AM",
+      timeOut: "04:30 PM",
+      status: "Work",
+    },
+    {
+      id: "212578",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "09:00 AM",
+      timeOut: "06:00 PM",
+      status: "Work",
+    },
+    {
+      id: "213631",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "-",
+      timeIn: "-",
+      timeOut: "-",
+      status: "Rest Day",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+    {
+      id: "214205",
+      date: "2025-02-17",
+      day: "Monday",
+      type: "Onsite",
+      timeIn: "07:30 AM",
+      timeOut: "03:30 PM",
+      status: "Work",
+    },
+  ];
 
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-  const currentEntries = data.slice(indexOfFirstEntry, indexOfLastEntry);
+  const currentEntries = attendanceData.slice(indexOfFirstEntry, indexOfLastEntry);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
+    <div className="flex h-screen bg-black/90">
       < Sidebar />
 
       {/* Main Content */}
@@ -123,7 +215,7 @@ function formatDateTime(isoString) {
         {/* Centered Header for mobile */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
-            Attendance List
+            Attendance
           </h1>
           <div className="flex flex-col items-center">
             <div className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-white">
@@ -138,21 +230,20 @@ function formatDateTime(isoString) {
         {/* Responsive Filters and Search */}
         <div className="flex flex-col md:flex-row justify-between gap-4 mt-8 mb-5 font-semibold">
           <div className="flex gap-2">
-          <select
-  className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 duration-300"
-  value={selectedFilter}
-  onChange={(e) => setSelectedFilter(e.target.value)}
->
-  <option className="bg-white text-black" value="All">All</option>
-  <option className="bg-white text-black" value="Employee">Employee</option>
-  <option className="bg-white text-black" value="Intern">Intern</option>
-</select>
-
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800  hover:active:bg-green-800 duration-300">
+              <option className="bg-white text-black">Employee</option>
+              <option className="bg-white text-black">Intern</option>
+              <option className="bg-white text-black">Inactive</option>
+            </select>
+            <select className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 hover:active:bg-green-800 duration-300">
+              <option className="bg-white text-black">Active</option>
+              <option className="bg-white text-black">Archive</option>
+            </select>
           </div>
           <div className="relative">
             <input
               type="text"
-              placeholder="Search Name..."
+              placeholder="Search ID..."
               className="bg-black/80 text-white px-3 md:px-4 py-1 md:py-2 rounded pl-8 md:pl-10 text-sm md:text-base w-full md:w-auto"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -165,27 +256,26 @@ function formatDateTime(isoString) {
         </div>
 
         {/* Attendance Table */}
-        <div className="bg-[#363636] rounded-lg overflow-hidden ">
+        <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
             <div className="overflow-y-auto max-h-[calc(100vh-500px)] md:max-h-[calc(100vh-400px)]">
               <table className="w-full">
                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                   <tr>
-                    <th className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">ID</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Name</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Date</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text- md:text-2xl text-center">Day</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Site</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Time-in</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Time-out</th>
-                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-2xl text-center">Status</th>
+                    <th className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">User ID</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Date</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Day</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Type</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Time-in</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Time-out</th>
+                    <th className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                 {currentEntries
   .filter((entry) => 
     entry.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (selectedFilter === "All" || entry.employment_status === selectedFilter) // Filter based on role
+    (selectedFilter === "Intern" || entry.employment_status === selectedFilter )// Filter based on role
   )
   .map((entry) => (
 
@@ -230,7 +320,7 @@ function formatDateTime(isoString) {
           {/* Pagination */}
           <div className="bg-[#2b2b2b] py-2 px-2 md:px-4 flex justify-center gap-1">
             {Array.from({
-              length: Math.ceil(data.length / entriesPerPage),
+              length: Math.ceil(attendanceData.length / entriesPerPage),
             }).map((_, index) => (
               <button
                 key={index}
@@ -256,8 +346,6 @@ function formatDateTime(isoString) {
       )}
     </div>
   );
-}
-  
-
+};
 
 export default AdminAttendance;
