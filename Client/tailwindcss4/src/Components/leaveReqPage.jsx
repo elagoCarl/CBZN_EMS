@@ -429,7 +429,7 @@ const LeaveReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Date
+                                            Requested Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status

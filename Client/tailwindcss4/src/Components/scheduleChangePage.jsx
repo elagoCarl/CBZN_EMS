@@ -272,24 +272,27 @@ const ScheduleChangePage = () => {
                                 )}
                               </button>
                             </td>
-                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center">
-                              {request.status === 'pending' && (
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    onClick={() => initiateAction(request.id, 'approve')}
-                                    className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-                                  >
-                                    <Check className="w-3 h-3 mr-1" /> Approve
-                                  </button>
-                                  <button
-                                    onClick={() => initiateAction(request.id, 'reject')}
-                                    className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
-                                  >
-                                    <XCircle className="w-3 h-3 mr-1" /> Reject
-                                  </button>
-                                </div>
-                              )}
-                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
+                                                            {/* Admin actions for pending requests */}
+                                                            {request.status === 'pending' && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => initiateApprove(request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => initiateReject(request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
                           </tr>
                           {expandedRow === request.id && (
                             <tr>
