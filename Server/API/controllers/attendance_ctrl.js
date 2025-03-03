@@ -212,7 +212,7 @@ const getAttendanceById = async (req, res) => {
 const getAllAttendances = async (req, res) => {
   try {
     const attendances = await Attendance.findAll({
-      include: [{ model: User, attributes: ['id', 'name'] }],
+      include: [{ model: User, attributes: ['id', 'name', 'employment_status'] }],
       order: [['time_in', 'DESC']]
     });
     if (!attendances || attendances.length === 0) {
