@@ -7,7 +7,7 @@ const RejectConfirmModal = ({ requestName, onConfirm, onCancel }) => {
             <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
                 <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
                 <p className="text-gray-300 mb-6">
-                    Are you sure you want to reject the schedule change request from <span className="text-red-500 font-medium">{requestName}</span>?
+                    Are you sure you want to reject the {requestName} change request?
                 </p>
                 <div className="flex justify-end gap-3">
                     <button 

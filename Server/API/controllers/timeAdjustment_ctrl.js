@@ -1,5 +1,4 @@
-const { TimeAdjustment, User } = require('../models');
-const { Op } = require('sequelize');
+const { TimeAdjustment, User, JobTitle, Department } = require('../models');
 const dayjs = require('dayjs');
 const utils = require('../../utils');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
@@ -75,16 +74,28 @@ const getAllTimeAdjustments = async (req, res) => {
             include: [
                 {
                     model: User,
-                    as: 'user',
-                    attributes: ['id', 'name']
+                    as: 'user', // User who requested the adjustment
+                    attributes: ['name'],
+                    include: [
+                        {
+                            model: JobTitle,
+                            attributes: ['name'],
+                            include: [
+                                {
+                                    model: Department,
+                                    attributes: ['name']
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     model: User,
-                    as: 'reviewer',
-                    attributes: ['id', 'name']
+                    as: 'reviewer', // User who reviewed the adjustment
+                    attributes: ['name']
                 }
             ],
-            order: [['date', 'DESC']]
+            order: [['createdAt', 'DESC']] // Order from latest to oldest
         });
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
