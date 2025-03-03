@@ -8,7 +8,7 @@ const LeaveReqPage = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("Carl Kulangot"); // The current logged-in user
+    const [currentUser, setCurrentUser] = useState("Carl Elago"); // The current logged-in user
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
