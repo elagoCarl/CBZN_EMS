@@ -11,7 +11,7 @@ const ScheduleChangePage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentUser] = useState("John Doe");
+  const [currentUser, setCurrentUser] = useState("null");
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
@@ -24,6 +24,9 @@ const ScheduleChangePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const userId = 2
+        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(user.data.data);
         const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setError(null);
@@ -66,12 +69,13 @@ const ScheduleChangePage = () => {
 
   const updateRequest = status => async () => {
     try {
+      
       // Send the update request to the backend endpoint.
       await axios.put(
         `http://localhost:8080/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
         {
           status,
-          reviewer_id: 2,
+          reviewer_id: currentUser.id,
         }
       );
       
@@ -82,7 +86,7 @@ const ScheduleChangePage = () => {
               ...req, 
               status, 
               review_date: today,
-              reviewer: { id: 2, name: currentUser } 
+              reviewer: { id: currentUser.id, name: currentUser.name } 
             }
           : req
       ));
@@ -156,8 +160,6 @@ const ScheduleChangePage = () => {
     if (currentPage >= totalPages - 2) return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
   };
-
-  const getRequestName = id => requestData.find(r => r.id === id)?.user?.name || 'Unknown';
   const getDepartmentName = req => req?.user?.JobTitle?.Department?.name || 'N/A';
 
   return (
@@ -165,14 +167,14 @@ const ScheduleChangePage = () => {
       <Sidebar />
       {showApproveConfirm && (
         <ApproveConfirmModal
-          requestName={getRequestName(selectedRequestId)}
+          requestName={'Schedule Change'}
           onConfirm={updateRequest('approved')}
           onCancel={closeModals}
         />
       )}
       {showRejectConfirm && (
         <RejectConfirmModal
-          requestName={getRequestName(selectedRequestId)}
+          requestName={'Schedule Change'}
           onConfirm={updateRequest('rejected')}
           onCancel={closeModals}
         />
@@ -272,24 +274,27 @@ const ScheduleChangePage = () => {
                                 )}
                               </button>
                             </td>
-                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-center">
-                              {request.status === 'pending' && (
-                                <div className="flex items-center justify-center gap-2">
-                                  <button
-                                    onClick={() => initiateAction(request.id, 'approve')}
-                                    className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-                                  >
-                                    <Check className="w-3 h-3 mr-1" /> Approve
-                                  </button>
-                                  <button
-                                    onClick={() => initiateAction(request.id, 'reject')}
-                                    className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
-                                  >
-                                    <XCircle className="w-3 h-3 mr-1" /> Reject
-                                  </button>
-                                </div>
-                              )}
-                            </td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
+                                                            {/* Admin actions for pending requests */}
+                                                            {request.status === 'pending' && (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => initiateApprove(request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => initiateReject(request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                                                    >
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </td>
                           </tr>
                           {expandedRow === request.id && (
                             <tr>
