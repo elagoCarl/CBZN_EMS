@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route,  } from "react-router-dom";
+// import { useState } from 'react';
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from './Components/manageUsers.jsx';
@@ -12,13 +13,22 @@ import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjusmentPAge.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
+import NotFound from "./Components/notFound.jsx"; 
+// import ProtectedRoutes from "./Components/protectedRoutes.jsx";
+
 
 function App() {
+
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+   {/* Protected Routes
+          <Route path="/protectedRoutes" element={<ProtectedRoutes isAuthenticated={isAuthenticated} />} /> */}
+
+ 
   return (
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<LoginPage  />} />
           <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
           <Route path="/manageUsers" element={<ManageUsers />} />
@@ -32,6 +42,9 @@ function App() {
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+
+          {/* Catch-all 404 Route */}
+          <Route path="*" element={<NotFound />} />
       </Routes>
       </Router>
     </>
