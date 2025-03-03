@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, UserCheck, X, Plus, ChevronDown, ChevronUp, Menu, Check, XCircle } from 'lucide-react';
-import Sidebar from "../Components/callComponents/sidebar.jsx";
+import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import Sidebar from "./callComponents/sidebar.jsx";
 
 const TimeAdjustmentPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
@@ -9,6 +9,11 @@ const TimeAdjustmentPage = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+    
+    // Add states for confirmation modals
+    const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
 
     const [requestData, setRequestData] = useState([
         {
@@ -120,23 +125,54 @@ const TimeAdjustmentPage = () => {
         }
     };
 
-    const handleApprove = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'approved' } : req
-        ));
+    // Added function to get request name by ID
+    const getRequestName = (id) => {
+        const request = requestData.find(req => req.id === id);
+        return request ? request.name : "";
     };
 
-    const handleReject = (id) => {
-        setRequestData(requestData.map(req =>
-            req.id === id ? { ...req, status: 'rejected' } : req
-        ));
+     // Modified to show confirmation modal
+     const initiateApprove = (id) => {
+        setSelectedRequestId(id);
+        setShowApproveConfirm(true);
     };
 
-    // New function to handle cancellation of a request
+    // Modified to show confirmation modal
+    const initiateReject = (id) => {
+        setSelectedRequestId(id);
+        setShowRejectConfirm(true);
+    };
+
+    // Actual approve action after confirmation
+    const handleApprove = () => {
+        setRequestData(requestData.map(req =>
+            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
+        ));
+        setShowApproveConfirm(false);
+        setSelectedRequestId(null);
+    };
+
+    // Actual reject action after confirmation
+    const handleReject = () => {
+        setRequestData(requestData.map(req =>
+            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+        ));
+        setShowRejectConfirm(false);
+        setSelectedRequestId(null);
+    };
+
+    // Function to handle cancellation of a request
     const handleCancel = (id) => {
         setRequestData(requestData.map(req =>
             req.id === id ? { ...req, status: 'canceled' } : req
         ));
+    };
+
+    // Function to close any open modals
+    const closeModals = () => {
+        setShowApproveConfirm(false);
+        setShowRejectConfirm(false);
+        setSelectedRequestId(null);
     };
 
     const renderTypeIcon = (type) => {
@@ -238,6 +274,54 @@ const TimeAdjustmentPage = () => {
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
             <Sidebar /> {/* Mobile Nav Toggle */}
 
+            {/* Confirmation Dialog */}
+            {showApproveConfirm && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
+                        <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to approve the schedule change request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={handleApprove}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center">
+                                <Check className="w-4 h-4 mr-2" /> Yes, Approve
+                            </button>
+                            <button 
+                                onClick={closeModals}
+                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Reject Confirmation Modal */}
+            {showRejectConfirm && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
+                        <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
+                        <p className="text-gray-300 mb-6">
+                            Are you sure you want to reject the schedule change request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={handleReject}
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors flex items-center">
+                                <XCircle className="w-4 h-4 mr-2" /> Yes, Reject
+                            </button>
+                            <button 
+                                onClick={closeModals}
+                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}  
+
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 {/* Page header with responsive layout */}
@@ -306,7 +390,7 @@ const TimeAdjustmentPage = () => {
                     </div>
                 </div>
 
-                {/* Table Container */}
+                {/* Main Content - Responsive layout */}
                 <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col">
                     {/* Responsive Table - Scrollable on all devices */}
                     <div className="overflow-x-auto">
@@ -321,7 +405,7 @@ const TimeAdjustmentPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Date
+                                            Request Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -382,27 +466,24 @@ const TimeAdjustmentPage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            {/* Admin actions for pending requests */}
-                                                            {request.status === 'pending' && (
-                                                                <>
-                                                                    <button
-                                                                        onClick={() => handleApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
-                                                                    >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
-                                                                    >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                
-                                                        </div>
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                                                        {/* Admin actions for pending requests */}
+                                                        {request.status === 'pending' && (
+                                                            <div className="flex items-center space-x-2">
+                                                                <button
+                                                                    onClick={() => initiateApprove(request.id)}
+                                                                    className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                >
+                                                                    <Check className="w-3 h-3 mr-1" /> Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => initiateReject(request.id)}
+                                                                    className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                >
+                                                                    <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </tr>
                                                 {expandedRow === request.id && (
