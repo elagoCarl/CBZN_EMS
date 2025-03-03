@@ -26,17 +26,20 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         }
     },
-        {
-            timestamps: true
-        });
+    {
+        timestamps: true
+
+    });
+     
 
     OvertimeRequest.associate = (models) => {
         // Admin reviewing the overtime request
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'reviewer_id',
-            as: 'reviewer'
-        });
-        // Employee who submitted the overtime request
+            as: "reviewer"
+           
+        }),
+
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
             as: 'user'

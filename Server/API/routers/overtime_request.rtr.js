@@ -7,9 +7,9 @@ router.post('/addOvertimeReq', OvertimeRequest.addOvertimeRequest)
 router.get('/getAllOvertimeReq', OvertimeRequest.getAllOvertimeRequests)
 router.get('/getAllOTReqsByUser/:id', OvertimeRequest.getAllOTReqsByUser)
 router.get('/getOvertimeReq/:id', OvertimeRequest.getOvertimeRequest)
-// router.get('/getOvertimeReqbyUID/:id', OvertimeRequest.getOvertimeRequestByUID)
+// router.get('/getOvertimeReqbyUID/:user_id', OvertimeRequest.getOvertimeRequestByUID)
 router.put('/updateOvertimeReq/:id', OvertimeRequest.updateOvertimeRequest)
-
+//router.delete('/deleteOvertimeReq/:id', OvertimeRequest.deleteOvertimeRequest)
 
 
 module.exports = router;
