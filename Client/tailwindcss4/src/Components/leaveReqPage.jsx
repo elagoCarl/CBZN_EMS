@@ -191,7 +191,7 @@ const LeaveReqPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-base">
                 {/* Column 1: Request Details */}
                 <div className="space-y-4">
-                    <p className="text-sm sm:text-base font-semibold text-white">Request Details</p>
+                    <p className="text-sm sm:text-base font-semibold text-green-500">Request Details</p>
                     
                     <div>
                         <p className="text-xs sm:text-sm font-medium text-gray-400">Start Date</p>
@@ -211,7 +211,7 @@ const LeaveReqPage = () => {
     
                 {/* Column 2: Review Details */}
                 <div className="space-y-4">
-                    <p className="text-sm sm:text-base font-semibold text-white">Review Details</p>
+                    <p className="text-sm sm:text-base font-semibold text-green-500">Review Details</p>
                     
                     {(request.Reviewer || reviewer) && (
                         <div>

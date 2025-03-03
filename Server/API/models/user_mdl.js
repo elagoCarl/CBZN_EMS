@@ -133,5 +133,5 @@ module.exports = (sequelize, DataTypes) => {
         throw new Error('Email does not exist');
     };
 
-    return User;
+    return User;
 };
