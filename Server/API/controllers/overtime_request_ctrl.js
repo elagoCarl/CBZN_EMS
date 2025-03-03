@@ -1,4 +1,4 @@
-const { OvertimeRequest, User } = require('../models');
+const { OvertimeRequest, User, Schedule } = require('../models');
 const util = require('../../utils');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
@@ -21,22 +21,24 @@ const addOvertimeRequest = async (req, res) => {
         if (!userExists) {
             return res.status(404).json({ error: 'User not found.' });
         }
+    
 
-        const overlappingLeave = await OvertimeRequest.findOne({
+
+        const overlappingOvertime = await OvertimeRequest.findOne({
             where: {
                 user_id,
                 [Op.or]: [
-                    { start_date: { [Op.between]: [start_time, end_time] } },
-                    { end_date: { [Op.between]: [start_time, end_time] } },
+                    { start_time: { [Op.between]: [start_time, end_time] } },
+                    { end_time: { [Op.between]: [start_time, end_time] } },
                     {
-                        start_date: { [Op.lte]: start_time },
-                        end_date: { [Op.gte]: end_time }
+                        start_time: { [Op.lte]: start_time },
+                        end_time: { [Op.gte]: end_time }
                     }
                 ]
             }
         });
 
-        if (overlappingLeave) {
+        if (overlappingOvertime) {
             return res.status(400).json({
                 error: 'Overtime request dates overlap with an existing request.'
             });
@@ -46,6 +48,7 @@ const addOvertimeRequest = async (req, res) => {
         const newOvertimeRequest = await OvertimeRequest.create({ user_id, date, start_time, end_time, reason });
         return res.status(201).json({
             successful: true,
+            message: ("Successfully created overtime request"),
             data: newOvertimeRequest
         });
 
@@ -54,43 +57,63 @@ const addOvertimeRequest = async (req, res) => {
     }
 };
 
-// Get all leave requests
+// Get all overtime requests
 const getAllOvertimeRequests = async (req, res) => {
     try {
-        const overtimeRequests = await OvertimeRequest.findAll({
-            include: [{ model: User, as: 'employee', attributes: ['name', 'email'] }]
-        });
+        const overtimeRequests = await OvertimeRequest.findAll();
 
         if (overtimeRequests.length > 0) {
+            // Ensure correct data format
+            const formattedRequests = overtimeRequests.map(request => {
+                return {
+                    ...request.toJSON(),
+                    start_time: request.start_time ? dayjs(request.start_time, "HH:mm:ss").format("HH:mmA") : null,
+                    end_time: request.end_time ? dayjs(request.end_time, "HH:mm:ss").format("HH:mmA") : null,
+                };
+            });
+
             return res.status(200).json({
                 successful: true,
-                data: overtimeRequests
+                data: formattedRequests
             });
         }
+
         return res.status(404).json({ error: 'No overtime request found' });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Error in getAllOvertimeRequests:", error); // Debugging: Catch errors
+        return res.status(500).json({ error: error });
     }
-}
+};
 
-// Get a single leave request by ID
+
+// Get a single overtime request by ID
 const getOvertimeRequest = async (req, res) => {
     try {
         const { id } = req.params;
         const overtimeRequest = await OvertimeRequest.findByPk(id);
-        console.log(overtimeRequest)
-        if (!overtimeRequest) return res.status(404).json({ error: 'Overtime request not found' });
 
+        if (!overtimeRequest) {
+            return res.status(404).json({ error: 'Overtime request not found' });
+        }
+
+        // Format start_time and end_time
+        const formattedOvertimeRequest = {
+            ...overtimeRequest.toJSON(),
+            start_time: overtimeRequest.start_time ? dayjs(overtimeRequest.start_time, "HH:mm:ss").format("HH:mmA") : null,
+            end_time: overtimeRequest.end_time ? dayjs(overtimeRequest.end_time, "HH:mm:ss").format("HH:mmA") : null,
+        };
 
         return res.status(200).json({
             successful: true,
-            data: overtimeRequest
+            data: formattedOvertimeRequest
         });
+
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: error });
     }
-}
+};
+
 
 
 
@@ -164,11 +187,92 @@ const cancelOvertimeRequest = async (req, res) => {
     }
 }
 
+// const deleteOvertimeRequest = async (req, res) => {
+//     try {
+//         const { id } = req.params; // Get overtime request ID from URL parameters
+
+//         // Find the overtime request by ID
+//         const overtimeRequest = await OvertimeRequest.findOne({ where: { id } });
+
+//         if (!overtimeRequest) {
+//             return res.status(404).json({ error: 'Overtime request not found' });
+//         }
+
+//         // Check if the status is 'PENDING'
+//         if (overtimeRequest.status !== 'pending') {
+//             return res.status(400).json({ error: 'Only PENDING overtime requests can be deleted' });
+//         }
+
+//         // Delete the overtime request
+//         await OvertimeRequest.destroy({ where: { id } });
+
+//         return res.status(200).json({
+//             successful: true,
+//             message: 'Overtime request deleted successfully'
+//         });
+
+//     } catch (error) {
+//         console.error("Error deleting overtime request:", error);
+//         return res.status(500).json({ error: 'Internal server error'});
+//     }
+// };
+
+
+const getAllOTReqsByUser = async (req, res) => {
+    try {
+        const reqs = await OvertimeRequest.findAll({
+            where: {
+                user_id: req.params.id
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                },
+
+                {
+                    model: Schedule,
+                    as: 'schedule',
+                    attributes: ['id', 'title', 'In', 'Out']
+                }
+
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+        if (!reqs || reqs.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No reqs found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: reqs
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
 // Export the functions
 module.exports = {
     addOvertimeRequest,
     getOvertimeRequest,
     getAllOvertimeRequests,
     updateOvertimeRequest,
-    cancelOvertimeRequest
+    cancelOvertimeRequest,
+    getAllOTReqsByUser
 };

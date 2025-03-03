@@ -218,6 +218,49 @@ const cancelLeaveRequest = async (req, res) => {
     }
 }
 
+const getAllLeaveRequestsByUser = async (req, res) => {
+    try {
+      const leaveRequests = await LeaveRequest.findAll({
+        where: { user_id: req.params.id },
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name']
+          },
+          {
+            model: User,
+            as: 'reviewer',
+            attributes: ['id', 'name']
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      });
+  
+      if (!leaveRequests || leaveRequests.length === 0) {
+        return res.status(200).json({
+          successful: true,
+          message: "No leave requests found.",
+          count: 0,
+          data: []
+        });
+      }
+  
+      return res.status(200).json({
+        successful: true,
+        data: leaveRequests
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        successful: false,
+        message: error.message || "An unexpected error occurred."
+      });
+    }
+  };
+  
+  module.exports = getAllLeaveRequestsByUser;
+  
 
 // Export the functions
 module.exports = {
@@ -225,5 +268,6 @@ module.exports = {
     getLeaveRequest,
     getAllLeaveRequests,
     updateLeaveRequest,
-    cancelLeaveRequest
+    cancelLeaveRequest,
+    getAllLeaveRequestsByUser
 };
