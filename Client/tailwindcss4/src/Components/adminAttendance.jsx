@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Search, Menu, X } from "lucide-react";
-import logo from "../Components/Img/CBZN-Logo.png";
+import { useState, useEffect } from "react";
+import { Search} from "lucide-react";
 import Sidebar from "../Components/callComponents/sidebar.jsx"
 
 const AdminAttendance = () => {
