@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, Clock, UserCheck, X } from 'lucide-react';
+import axios from 'axios';
 
-export const AddReq = ({ isOpen, onClose }) => {
+export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
   const [activeRequest, setActiveRequest] = useState(null);
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ export const AddReq = ({ isOpen, onClose }) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
+        setActiveRequest(null);
       }
     };
 
@@ -41,9 +42,7 @@ export const AddReq = ({ isOpen, onClose }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(`Submitting ${activeRequest} request:`, formData);
+  const resetForm = () => {
     setFormData({
       overtimeDate: '',
       overtimeReason: '',
@@ -61,7 +60,68 @@ export const AddReq = ({ isOpen, onClose }) => {
       schedule: '',
       scheduleReason: ''
     });
-    setActiveRequest(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // For schedule change request
+    if (activeRequest === 'schedule') {
+      const { scheduleDate, schedule, scheduleReason } = formData;
+      const scheduleMapping = {
+        "9AM-6PM": { time_in: "09:00", time_out: "18:00" },
+        "10AM-7PM": { time_in: "10:00", time_out: "19:00" }
+      };
+      const times = scheduleMapping[schedule];
+      if (!times) {
+        console.error("Invalid schedule selected");
+        return;
+      }
+      try {
+        const response = await axios.post('http://localhost:8080/schedAdjustment/addSchedAdjustment', {
+          user_id: 1, // Replace with actual user id
+          date: scheduleDate,
+          time_in: times.time_in,
+          time_out: times.time_out,
+          reason: scheduleReason,
+        });
+        console.log("Schedule change request submitted:", response.data);
+        // Notify parent component of the new request
+        if (onRequestAdded) onRequestAdded(response.data);
+        resetForm();
+        setActiveRequest(null);
+        onClose(); // Close modal on success
+      } catch (error) {
+        console.error("Error submitting schedule change request:", error);
+      }
+    } else if (activeRequest === 'timeadjustment') {
+      // For time adjustment request
+      const { timeAdjustDate, timeAdjustFrom, timeAdjustTo, timeAdjustReason } = formData;
+      try {
+        const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
+          user_id: 1, // Replace with actual user id
+          date: timeAdjustDate,
+          time_in: timeAdjustFrom,
+          time_out: timeAdjustTo,
+          reason: timeAdjustReason,
+        });
+        console.log("Time adjustment request submitted:", response.data);
+        // Notify parent component of the new request
+        if (onRequestAdded) onRequestAdded(response.data);
+        resetForm();
+        setActiveRequest(null);
+        onClose(); // Close modal on success
+      } catch (error) {
+        console.error("Error submitting time adjustment request:", error);
+      }
+    } else {
+      // For other types (overtime, leave, etc.)
+      console.log(`Submitting ${activeRequest} request:`, formData);
+      // You can integrate similar axios requests here if needed.
+      resetForm();
+      setActiveRequest(null);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -120,7 +180,6 @@ export const AddReq = ({ isOpen, onClose }) => {
             </div>
           </form>
         );
-
       case 'leave':
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -164,7 +223,6 @@ export const AddReq = ({ isOpen, onClose }) => {
             </div>
           </form>
         );
-
       case 'timeadjustment':
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -206,7 +264,6 @@ export const AddReq = ({ isOpen, onClose }) => {
             </div>
           </form>
         );
-
       case 'schedule':
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -275,8 +332,7 @@ export const AddReq = ({ isOpen, onClose }) => {
               <button
                 key={id}
                 onClick={() => setActiveRequest(id)}
-                className={`p-3 sm:p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === id ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'
-                  }`}
+                className={`p-3 sm:p-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-colors ${activeRequest === id ? 'bg-green-600' : 'bg-[#363636] hover:bg-[#404040]'}`}
               >
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 <span className="text-white text-xs sm:text-sm">{label}</span>
