@@ -11,7 +11,7 @@ const ScheduleChangePage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentUser] = useState("null");
+  const [currentUser, setCurrentUser] = useState("null");
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
@@ -24,6 +24,9 @@ const ScheduleChangePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const userId = 2
+        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(user.data.data);
         const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setError(null);
@@ -66,12 +69,13 @@ const ScheduleChangePage = () => {
 
   const updateRequest = status => async () => {
     try {
+      
       // Send the update request to the backend endpoint.
       await axios.put(
         `http://localhost:8080/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
         {
           status,
-          reviewer_id: 2,
+          reviewer_id: currentUser.id,
         }
       );
       
@@ -82,7 +86,7 @@ const ScheduleChangePage = () => {
               ...req, 
               status, 
               review_date: today,
-              reviewer: { id: 2, name: currentUser } 
+              reviewer: { id: currentUser.id, name: currentUser.name } 
             }
           : req
       ));
@@ -156,8 +160,6 @@ const ScheduleChangePage = () => {
     if (currentPage >= totalPages - 2) return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
   };
-
-  const getRequestName = id => requestData.find(r => r.id === id)?.user?.name || 'Unknown';
   const getDepartmentName = req => req?.user?.JobTitle?.Department?.name || 'N/A';
 
   return (
@@ -165,14 +167,14 @@ const ScheduleChangePage = () => {
       <Sidebar />
       {showApproveConfirm && (
         <ApproveConfirmModal
-          requestName={getRequestName(selectedRequestId)}
+          requestName={'Schedule Change'}
           onConfirm={updateRequest('approved')}
           onCancel={closeModals}
         />
       )}
       {showRejectConfirm && (
         <RejectConfirmModal
-          requestName={getRequestName(selectedRequestId)}
+          requestName={'Schedule Change'}
           onConfirm={updateRequest('rejected')}
           onCancel={closeModals}
         />
