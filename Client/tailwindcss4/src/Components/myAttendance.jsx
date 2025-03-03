@@ -68,7 +68,7 @@ const MyAttendance = () => {
         });
 
         if (response.data && response.data.successful) {
-          setUserData(response.data.user); 
+          setUserData(response.data.user);
         }
       } catch (error) {
         console.error("Error fetching authenticated user:", error);
@@ -340,8 +340,34 @@ const MyAttendance = () => {
           </div>
         )}
 
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={handleRestDay}
+            disabled={isLoading}
+            className="bg-red-600 text-white px-3 sm:px-4 md:px-6 py-1 md:py-2 rounded text-xs sm:text-sm hover:bg-red-700 disabled:opacity-50"
+          >
+            REST DAY
+          </button>
+          <button
+            onClick={handleTimeIn}
+            disabled={isLoading || !isTimeOutDisabled}
+            className="bg-green-600 text-white px-3 sm:px-4 md:px-6 py-1 md:py-2 rounded text-xs sm:text-sm hover:bg-green-700 disabled:opacity-50"
+          >
+            TIME-IN
+          </button>
+          <button
+            onClick={handleTimeOut}
+            disabled={isLoading || isTimeOutDisabled}
+            className="bg-black/90 text-white px-3 sm:px-4 md:px-6 py-1 md:py-2 rounded text-xs sm:text-sm hover:bg-black/40 disabled:opacity-50"
+          >
+            TIME-OUT
+          </button>
+        </div>
+
+
+
         {/* Attendance records table */}
-        <div className="bg-[#363636] rounded-lg overflow-hidden mt-4 sm:mt-8 flex flex-col w-full">
+        <div className="bg-[#363636] rounded-lg overflow-hidden mt-4 sm:mt-4 flex flex-col w-full">
           <div className="overflow-x-auto">
             <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)] md:max-h-[calc(100vh-400px)]">
               <table className="w-full text-white">
@@ -411,7 +437,7 @@ const MyAttendance = () => {
             </select>
           </div>
 
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button
               onClick={handleRestDay}
               disabled={isLoading}
@@ -433,7 +459,7 @@ const MyAttendance = () => {
             >
               TIME-OUT
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
