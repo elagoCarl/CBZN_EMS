@@ -55,7 +55,7 @@ const addLeaveRequest = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("ERROR ATTACK: ", error);
+        console.log(error);
         if (error.name === 'SequelizeValidationError') {
             return res.status(400).json({ error: error.errors[0].message });
         }
@@ -67,15 +67,21 @@ const addLeaveRequest = async (req, res) => {
 const getAllLeaveRequests = async (req, res) => {
     try {
         const leaveRequests = await LeaveRequest.findAll({
-            include: [{ model: User, attributes: ['name'] }]
+            include: [
+                {
+                    model: User,
+                    as: 'User', // Match the alias in the model
+                    attributes: ['name'] // Fetch only the 'name' field
+                }
+            ]
         });
 
-        
         return res.status(200).json({ successful: true, data: leaveRequests });
     } catch (error) {
         return res.status(500).json({ successful: false, error: error.message });
     }
 };
+
 
 
 // Get a single leave request by ID
