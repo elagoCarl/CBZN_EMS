@@ -124,8 +124,8 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
           user_id: 1,               // Replace with actual user id
           date: timeAdjustDate,     // e.g., "2025-03-03"
-          from_time: fromTime,      // e.g., "08:00"
-          to_time: toTime,          // e.g., "17:00"
+          from_datetime: fromTime,  // e.g., "08:00"
+          to_datetime: toTime,      // e.g., "17:00"
           reason: timeAdjustReason, // Reason must be non-empty
         });
         setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
@@ -135,11 +135,9 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         onClose();
       } catch (error) {
         console.error("Error submitting time adjustment request:", error);
-        setBackendMessage(error.response?.data?.message);
+        setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
       }
-    }
-
-    else if (activeRequest === 'leave') {
+    } else if (activeRequest === 'leave') {
       // Leave Request
       const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
       try {

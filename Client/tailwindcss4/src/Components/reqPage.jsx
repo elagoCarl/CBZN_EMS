@@ -74,6 +74,7 @@ const ReqPage = () => {
                 }
 
                 setRequestData(combinedData);
+                console.log("Requests fetched:", combinedData); 
             } catch (error) {
                 console.error("Error fetching requests:", error);
             }
