@@ -26,6 +26,7 @@ const job_title_rtr = require ('./API/routers/job_title_rtr')
 const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
 const time_adjustment_rtr = require('./API/routers/timeAdjustment_rtr');
 const leave_request_rtr = require('./API/routers/leave_request_rtr');
+const sched_user_rtr = require('./API/routers/sched_user_rtr');
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -107,6 +108,7 @@ app.use((req, res, next) => {
 
 //MIDDLEWARE FOR THE ROUTERS
 app.use("/uploads", express.static("uploads"));
+app.use('/schedUser', sched_user_rtr);
 app.use('/schedule', schedule_rtr);
 app.use('/users', user_rtr);
 app.use('/attendance', attendance_rtr);
