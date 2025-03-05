@@ -8,14 +8,14 @@ module.exports = function (sequelize, DataTypes) {
             }
         },
         time_in: {
-            type: DataTypes.TIME,
+            type: DataTypes.DATE,
             allowNull: false,
             validate: {
                 notEmpty: { msg: "Time in is required." }
             }
         },
         time_out: {
-            type: DataTypes.TIME,
+            type: DataTypes.DATE,
             allowNull: false,
             validate: {
                 notEmpty: { msg: "Time out is required." }

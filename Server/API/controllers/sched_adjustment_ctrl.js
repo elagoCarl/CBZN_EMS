@@ -32,14 +32,6 @@ const addSchedAdjustment = async (req, res) => {
             });
         }
 
-        // Validate reason length
-        if (reason.length < 5) {
-            return res.status(400).json({
-                successful: false,
-                message: "Reason must be at least 5 characters long."
-            });
-        }
-
         // Create schedule adjustment
         const newAdjustment = await ScheduleAdjustment.create({
             user_id,

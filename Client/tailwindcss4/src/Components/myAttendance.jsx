@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "./callComponents/sidebar.jsx";
-// import dayjs from "dayjs";
+import dayjs from "dayjs";
 
-const userId = 4; // This should ideally come from authentication
+const userId = 1; // This should ideally come from authentication
 
 const MyAttendance = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -58,37 +58,13 @@ const MyAttendance = () => {
     }
   };
 
-  useEffect(() => {
-    // Retrieve the logged-in user's data
-    const fetchAuthenticatedUser = async () => {
-      try {
-        const token = localStorage.getItem("authToken"); // Example: token-based auth
-        const response = await axios.get("http://localhost:8080/auth/me", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.data && response.data.successful) {
-          setUserData(response.data.user);
-        }
-      } catch (error) {
-        console.error("Error fetching authenticated user:", error);
-      }
-    };
-
-    fetchAuthenticatedUser();
-  }, []);
-
-  useEffect(() => {
-    if (userData?.userId) {
-      fetchAttendanceRecords(userData.userId);
-    }
-  }, [userData]);
-
   // Function to fetch attendance records
   const fetchAttendanceRecords = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/attendance/getAttendanceByUser/${userId}`);
-      if (response.data && response.data.successful) {
+      console.log("Attendance response:", response.data);
+
+      if (response.data && response.data.successful && Array.isArray(response.data.data)) {
         // Transform data to match expected format
         const formattedRecords = response.data.data.map(record => ({
           date: record.date,
@@ -99,9 +75,14 @@ const MyAttendance = () => {
           isRestDay: record.isRestDay ? "Rest Day" : "Work"
         }));
         setAttendanceRecords(formattedRecords);
+      } else {
+        // If data is not an array or the response is not successful, set empty array
+        console.warn("Invalid attendance data format received:", response.data);
+        setAttendanceRecords([]);
       }
     } catch (error) {
       console.error("Error fetching attendance records:", error);
+      setAttendanceRecords([]); // Set empty array on error
     }
   };
 
@@ -145,16 +126,13 @@ const MyAttendance = () => {
 
     try {
       const now = dayjs();
-      // const currentDate = now.format("YYYY-MM-DD");
       const timeOutFormatted = now.format("YYYY-MM-DD HH:mm");
 
-      // First, let's log what we're sending to help debug
       console.log("Sending time-out request:", {
         time_out: timeOutFormatted,
         UserId: userId
       });
 
-      // Try the request with the path matching your backend function signature
       const response = await axios.put(`http://localhost:8080/attendance/updateAttendance`, {
         time_out: timeOutFormatted,
         UserId: userId
@@ -165,25 +143,19 @@ const MyAttendance = () => {
         setIsTimeOutDisabled(true);
         fetchAttendanceRecords(); // Refresh records
       } else {
-        // Handle case where API returns a response but it's not successful
         setAttendanceStatus(response.data?.message || "Error recording time-out.");
       }
     } catch (error) {
       console.error("Error recording time-out:", error);
 
-      // Improved error reporting
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
         setAttendanceStatus(error.response.data?.message || `Error ${error.response.status}: Failed to record time-out.`);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error("No response received:", error.request);
         setAttendanceStatus("Server did not respond. Please try again.");
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error("Error message:", error.message);
         setAttendanceStatus(`Error: ${error.message}`);
       }
@@ -292,7 +264,7 @@ const MyAttendance = () => {
     const dataInterval = setInterval(() => {
       fetchUserData();
       fetchAttendanceRecords();
-    }, 30000);
+    }, 3000);
 
     return () => clearInterval(dataInterval);
   }, []);

@@ -326,8 +326,8 @@ const getAttendancesByUserId = async (req, res) => {
     const attendances = await Attendance.findAll({ where: { UserId: req.params.id } });
 
     if (!attendances || attendances.length === 0) {
-      return res.status(404).json({
-        successful: false,
+      return res.status(200).json({
+        successful: true,
         message: "No attendance records found for this user."
       });
     }
