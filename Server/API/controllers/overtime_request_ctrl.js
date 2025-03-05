@@ -1,19 +1,23 @@
-const { OvertimeRequest, User, Schedule } = require('../models');
+const { OvertimeRequest, User } = require('../models'); //Schedule
 const util = require('../../utils');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
 
 
 const addOvertimeRequest = async (req, res) => {
-
     try {
-        const { user_id, date, start_time, end_time, reason } = req.body;
+        let { user_id, date, start_time, end_time, reason } = req.body;
 
-        // Check mandatory fields
-        if (!util.improvedCheckMandatoryFields({ user_id, date, start_time, end_time, reason })) {
+        // Check mandatory fields except `date`
+        if (!util.improvedCheckMandatoryFields({ user_id, start_time, end_time, reason })) {
             return res.status(400).json({ error: 'A mandatory field is missing.' });
+        }
+
+        // If date is not provided, use the current date
+        if (!date) {
+            date = new Date(); // Ensures correct DATE format
         }
 
         // Check if user exists
@@ -21,12 +25,12 @@ const addOvertimeRequest = async (req, res) => {
         if (!userExists) {
             return res.status(404).json({ error: 'User not found.' });
         }
-    
 
-
-        const overlappingOvertime = await OvertimeRequest.findOne({
+        // **Improved Overlap Check: Ensures only requests on the same date conflict**
+        const existingOvertime = await OvertimeRequest.findOne({
             where: {
                 user_id,
+                date: Sequelize.fn('DATE', start_time), // Ensures check happens only on same date
                 [Op.or]: [
                     { start_time: { [Op.between]: [start_time, end_time] } },
                     { end_time: { [Op.between]: [start_time, end_time] } },
@@ -38,56 +42,71 @@ const addOvertimeRequest = async (req, res) => {
             }
         });
 
-        if (overlappingOvertime) {
+        if (existingOvertime) {
             return res.status(400).json({
                 error: 'Overtime request dates overlap with an existing request.'
             });
         }
 
-        // Create overtime request
-        const newOvertimeRequest = await OvertimeRequest.create({ user_id, date, start_time, end_time, reason });
+        // Create a new overtime request
+        const newOvertimeRequest = await OvertimeRequest.create({
+            user_id,
+            date,
+            start_time,
+            end_time,
+            reason
+        });
+
         return res.status(201).json({
             successful: true,
-            message: ("Successfully created overtime request"),
+            message: 'Successfully created overtime request',
             data: newOvertimeRequest
         });
 
     } catch (error) {
+        console.error("Error in addOvertimeRequest:", error);
         return res.status(500).json({ error: error.message });
     }
 };
 
+
+
 // Get all overtime requests
 const getAllOvertimeRequests = async (req, res) => {
     try {
-        const overtimeRequests = await OvertimeRequest.findAll();
+        const overtimeRequests = await OvertimeRequest.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'user', // User who requested the adjustment
+                    attributes: ['name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer', // User who reviewed the adjustment
+                    attributes: ['name']
+                }
+            ]
+        });
 
         if (overtimeRequests.length > 0) {
-            // Ensure correct data format
-            const formattedRequests = overtimeRequests.map(request => {
-                return {
-                    ...request.toJSON(),
-                    start_time: request.start_time ? dayjs(request.start_time, "HH:mm:ss").format("HH:mmA") : null,
-                    end_time: request.end_time ? dayjs(request.end_time, "HH:mm:ss").format("HH:mmA") : null,
-                };
-            });
-
             return res.status(200).json({
                 successful: true,
-                data: formattedRequests
+                data: overtimeRequests
             });
         }
 
         return res.status(404).json({ error: 'No overtime request found' });
 
     } catch (error) {
-        console.error("Error in getAllOvertimeRequests:", error); // Debugging: Catch errors
-        return res.status(500).json({ error: error });
+        console.error("Error in getAllOvertimeRequests:", error);
+        return res.status(500).json({ error: error.message });
     }
 };
 
 
-// Get a single overtime request by ID
+
+// Get a single overtime request by OT Request ID
 const getOvertimeRequest = async (req, res) => {
     try {
         const { id } = req.params;
@@ -97,20 +116,14 @@ const getOvertimeRequest = async (req, res) => {
             return res.status(404).json({ error: 'Overtime request not found' });
         }
 
-        // Format start_time and end_time
-        const formattedOvertimeRequest = {
-            ...overtimeRequest.toJSON(),
-            start_time: overtimeRequest.start_time ? dayjs(overtimeRequest.start_time, "HH:mm:ss").format("HH:mmA") : null,
-            end_time: overtimeRequest.end_time ? dayjs(overtimeRequest.end_time, "HH:mm:ss").format("HH:mmA") : null,
-        };
-
         return res.status(200).json({
             successful: true,
-            data: formattedOvertimeRequest
+            data: overtimeRequest // Returns unformatted data
         });
 
     } catch (error) {
-        return res.status(500).json({ error: error });
+        console.error("Error in getOvertimeRequest:", error);
+        return res.status(500).json({ error: error.message });
     }
 };
 
@@ -155,7 +168,7 @@ const updateOvertimeRequest = async (req, res) => {
         } else {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid status. Status should be either 'Approved' or 'Rejected'."
+                message: "Invalid status. Status should be either 'Approved' or 'Rejected."
             });
         }
     } catch (err) {
@@ -234,13 +247,13 @@ const getAllOTReqsByUser = async (req, res) => {
                     model: User,
                     as: 'reviewer',
                     attributes: ['id', 'name']
-                },
-
-                {
-                    model: Schedule,
-                    as: 'schedule',
-                    attributes: ['id', 'title', 'In', 'Out']
                 }
+
+                // {
+                //     model: Schedule,
+                //     as: 'schedule',
+                //     attributes: ['id', 'title', 'In', 'Out']
+                // }
 
             ],
             order: [['createdAt', 'DESC']]
