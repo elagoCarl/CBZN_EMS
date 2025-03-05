@@ -26,6 +26,7 @@ const job_title_rtr = require ('./API/routers/job_title_rtr')
 const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
 const time_adjustment_rtr = require('./API/routers/timeAdjustment_rtr');
 const leave_request_rtr = require('./API/routers/leave_request_rtr');
+const cutoff_rtr = require('./API/routers/cutoff_rtr');
 const sched_user_rtr = require('./API/routers/sched_user_rtr');
 
 // para lang makita kung anong request sa console
@@ -120,6 +121,7 @@ app.use('/jobtitle', job_title_rtr)
 app.use('/OTrequests', overtime_request_rtr)
 app.use('/timeAdjustment', time_adjustment_rtr);
 app.use('/leaveRequest', leave_request_rtr)
+app.use('/cutoff', cutoff_rtr)
 
 
 
