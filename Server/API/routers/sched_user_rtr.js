@@ -5,6 +5,7 @@ const router = express.Router();
 router.post('/addSchedUser', SchedUser.addSchedUser);
 router.get('/getAllSchedUsers', SchedUser.getAllSchedUser);
 router.get('/getSchedUserById/:id', SchedUser.getSchedUser);
-router.put('/updateSchedUser/:id', SchedUser.updateSchedUser);
+router.put('/updateSchedUserByUser/:userId', SchedUser.updateSchedUserByUser);
+router.get('/getSchedUserByUser/:userId', SchedUser.getSchedUserByUser);
 
 module.exports = router;
