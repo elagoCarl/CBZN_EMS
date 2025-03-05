@@ -103,7 +103,11 @@ module.exports = (sequelize, DataTypes) => {
 
 
         // Other existing associations
-        User.belongsTo(models.Schedule);
+        User.belongsToMany(models.Schedule, {
+            through: models.SchedUser,
+            foreignKey: 'user_id',
+            otherKey: 'schedule_id',
+          });
         User.belongsTo(models.JobTitle);
         User.hasMany(models.Attendance, {
             onDelete: 'CASCADE',

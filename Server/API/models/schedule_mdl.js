@@ -40,7 +40,11 @@ module.exports = (sequelize, DataTypes) => {
     }, { timestamps: true });
 
     Schedule.associate = (models) => {
-        Schedule.hasMany(models.User, {});
+        Schedule.belongsToMany(models.User, {
+            through: models.SchedUser,
+            foreignKey: 'schedule_id',
+            otherKey: 'user_id',
+          });
     }
 
     return Schedule;

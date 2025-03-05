@@ -32,8 +32,6 @@ const addSchedule = async (req, res) => {
 
 const getAllSchedules = async (req, res) => {
     try{
-        const {id} = req.params;
-
         const schedules = await Schedule.findAll();
 
         if(schedules){
