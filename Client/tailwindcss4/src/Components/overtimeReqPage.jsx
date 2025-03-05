@@ -8,57 +8,17 @@ const OvertimeReqPage = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("Carl Elago"); // Simulating current logged-in user
+    const [currentUser, setCurrentUser] = useState("John Doe"); // The current logged-in user
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
     const [showRejectConfirm, setShowRejectConfirm] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    const [requestData, setRequestData] = useState([
-        {
-            id: 1,
-            name: "John Doe",
-            type: 'overtime',
-            date: '2025-02-15',
-            status: 'pending',
-            details: {
-                date: '2025-02-15',
-                start_time: '10:00AM',
-                end_time: '22:00PM',
-                review_date: '',
-                reason: 'Money is important'
-            }
-        },
-        {
-            id: 2,
-            name: "Jane Smith",
-            type: 'overtime',
-            date: '2025-02-16',
-            status: 'pending',
-            details: {
-                date: '2025-02-15',
-                start_time: '10:00AM',
-                end_time: '22:00PM',
-                review_date: '',
-                reason: 'Money is important'
-            }
-        },
-        {
-            id: 3,
-            name: "Mike Johnson",
-            type: 'overtime',
-            date: '2025-02-17',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-17',
-                currentShift: '08:00 - 16:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '14:00 - 22:00',
-                reason: 'Need to swap to afternoon shift for coursework'
-            }
-        }
-    ]);
+    const [requestData, setRequestData] = useState([]);
 
     // Handle window resize with debounce for better performance
     useEffect(() => {
@@ -103,6 +63,28 @@ const OvertimeReqPage = () => {
             </div>
         );
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            setLoading(true);
+            const userId = 2
+            const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+            setCurrentUser(user.data.data);
+            const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
+            setRequestData(Array.isArray(data.data) ? data.data : []);
+            setError(null);
+          } catch (err) {
+            console.error('Error fetching schedule adjustments:', err);
+            setError('Failed to load schedule adjustment requests');
+            setRequestData([]);
+          } finally {
+            setLoading(false);
+          }
+    
+        };
+        fetchData();
+      }, []);
 
     const formatTime = (date) => {
         const timeString = date.toLocaleTimeString("en-US", {

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { LogOut, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 
+
 const LeaveReqPage = () => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("Carl Elago"); // The current logged-in user
+    const [currentUser, setCurrentUser] = useState(""); // The current logged-in user
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -25,7 +26,7 @@ const LeaveReqPage = () => {
             details: {
                 startDate: '2025-02-15',
                 endDate: '2025-02-17',
-                leaveReason: 'Medical appointment with Albularyo',
+                leaveReason: 'Medical appointment',
                 approvedBy: null // Initially null since it's pending
             }
         },
@@ -38,7 +39,7 @@ const LeaveReqPage = () => {
             details: {
                 startDate: '2025-02-15',
                 endDate: '2025-02-17',
-                leaveReason: 'Libre tuli sa barangay',
+                leaveReason: 'Brgy. Meeting',
                 approvedBy: null
             }
         },
