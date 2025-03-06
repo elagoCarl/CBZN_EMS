@@ -6,8 +6,9 @@ import axios from 'axios';
 const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({});
   const [scheduleOptions, setScheduleOptions] = useState([]);
+  const [jobTitleOptions, setJobTitleOptions] = useState([]);
 
-  // Fetch schedules when the component mounts
+  // Fetch schedules when the component mounts or isOpen changes
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
@@ -28,6 +29,29 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
 
     if (isOpen) {
       fetchSchedules();
+    }
+  }, [isOpen]);
+
+  // Fetch job titles when the component mounts or isOpen changes
+  useEffect(() => {
+    const fetchJobTitles = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
+        if (response.data.successful) {
+          const options = response.data.data.map(jobTitle => ({
+            value: jobTitle.id,
+            label: jobTitle.name
+          }));
+          setJobTitleOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching job titles:', error);
+        alert('Failed to load job titles');
+      }
+    };
+
+    if (isOpen) {
+      fetchJobTitles();
     }
   }, [isOpen]);
 
@@ -108,7 +132,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         { name: 'name', placeholder: 'Full Name', type: 'text' },
         { name: 'email', placeholder: 'Email Address', type: 'email' },
         { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: ['broadcast', 'creatives', 'web dev'] },
+        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
         { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
       ]
     },
