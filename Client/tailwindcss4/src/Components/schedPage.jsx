@@ -1,71 +1,38 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Edit, Filter, Search, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, Edit, Filter, Search } from 'lucide-react';
+import axios from 'axios';
+import dayjs from 'dayjs';
 import Sidebar from './callComponents/sidebar';
+import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleModal';
 
 const SchedulePage = () => {
-  const [schedules, setSchedules] = useState([
-    {
-      id: 1,
-      title: 'Standard Work Hours',
-      schedule: {
-        "Monday": { "In": "09:00", "Out": "18:00" },
-        "Tuesday": { "In": "09:00", "Out": "18:00" },
-        "Wednesday": { "In": "09:00", "Out": "18:00" },
-        "Thursday": { "In": "09:00", "Out": "18:00" },
-        "Friday": { "In": "09:00", "Out": "18:00" },
-        "Saturday": { "In": "", "Out": "" },
-        "Sunday": { "In": "", "Out": "" }
-      },
-      isActive: true
-    },
-    {
-      id: 2,
-      title: 'Part-Time Schedule',
-      schedule: {
-        "Monday": { "In": "10:00", "Out": "15:00" },
-        "Wednesday": { "In": "10:00", "Out": "15:00" },
-        "Friday": { "In": "10:00", "Out": "15:00" },
-        "Tuesday": { "In": "", "Out": "" },
-        "Thursday": { "In": "", "Out": "" },
-        "Saturday": { "In": "", "Out": "" },
-        "Sunday": { "In": "", "Out": "" }
-      },
-      isActive: false
-    },
-    {
-      id: 3,
-      title: 'Weekend Shift',
-      schedule: {
-        "Saturday": { "In": "10:00", "Out": "16:00" },
-        "Sunday": { "In": "10:00", "Out": "16:00" },
-        "Monday": { "In": "", "Out": "" },
-        "Tuesday": { "In": "", "Out": "" },
-        "Wednesday": { "In": "", "Out": "" },
-        "Thursday": { "In": "", "Out": "" },
-        "Friday": { "In": "", "Out": "" }
-      },
-      isActive: false
-    },
-    {
-      id: 4,
-      title: 'Night Shift',
-      schedule: {
-        "Monday": { "In": "22:00", "Out": "06:00" },
-        "Tuesday": { "In": "22:00", "Out": "06:00" },
-        "Wednesday": { "In": "22:00", "Out": "06:00" },
-        "Thursday": { "In": "", "Out": "" },
-        "Friday": { "In": "", "Out": "" },
-        "Saturday": { "In": "", "Out": "" },
-        "Sunday": { "In": "", "Out": "" }
-      },
-      isActive: true
-    }
-  ]);
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [statusFilter, setStatusFilter] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
+
+  // Fetch all schedules from the API
+  const fetchSchedules = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+      setSchedules(response.data.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching schedules:', err);
+      setError('Failed to load schedules. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
 
   const handleAddScheduleClick = () => {
     setIsAddScheduleOpen(true);
@@ -84,26 +51,59 @@ const SchedulePage = () => {
     setIsEditScheduleOpen(false);
   };
 
+  // Called when a new schedule is added from the modal
+  const handleAddSchedule = async (newSchedule) => {
+    try {
+      await axios.post('http://localhost:8080/schedule/addSchedule', newSchedule);
+      fetchSchedules();
+    } catch (error) {
+      console.error('Error adding schedule:', error);
+    }
+  };
+
+  // Called when an existing schedule is updated from the modal
+  const handleUpdateSchedule = async (updatedSchedule) => {
+    try {
+      await axios.put(`http://localhost:8080/schedule/updateSchedule/${updatedSchedule.id}`, updatedSchedule);
+      fetchSchedules();
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+    }
+  };
+
   const filteredSchedules = useMemo(() => {
-    return schedules.filter(schedule => 
-      (statusFilter === 'all' || 
-       (statusFilter === 'active' ? schedule.isActive : !schedule.isActive)) &&
+    return schedules.filter(schedule =>
+      (statusFilter === 'all' ||
+        (statusFilter === 'active' ? schedule.isActive : !schedule.isActive)) &&
       schedule.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [schedules, statusFilter, searchQuery]);
 
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    try {
+      return dayjs(`2000-01-01 ${timeString}`).format('h:mm A');
+    } catch (err) {
+      console.error('Error formatting time:', err);
+      return timeString;
+    }
+  };
+
   const renderScheduleDetails = (scheduleObj) => {
-    const activeDays = Object.entries(scheduleObj)
-      .filter(([_, timeSlots]) => timeSlots.In && timeSlots.Out);
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const activeDaysEntries = Object.entries(scheduleObj).filter(([_, timeSlots]) => timeSlots.In && timeSlots.Out);
+    const sortedDays = activeDaysEntries.sort((a, b) => dayOrder.indexOf(a[0]) - dayOrder.indexOf(b[0]));
 
     return (
       <div className="text-sm text-gray-300 space-y-1">
-        {activeDays.map(([day, timeSlots]) => (
-          <div key={day} className="flex justify-between">
-            <span className="font-medium">{day}</span>
-            <div>
-              <span className="mr-2">In: {timeSlots.In}</span>
-              <span>Out: {timeSlots.Out}</span>
+        {sortedDays.map(([day, timeSlots]) => (
+          <div key={day} className="flex">
+            <div className="flex-1">
+              <span className="font-medium">{day}</span>
+            </div>
+            <div className="flex flex-2 justify-around">
+              <span>In: {formatTime(timeSlots.In)}</span>
+              <span>Out: {formatTime(timeSlots.Out)}</span>
             </div>
           </div>
         ))}
@@ -116,10 +116,10 @@ const SchedulePage = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-xl md:text-2xl font-bold text-green-500">Schedule Management</h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500">Schedule Management</h1>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <button 
-              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-green-600 text-sm font-medium text-white hover:bg-green-700 w-full sm:w-auto" 
+            <button
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-green-600 text-sm font-medium text-white hover:bg-green-700 w-full sm:w-auto"
               onClick={handleAddScheduleClick}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -135,9 +135,9 @@ const SchedulePage = () => {
                 <h2 className="text-lg md:text-xl font-semibold text-white">Schedules</h2>
                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                   <div className="relative flex-1 sm:mr-2">
-                    <input 
-                      type="text" 
-                      placeholder="Search schedules..." 
+                    <input
+                      type="text"
+                      placeholder="Search schedules..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-8 pr-3 py-2 bg-[#363636] text-white text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -160,37 +160,38 @@ const SchedulePage = () => {
               </div>
             </div>
             <div className="p-4 md:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {filteredSchedules.map(schedule => (
-                  <div 
-                    key={schedule.id} 
-                    className="relative flex flex-col justify-between p-3 bg-[#363636] rounded-lg"
-                  >
-                    <button 
-                      className="absolute top-2 right-2 p-1 text-white hover:text-gray-900 hover:bg-green-500 rounded"
-                      onClick={() => handleEditScheduleClick(schedule)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <div>
-                      <h3 className="font-medium text-white mb-2 text-base">{schedule.title}</h3>
-                      {renderScheduleDetails(schedule.schedule)}
-                      <span 
-                        className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-2 ${
-                          schedule.isActive 
-                            ? 'bg-green-500/20 text-green-500' 
-                            : 'bg-red-500/20 text-red-500'
-                        }`}
+              {loading ? (
+                <div className="text-center py-8 text-gray-400">Loading schedules...</div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-500">{error}</div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {filteredSchedules.map((schedule) => (
+                    <div key={schedule.id} className="relative flex flex-col justify-between p-3 bg-[#363636] rounded-lg">
+                      <button
+                        className="absolute top-2 right-2 p-1 text-white hover:text-gray-900 hover:bg-green-500 rounded"
+                        onClick={() => handleEditScheduleClick(schedule)}
                       >
-                        {schedule.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <div>
+                        <h3 className="font-medium text-white mb-2 text-base">{schedule.title}</h3>
+                        {renderScheduleDetails(schedule.schedule)}
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-2 ${
+                            schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                          }`}
+                        >
+                          {schedule.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              {filteredSchedules.length === 0 && (
-                <div className="text-center py-4 text-gray-400 col-span-full">
-                  No schedules found for the selected filters
+                  ))}
+                  {filteredSchedules.length === 0 && !loading && !error && (
+                    <div className="text-center py-4 text-gray-400 col-span-full">
+                      No schedules found for the selected filters
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -198,43 +199,19 @@ const SchedulePage = () => {
         </div>
       </div>
 
-      {/* Modals remain the same as in previous version */}
       {isAddScheduleOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-[#2b2b2b] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-white/10">
-              <h2 className="text-xl font-semibold text-white">Add New Schedule</h2>
-              <button 
-                onClick={handleAddScheduleClose} 
-                className="text-white hover:text-red-500"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-white">Add Schedule Modal Placeholder</p>
-            </div>
-          </div>
-        </div>
+        <AddScheduleModal 
+          onClose={handleAddScheduleClose} 
+          onAddSchedule={handleAddSchedule}
+        />
       )}
 
-      {isEditScheduleOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-[#2b2b2b] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-white/10">
-              <h2 className="text-xl font-semibold text-white">Edit Schedule</h2>
-              <button 
-                onClick={handleEditScheduleClose} 
-                className="text-white hover:text-red-500"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-white">Edit Schedule Modal Placeholder</p>
-            </div>
-          </div>
-        </div>
+      {isEditScheduleOpen && selectedSchedule && (
+        <EditScheduleModal 
+          schedule={selectedSchedule}
+          onClose={handleEditScheduleClose}
+          onUpdateSchedule={handleUpdateSchedule}
+        />
       )}
     </div>
   );
