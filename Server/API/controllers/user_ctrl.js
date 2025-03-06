@@ -511,7 +511,7 @@ const logoutUser = async (req, res, next) => {
         console.error("Error logging out:", error);
         res.status(500).json({
             successful: false,
-            message: "Internal server error"
+            message: error.message  
         });
     }
 };

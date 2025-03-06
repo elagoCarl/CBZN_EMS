@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 //TO LOG CLIENT REQUEST-RESPONSE DATA IN A DEV ENVIRONMENT
 app.use(morgan('dev'));
 app.use(express.json())
-// app.use(cookieParser());
+app.use(cookieParser());
 
 //PARSE DATA THAT ARE URLENCODED
 //content-type: application/x-www-form-urlencoded

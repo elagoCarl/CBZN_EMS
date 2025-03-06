@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../Components/Img/CBZN-Logo.png';
-
+import { useAuth } from '../Components/authContext'; // Adjust path if needed
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -11,15 +11,28 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { setUser } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
     try {
-      const response = await axios.post('http://localhost:8080/users/loginUser', { email, password }, { withCredentials: true });
+      const response = await axios.post(
+        'http://localhost:8080/users/loginUser',
+        { email, password },
+        { withCredentials: true }
+      );
 
       if (response.data.successful) {
+        // Update AuthContext with user details returned from the backend.
+        // Adjust the fields according to your API response.
+        setUser({
+          id: response.data.user,
+          email: response.data.userEmail,
+          first_name: response.data.first_name, // if provided
+          surname: response.data.surname,         // if provided
+        });
         navigate('/myAttendance'); // Redirect on successful login
       }
     } catch (err) {
@@ -28,9 +41,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div
-      className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/95"
-    >
+    <div className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/95">
       <div className="fixed top-0 left-0 w-full bg-black text-white p-8 flex justify-between items-center z-50">
         <img src={logo} alt="Logo" className="h-11 w-auto ml-8" />
       </div>
@@ -52,7 +63,7 @@ const LoginPage = () => {
             </div>
             <div className="relative w-full">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -60,9 +71,6 @@ const LoginPage = () => {
                 required
               />
               <button
-                //src={icon}
-                //alt="Show Password"
-                //className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-5 h-5 hover:bg-gray-600 rounded-3xl duration-300"
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                 onMouseDown={() => setShowPassword(true)}
@@ -72,14 +80,16 @@ const LoginPage = () => {
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
             </div>
-            <div className='flex flex-col space-y-4'>
-              <button type="submit" className='font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full'>
+            <div className="flex flex-col space-y-4">
+              <button
+                type="submit"
+                className="font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full"
+              >
                 Login
               </button>
-              {/* Forgot Password Button - Now Navigates to /forgotPass */}
               <button
                 type="button"
-                className='font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full'
+                className="font-semibold text-white hover:text-gray-400 text-center text-lg rounded-md duration-300 w-full"
                 onClick={() => navigate('/forgotPass')}
               >
                 Forgot Password?
@@ -92,4 +102,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage;
