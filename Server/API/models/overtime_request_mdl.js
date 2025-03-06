@@ -44,6 +44,11 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'user_id',
             as: 'user'
         });
+
+        OvertimeRequest.belongsTo(models.Schedule, {
+            foreignKey: 'schedule_id',  // Ensure this foreign key exists in your DB
+            as: 'schedule'
+        });
     };
 
     return OvertimeRequest;
