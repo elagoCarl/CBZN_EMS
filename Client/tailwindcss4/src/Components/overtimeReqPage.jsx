@@ -14,8 +14,8 @@ const OvertimeReqPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [requestData, setRequestData] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-    
-    
+
+
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -73,8 +73,8 @@ const OvertimeReqPage = () => {
     const initiateAction = (id, type) => {
         setSelectedRequestId(id);
         type === 'approve' ? setShowApproveConfirm(true) : setShowRejectConfirm(true);
-      };
-    
+    };
+
 
     // Modified to show confirmation modal
     const initiateApprove = (id) => {
@@ -184,14 +184,9 @@ const OvertimeReqPage = () => {
                     <div><p className="text-xs sm:text-sm font-medium text-gray-400">End of Overtime</p><p className="text-white"> {formatDateTime(request.end_time)}</p></div>
                     <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p><p className="text-white">{request.reason || 'No reason provided'}</p></div>
                 </div>
-                
+
                 <div className="space-y-4">
-                    <p className="text-xs sm:text-sm font-medium text-gray-400 pt-7">Current Shift</p>
-                    <p className="text-white mt-[-12px]"> {request.user?.name || "Unknown User"}
-                      
-                    </p>
-                    
-                   
+                    <h3 className="text-green-500 font-semibold text-sm sm:text-base mb-2">Review Details</h3>
                     {(request.reviewer || request.review_date) ? (
                         <>
                             {request.review_date && <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed On</p><p className="text-white">{formatDate(request.review_date)}</p></div>}
@@ -200,7 +195,7 @@ const OvertimeReqPage = () => {
                     ) : <p className="text-gray-400 italic">Not yet reviewed</p>}
                 </div>
             </div>
-           
+
         );
     }
 
@@ -226,8 +221,8 @@ const OvertimeReqPage = () => {
     const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
     const currentRequests = filteredRequests.slice(indexOfFirstRequest, indexOfLastRequest);
     const formatDate = d => d ? dayjs(d).format('MMM D, YYYY') : 'N/A';
-    const formatTime = t => t ? dayjs().hour(+t.split(':')[0]).minute(+t.split(':')[1]).format('h:mm A') : 'N/A';
-    const formatDateTime = d => d ? dayjs(d).format('MMM D, YYYY h:mm A') : 'N/A';
+    const formatTime = t => t ? dayjs().hour(+t.split(':')[0]).minute(+t.split(':')[1]).format('hh:mm A') : 'N/A';
+    const formatDateTime = d => d ? dayjs(d).format('MMM D, YYYY hh:mm A') : 'N/A';
 
     const toggleRow = id => setExpandedRow(expandedRow === id ? null : id);
 
@@ -271,21 +266,21 @@ const OvertimeReqPage = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-          <Sidebar />
-          {showApproveConfirm && (
-            <ApproveConfirmModal
-              requestName={'Time Adjustment'}
-              onConfirm={updateRequest('approved')}
-              onCancel={closeModals}
-            />
-          )}
-          {showRejectConfirm && (
-            <RejectConfirmModal
-              requestName={'Time Adjustment'}
-              onConfirm={updateRequest('rejected')}
-              onCancel={closeModals}
-            />
-          )}
+            <Sidebar />
+            {showApproveConfirm && (
+                <ApproveConfirmModal
+                    requestName={'Overtime'}
+                    onConfirm={updateRequest('approved')}
+                    onCancel={closeModals}
+                />
+            )}
+            {showRejectConfirm && (
+                <RejectConfirmModal
+                    requestName={'Overtime'}
+                    onConfirm={updateRequest('rejected')}
+                    onCancel={closeModals}
+                />
+            )}
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
@@ -299,7 +294,7 @@ const OvertimeReqPage = () => {
                 <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                         <button
-                           
+
                             onClick={() => setActiveFilter('all')}
                             className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'all'
                                 ? 'bg-green-600 text-white'
@@ -388,12 +383,12 @@ const OvertimeReqPage = () => {
                                                         <div className="flex items-center">
                                                             {renderTypeIcon(request.type)}
                                                             <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
-                                                                {request.user?.name || "—"}
+                                                                {request.user?.name || "N/A"}
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-gray-300 hidden sm:table-cell">
-                                                        {formatDateTime(request.start_time)}
+                                                        {formatDate(request.date)}
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                                                         <span className={`text-xs sm:text-sm font-medium ${getStatusColor(request.status)}`}>
