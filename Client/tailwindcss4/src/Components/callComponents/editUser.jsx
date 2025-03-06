@@ -5,8 +5,56 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
-  // console.log("userId", userId);
+  const [scheduleOptions, setScheduleOptions] = useState([]);
+  const [jobTitleOptions, setJobTitleOptions] = useState([]);
 
+  // Fetch schedule options when modal opens
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+        if (response.data.successful) {
+          const options = response.data.data.map(schedule => ({
+            value: schedule.id,
+            label: schedule.title
+          }));
+          setScheduleOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching schedules:', error);
+        alert('Failed to load schedules');
+      }
+    };
+
+    if (isOpen) {
+      fetchSchedules();
+    }
+  }, [isOpen]);
+
+  // Fetch job title options when modal opens
+  useEffect(() => {
+    const fetchJobTitles = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
+        if (response.data.successful) {
+          const options = response.data.data.map(jobTitle => ({
+            value: jobTitle.id,
+            label: jobTitle.name
+          }));
+          setJobTitleOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching job titles:', error);
+        alert('Failed to load job titles');
+      }
+    };
+
+    if (isOpen) {
+      fetchJobTitles();
+    }
+  }, [isOpen]);
+
+  // Fetch user data along with schedule association when modal opens
   useEffect(() => {
     if (isOpen && userId) {
       (async () => {
@@ -14,27 +62,34 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
           const [
             userDataResponse,
             userInfoResponse,
-            emergencyContactResponse
+            emergencyContactResponse,
+            scheduleResponse
           ] = await Promise.all([
             axios.get(`http://localhost:8080/users/getUser/${userId}`),
             axios.get(`http://localhost:8080/userInfo/getUserInfoById/${userId}`),
-            axios.get(`http://localhost:8080/emgncyContact/getEmgncyContactById/${userId}`)
+            axios.get(`http://localhost:8080/emgncyContact/getEmgncyContactById/${userId}`),
+            // Assuming an endpoint to fetch schedule association by user ID
+            axios.get(`http://localhost:8080/schedUser/getSchedUserByUser/${userId}`)
           ]);
 
           const fetchedData = {
-            // Spread the user account data (assumed to be nested under 'data')
+            // Spread main user data (assumed nested under 'data')
             ...userDataResponse.data.data,
-            // Spread the user info data from its nested property
+            // Derive role from isAdmin value:
+            role: userDataResponse.data.data.isAdmin ? 'admin' : 'user',
+            // Spread user info data (assumed nested under 'userInfo')
             ...userInfoResponse.data.userInfo,
-            // Spread emergency contact data from its nested property
+            // Map emergency contact data
             emergency_name: emergencyContactResponse.data.emgncyContact.name,
             emergency_relationship: emergencyContactResponse.data.emgncyContact.relationship,
-            emergency_contact: emergencyContactResponse.data.emgncyContact.contact_number
+            emergency_contact: emergencyContactResponse.data.emgncyContact.contact_number,
+            // Include schedule association if available
+            schedule: scheduleResponse.data.schedUser?.schedule_id || '',
+            effectivity_date: scheduleResponse.data.schedUser?.effectivity_date || ''
           };
 
+          console.log(fetchedData);
           setFormData(fetchedData);
-          // console.log("Fetched formData:", fetchedData);
-          // console.log("Fetched formData:", fetchedData);
         } catch (error) {
           console.error('Error fetching user data:', error);
           alert('Failed to load user data.');
@@ -90,6 +145,12 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         contact_number: formData.emergency_contact
       });
 
+      // Update schedule-user association (assumes an update endpoint exists)
+      await axios.put(`http://localhost:8080/schedUser/updateSchedUserByUser/${userId}`, {
+        schedule_id: formData.schedule,
+        effectivity_date: formData.effectivity_date
+      });
+
       onUserUpdated(formData);
       onClose();
     } catch (error) {
@@ -106,8 +167,21 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         { name: 'name', placeholder: 'Full Name', type: 'text' },
         { name: 'email', placeholder: 'Email Address', type: 'email' },
         { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: ['broadcast', 'creatives', 'web dev'] },
+        // Updated JobTitleId field options using jobTitleOptions state
+        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
         { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
+      ]
+    },
+    {
+      title: 'Schedule Information',
+      fields: [
+        {
+          name: 'schedule',
+          type: 'select',
+          placeholder: 'Select Schedule',
+          options: scheduleOptions
+        },
+        { name: 'effectivity_date', placeholder: 'Effectivity Date', type: 'date' }
       ]
     },
     {
@@ -159,6 +233,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     }
   ];
 
+  // Enhanced renderField to handle both string options and object options
   const renderField = (field) => {
     const baseClass =
       "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
@@ -174,11 +249,20 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             required
           >
             <option value="">{field.placeholder}</option>
-            {field.options.map(opt => (
-              <option key={opt} value={opt.toLowerCase()} className="bg-gray-800">
-                {opt}
-              </option>
-            ))}
+            {field.options.map(opt => {
+              if (typeof opt === 'object') {
+                return (
+                  <option key={opt.value} value={opt.value} className="bg-gray-800">
+                    {opt.label}
+                  </option>
+                );
+              }
+              return (
+                <option key={opt} value={opt} className="bg-gray-800">
+                  {opt}
+                </option>
+              );
+            })}
           </select>
         </div>
       );

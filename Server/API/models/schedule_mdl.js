@@ -50,5 +50,13 @@
 
         
 
-        return Schedule;
-    };
+    Schedule.associate = (models) => {
+        Schedule.belongsToMany(models.User, {
+            through: models.SchedUser,
+            foreignKey: 'schedule_id',
+            otherKey: 'user_id',
+          });
+    }
+
+    return Schedule;
+};

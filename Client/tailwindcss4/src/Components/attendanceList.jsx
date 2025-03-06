@@ -10,6 +10,7 @@ const AdminAttendance = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [attendances, setAttendances] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("Employee"); // Default
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [loading, setLoading] = useState(true);
 
   const fetchAttendance = useCallback(async () => {
@@ -25,7 +26,7 @@ const AdminAttendance = () => {
       }));
 
       console.log("Formatted Data:", formattedData);
-      setAttendances(formattedData); // Store formatted data
+      setAttendances(formattedData);
     } catch (error) {
       console.error('Error fetching attendances:', error);
       setAttendances([]);
@@ -34,21 +35,16 @@ const AdminAttendance = () => {
     }
   }, []);
 
-
   useEffect(() => {
     fetchAttendance();
   }, [fetchAttendance]);
 
   function formatDateTime(isoString) {
     const date = new Date(isoString);
-
     let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const amPm = hours >= 12 ? 'PM' : 'AM';
-
-    // Convert hours to 12-hour format
-    hours = hours % 12 || 12; // Converts 0 (midnight) to 12 AM
-
+    hours = hours % 12 || 12;
     return `${hours}:${minutes} ${amPm}`;
   }
 
@@ -68,23 +64,19 @@ const AdminAttendance = () => {
   // Number of entries per page
   const entriesPerPage = windowWidth < 780 ? 5 : 10;
 
-  // Filter attendances based on selected employment status
+  // Filter attendances based on employment status, selected date, and search query
   const filteredAttendances = attendances.filter(attendance => {
-    const employmentStatus = attendance.User?.employment_status; // Ensure User exists
+    const employmentStatus = attendance.User?.employment_status;
     if (!employmentStatus || employmentStatus !== selectedFilter) return false;
-
+    if (!attendance.date || dayjs(attendance.date).format("YYYY-MM-DD") !== selectedDate) return false;
     const searchTerm = searchQuery.toLowerCase();
-    return (
-      attendance.User?.name?.toLowerCase().includes(searchTerm)
-    )
-
+    return attendance.User?.name?.toLowerCase().includes(searchTerm);
   });
 
-    const formatDate = d => d ? dayjs(d).format('MMM D, YYYY') : 'N/A';
-  
+  const formatDate = d => d ? dayjs(d).format('MMM D, YYYY') : 'N/A';
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredAttendances.length / entriesPerPage)
+  const totalPages = Math.ceil(filteredAttendances.length / entriesPerPage);
   const indexOfLastEntry = currentPage * entriesPerPage;
   const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
   const currentEntries = filteredAttendances.slice(indexOfFirstEntry, indexOfLastEntry);
@@ -111,6 +103,12 @@ const AdminAttendance = () => {
               <option value="Employee">Employees</option>
               <option value="Intern">Interns</option>
             </select>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-green-600 text-white px-3 md:px-4 py-1 md:py-2 rounded text-sm md:text-base hover:bg-green-800 duration-300"
+            />
           </div>
           <div className="relative">
             <input
@@ -144,11 +142,11 @@ const AdminAttendance = () => {
                 <tbody>
                   {currentEntries.map((attendance) => (
                     <tr key={attendance.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
-                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-md md:text- text-center">
+                      <td className="text-[#4E9F48] py-2 md:py-3 px-2 md:px-4 text-md text-center">
                         {attendance.UserId}
                       </td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
-                        {attendance.User?.name || "Unknown"} {/* Use User.name */}
+                        {attendance.User?.name || "Unknown"}
                       </td>
                       <td className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
                         {formatDate(attendance.date)}
@@ -171,7 +169,6 @@ const AdminAttendance = () => {
                     </tr>
                   ))}
                 </tbody>
-
               </table>
             </div>
           </div>
@@ -183,9 +180,10 @@ const AdminAttendance = () => {
                 key={index}
                 onClick={() => paginate(index + 1)}
                 className={`px-2 md:px-3 py-1 rounded text-sm md:text-base ${currentPage === index + 1
-                    ? "bg-green-600 text-white"
-                    : "bg-[#363636] text-white hover:bg-[#404040]"
-                  }`}>
+                  ? "bg-green-600 text-white"
+                  : "bg-[#363636] text-white hover:bg-[#404040]"
+                  }`}
+              >
                 {index + 1}
               </button>
             ))}

@@ -12,6 +12,7 @@ import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
+import SchedulePage from "./Components/schedPage.jsx";
 
 
 function App() {
@@ -33,9 +34,10 @@ function App() {
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
-         
+          <Route path="/schedulePage" element={<SchedulePage />} />
 
-      </Routes>
+
+        </Routes>
       </Router>
     </>
   )
