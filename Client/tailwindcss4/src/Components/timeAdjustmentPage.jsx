@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronDown, ChevronUp, Check, XCircle, Search, Clock } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Check, XCircle, Search, CalendarClock } from 'lucide-react';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import Sidebar from "./callComponents/sidebar.jsx";
@@ -247,7 +247,7 @@ const TimeAdjustmentPage = () => {
                           <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
                             <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                               <div className="flex items-center">
-                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                                 <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
                                   {request.user?.name || 'Unknown'}
                                 </span>
@@ -284,13 +284,13 @@ const TimeAdjustmentPage = () => {
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => initiateApprove(request.id)}
+                                                                        onClick={() => initiateAction(request.id, 'approve')}
                                                                         className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => initiateReject(request.id)}
+                                                                         onClick={() => initiateAction(request.id, 'reject')}
                                                                         className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
                                                                     >
                                                                         <XCircle className="w-4 h-4 mr-2" /> Reject

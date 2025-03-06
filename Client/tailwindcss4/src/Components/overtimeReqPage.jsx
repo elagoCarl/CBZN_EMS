@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -150,7 +150,7 @@ const OvertimeReqPage = () => {
     const renderTypeIcon = (type) => {
         switch (type) {
             case 'overtime':
-                return <History className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+                return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             default:
                 return null;
         }

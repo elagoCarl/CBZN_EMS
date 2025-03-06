@@ -1,10 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
 import axios from 'axios';
 
 const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({});
+  const [scheduleOptions, setScheduleOptions] = useState([]);
+  const [jobTitleOptions, setJobTitleOptions] = useState([]);
+
+  // Fetch schedules when the component mounts or isOpen changes
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+        if (response.data.successful) {
+          // Map schedules to objects with value and label for the select field
+          const options = response.data.data.map(schedule => ({
+            value: schedule.id,
+            label: schedule.title
+          }));
+          setScheduleOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching schedules:', error);
+        alert('Failed to load schedules');
+      }
+    };
+
+    if (isOpen) {
+      fetchSchedules();
+    }
+  }, [isOpen]);
+
+  // Fetch job titles when the component mounts or isOpen changes
+  useEffect(() => {
+    const fetchJobTitles = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
+        if (response.data.successful) {
+          const options = response.data.data.map(jobTitle => ({
+            value: jobTitle.id,
+            label: jobTitle.name
+          }));
+          setJobTitleOptions(options);
+        }
+      } catch (error) {
+        console.error('Error fetching job titles:', error);
+        alert('Failed to load job titles');
+      }
+    };
+
+    if (isOpen) {
+      fetchJobTitles();
+    }
+  }, [isOpen]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,7 +63,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
     e.preventDefault();
     try {
       // Create main user
-      const { data: user } = await axios.post('http://localhost:8080/users/addUser', {
+      const { data: userResponse } = await axios.post('http://localhost:8080/users/addUser', {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -22,11 +71,11 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         employment_status: formData.employment_status
       });
 
-      if (!user || !user.user || !user.user.id) {
+      if (!userResponse || !userResponse.user || !userResponse.user.id) {
         throw new Error("Failed to retrieve user ID.");
       }
 
-      const userId = user.user.id;
+      const userId = userResponse.user.id;
 
       // Create user info
       await axios.post('http://localhost:8080/userInfo/addUserInfo', {
@@ -60,7 +109,14 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         contact_number: formData.emergency_contact
       });
 
-      onUserAdded(user.user);
+      // Create schedule-user association
+      await axios.post('http://localhost:8080/schedUser/addSchedUser', {
+        schedule_id: formData.schedule, // the schedule id selected
+        user_id: userId,
+        effectivity_date: formData.effectivity_date
+      });
+
+      onUserAdded(userResponse.user);
       onClose();
     } catch (error) {
       console.error('Error adding user:', error);
@@ -76,8 +132,20 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         { name: 'name', placeholder: 'Full Name', type: 'text' },
         { name: 'email', placeholder: 'Email Address', type: 'email' },
         { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: ['broadcast', 'creatives', 'web dev'] },
+        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
         { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
+      ]
+    },
+    {
+      title: 'Schedule Information',
+      fields: [
+        {
+          name: 'schedule',
+          type: 'select',
+          placeholder: 'Select Schedule',
+          options: scheduleOptions // now contains objects with value and label
+        },
+        { name: 'effectivity_date', placeholder: 'Effectivity Date', type: 'date' }
       ]
     },
     {
@@ -130,7 +198,8 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   ];
 
   const renderField = (field) => {
-    const baseClass = "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
+    const baseClass =
+      "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
     if (field.type === 'select') {
       return (
@@ -142,11 +211,21 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             required
           >
             <option value="">{field.placeholder}</option>
-            {field.options.map(opt => (
-              <option key={opt} value={opt.toLowerCase()} className="bg-gray-800">
-                {opt}
-              </option>
-            ))}
+            {field.options.map(opt => {
+              // Check if option is an object or a string
+              if (typeof opt === 'object') {
+                return (
+                  <option key={opt.value} value={opt.value} className="bg-gray-800">
+                    {opt.label}
+                  </option>
+                );
+              }
+              return (
+                <option key={opt} value={opt} className="bg-gray-800">
+                  {opt}
+                </option>
+              );
+            })}
           </select>
         </div>
       );

@@ -1,40 +1,42 @@
 const { TimeAdjustment, User, JobTitle, Department } = require('../models');
 const dayjs = require('dayjs');
-const utils = require('../../utils');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
+const utils = require('../../utils');
 
 const addTimeAdjustment = async (req, res) => {
     try {
-        const { date, time_in, time_out, reason, user_id } = req.body
+        // Destructure fields expected from the front end
+        const { user_id, from_datetime, to_datetime, reason } = req.body;
 
         // Validate required fields
-        if (!utils.checkMandatoryFields([date, time_in, time_out, reason, user_id])) {
+        if (!utils.checkMandatoryFields([user_id, from_datetime, to_datetime, reason])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
             });
         }
 
-        // Validate date format
-        const dateFormat = dayjs(date, 'YYYY-MM-DD', true)
-        if (!dateFormat.isValid()) {
+        // Validate datetime format
+        // Assuming the datetime-local input gives a format like "YYYY-MM-DDTHH:mm"
+        const timeInDateTime = dayjs(from_datetime, 'YYYY-MM-DDTHH:mm', true);
+        const timeOutDateTime = dayjs(to_datetime, 'YYYY-MM-DDTHH:mm', true);
+        if (!timeInDateTime.isValid() || !timeOutDateTime.isValid()) {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid date format. Date should be in YYYY-MM-DD format."
+                message: "Invalid datetime format. Datetime should be in YYYY-MM-DDTHH:mm format."
             });
         }
 
-        // Validate time format
-        const timeInFormat = dayjs(time_in, 'HH:mm', true)
-        const timeOutFormat = dayjs(time_out, 'HH:mm', true)
-        if (!timeInFormat.isValid() || !timeOutFormat.isValid()) {
+        // Ensure that time_out is after time_in
+        if (timeOutDateTime.isBefore(timeInDateTime) || timeOutDateTime.isSame(timeInDateTime)) {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid time format. Time should be in HH:mm format."
+                message: "Time out cannot be earlier or the same as time in."
             });
         }
 
+        // Verify that the user exists
         const user = await User.findByPk(user_id);
         if (!user) {
             return res.status(404).json({
@@ -43,18 +45,15 @@ const addTimeAdjustment = async (req, res) => {
             });
         }
 
-        if (timeOutFormat.isBefore(timeInFormat) || timeInFormat.isSame(timeOutFormat)) {
-            return res.status(400).json({
-                successful: false,
-                message: "Time out cannot be earlier or the same as time in."
-            });
-        }
-        // Create time adjustment
+        // Extract the date portion from timeInDateTime for the model's date field
+        const date = timeInDateTime.format('YYYY-MM-DD');
+
+        // Create the time adjustment record
         const newAdjustment = await TimeAdjustment.create({
             user_id,
             date,
-            time_in,
-            time_out,
+            time_in: timeInDateTime.toDate(),
+            time_out: timeOutDateTime.toDate(),
             reason
         });
 
@@ -66,7 +65,7 @@ const addTimeAdjustment = async (req, res) => {
             message: err.message || "An unexpected error occurred."
         });
     }
-}
+};
 
 const getAllTimeAdjustments = async (req, res) => {
     try {
@@ -99,16 +98,16 @@ const getAllTimeAdjustments = async (req, res) => {
         });
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
-              successful: true,
-              message: "No attendance found.",
-              count: 0,
-              data: [],
+                successful: true,
+                message: "No attendance found.",
+                count: 0,
+                data: [],
             });
-          }
+        }
 
-        return res.status(200).json({ 
-            successful: true, 
-            data: adjustments 
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
         });
     } catch (err) {
         console.error(err);
@@ -117,7 +116,7 @@ const getAllTimeAdjustments = async (req, res) => {
             message: err.message || "An unexpected error occurred."
         });
     }
-}
+};
 
 const updateTimeAdjustment = async (req, res) => {
     try {
@@ -146,6 +145,7 @@ const updateTimeAdjustment = async (req, res) => {
             });
         }
 
+        // Only allow update if status is 'approved' or 'rejected'
         if (status === 'approved' || status === 'rejected') {
             adjustment.reviewer_id = reviewer_id;
             adjustment.status = status;
@@ -156,7 +156,7 @@ const updateTimeAdjustment = async (req, res) => {
         } else {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid status. Status should be either 'Approved' or 'Rejected'."
+                message: "Invalid status. Status should be either 'approved' or 'rejected'."
             });
         }
     } catch (err) {
@@ -166,7 +166,7 @@ const updateTimeAdjustment = async (req, res) => {
             message: err.message || "An unexpected error occurred."
         });
     }
-}
+};
 
 const getAllTimeAdjustmentsByUser = async (req, res) => {
     try {
@@ -190,16 +190,16 @@ const getAllTimeAdjustmentsByUser = async (req, res) => {
         });
         if (!adjustments || adjustments.length === 0) {
             return res.status(200).json({
-              successful: true,
-              message: "No adjustments found.",
-              count: 0,
-              data: [],
+                successful: true,
+                message: "No adjustments found.",
+                count: 0,
+                data: [],
             });
-          }
+        }
 
-        return res.status(200).json({ 
-            successful: true, 
-            data: adjustments 
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
         });
     } catch (err) {
         console.error(err);
@@ -208,7 +208,7 @@ const getAllTimeAdjustmentsByUser = async (req, res) => {
             message: err.message || "An unexpected error occurred."
         });
     }
-}
+};
 
 const cancelTimeAdjustment = async (req, res) => {
     try {
@@ -229,7 +229,7 @@ const cancelTimeAdjustment = async (req, res) => {
             message: err.message || "An unexpected error occurred."
         });
     }
-}
+};
 
 module.exports = {
     addTimeAdjustment,
@@ -237,4 +237,4 @@ module.exports = {
     updateTimeAdjustment,
     getAllTimeAdjustmentsByUser,
     cancelTimeAdjustment
-}
+};

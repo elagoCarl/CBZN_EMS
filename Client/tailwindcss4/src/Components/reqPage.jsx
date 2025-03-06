@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs'; // Add dayjs import
 import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import AddReq from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
@@ -18,6 +19,9 @@ const ReqPage = () => {
     const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
     const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
     const [requestData, setRequestData] = useState([]);
+
+    // Format datetime helper function
+    const formatDateTime = d => d ? dayjs(d).format('MMM D, YYYY h:mm A') : 'N/A';
 
     const typeFilters = [
         { value: 'all', label: 'All Requests' },
@@ -70,6 +74,7 @@ const ReqPage = () => {
                 }
 
                 setRequestData(combinedData);
+                console.log("Requests fetched:", combinedData); 
             } catch (error) {
                 console.error("Error fetching requests:", error);
             }
@@ -156,7 +161,7 @@ const ReqPage = () => {
                     <div>
                         <p className="text-xs sm:text-sm font-medium text-gray-400">Time Change</p>
                         <p className="text-white">
-                            Time In: {request.time_in} | Time Out: {request.time_out}
+                            Time In: {formatDateTime(request.time_in)} | Time Out: {formatDateTime(request.time_out)}
                         </p>
                     </div>
                     <div className="sm:col-span-2">
@@ -170,7 +175,7 @@ const ReqPage = () => {
                     <div>
                         <p className="text-xs sm:text-sm font-medium text-gray-400">New Schedule</p>
                         <p className="text-white">
-                            Time In: {request.time_in} | Time Out: {request.time_out}
+                            Time In: {formatDateTime(request.time_in)} | Time Out: {formatDateTime(request.time_out)}
                         </p>
                     </div>
                     <div className="sm:col-span-2">
@@ -180,7 +185,7 @@ const ReqPage = () => {
                     {request.reviewer_id && (
                         <div className="sm:col-span-2">
                             <p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed On</p>
-                            <p className="text-white">{request.review_date}</p>
+                            <p className="text-white">{formatDateTime(request.review_date)}</p>
                         </div>
                     )}
                 </div>

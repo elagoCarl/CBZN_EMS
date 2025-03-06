@@ -71,10 +71,10 @@ const Sidebar = () => {
             name: 'Requests',
             icon: <FileText size={20} color={iconColor} />,
             subItems: [
-                { name: 'OT Request', path: '/requests/overtime', icon: <Clock size={18} color={iconColor} /> },
-                { name: 'Leave Request', path: '/requests/leave', icon: <CalendarDays size={18} color={iconColor} /> },
-                { name: 'Time Adjustments', path: '/requests/time-adjustments', icon: <CalendarClock size={18} color={iconColor} /> },
-                { name: 'Schedule Change', path: '/requests/schedule-change', icon: <CalendarRange size={18} color={iconColor} /> }
+                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> }, //overtime
+                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={18} color={iconColor} /> }, //leave
+                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarClock size={18} color={iconColor} /> }, //time-adjustments
+                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={18} color={iconColor} /> } //schedule-change
             ]
         },
     ];
