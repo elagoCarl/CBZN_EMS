@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, Clock, UserCheck, X } from 'lucide-react';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
   const [activeRequest, setActiveRequest] = useState(null);
-  const [backendMessage, setBackendMessage] = useState('');
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
     // Overtime fields
@@ -64,12 +65,10 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       schedule: '',
       scheduleReason: ''
     });
-    setBackendMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setBackendMessage('');
 
     if (activeRequest === 'schedule') {
       // Schedule Change Request
@@ -80,7 +79,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       };
       const times = scheduleMapping[schedule];
       if (!times) {
-        setBackendMessage("Invalid schedule selected");
+        toast.error("Invalid schedule selected");
         return;
       }
       try {
@@ -91,14 +90,14 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           time_out: times.time_out,
           reason: scheduleReason,
         });
-        setBackendMessage(response.data.message || "Schedule change request submitted successfully.");
+        toast.success(response.data.message || "Schedule change request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
         onClose();
       } catch (error) {
         console.error("Error submitting schedule change request:", error);
-        setBackendMessage(error.response?.data?.message);
+        toast.error(error.response?.data?.message || "An error occurred while submitting the schedule change request.");
       }
     } else if (activeRequest === 'timeadjustment') {
       // Time Adjustment Request with separate date and datetime fields
@@ -106,7 +105,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
 
       // Ensure all mandatory fields are provided
       if (!timeAdjustDate || !timeAdjustFrom || !timeAdjustTo || !timeAdjustReason) {
-        setBackendMessage("All fields (date, start datetime, end datetime, and reason) are required.");
+        toast.error("All fields (date, start datetime, end datetime, and reason) are required.");
         return;
       }
 
@@ -116,7 +115,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
 
       // Validate that both datetime inputs match the selected adjustment date
       if (fromDate !== timeAdjustDate || toDate !== timeAdjustDate) {
-        setBackendMessage("Start and end datetime must match the selected adjustment date.");
+        toast.error("Start and end datetime must match the selected adjustment date.");
         return;
       }
 
@@ -128,14 +127,14 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           to_datetime: toTime,      // e.g., "17:00"
           reason: timeAdjustReason, // Reason must be non-empty
         });
-        setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
+        toast.success(response.data.message || "Time adjustment request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
         onClose();
       } catch (error) {
         console.error("Error submitting time adjustment request:", error);
-        setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
+        toast.error(error.response?.data?.message || "An unexpected error occurred");
       }
     } else if (activeRequest === 'leave') {
       // Leave Request
@@ -148,26 +147,26 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           end_date: leaveEndDate,
           reason: leaveReason,
         });
-        setBackendMessage(response.data.message || "Leave request submitted successfully.");
+        toast.success(response.data.message || "Leave request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
         onClose();
       } catch (error) {
         console.error("Error submitting leave request:", error);
-        setBackendMessage(error.response?.data?.message);
+        toast.error(error.response?.data?.message || "An error occurred while submitting the leave request.");
       }
     } else if (activeRequest === 'overtime') {
       // Overtime Request with separate date and datetime fields
       const { overtimeDate, overtimeStart, overtimeEnd, overtimeReason } = formData;
       if (!overtimeDate || !overtimeStart || !overtimeEnd) {
-        setBackendMessage("All fields (date, start, and end datetime) are required.");
+        toast.error("All fields (date, start, and end datetime) are required.");
         return;
       }
       const [startDate, startTime] = overtimeStart.split('T');
       const [endDate, endTime] = overtimeEnd.split('T');
       if (startDate !== overtimeDate || endDate !== overtimeDate) {
-        setBackendMessage("Start and end datetime must match the selected overtime date.");
+        toast.error("Start and end datetime must match the selected overtime date.");
         return;
       }
       try {
@@ -178,14 +177,14 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           end_time: endTime,       // 'HH:mm'
           reason: overtimeReason,
         });
-        setBackendMessage(response.data.message || "Overtime request submitted successfully.");
+        toast.success(response.data.message || "Overtime request submitted successfully.");
         if (onRequestAdded) onRequestAdded(response.data);
         resetForm();
         setActiveRequest(null);
         onClose();
       } catch (error) {
         console.error("Error submitting overtime request:", error);
-        setBackendMessage(error.response?.data?.message);
+        toast.error(error.response?.data?.message || "An error occurred while submitting the overtime request.");
       }
     }
   };
@@ -209,9 +208,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Overtime Request</h2>
-            {backendMessage && (
-              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
-            )}
             {/* Overtime Date */}
             <div className="space-y-2">
               <label className="block text-sm text-gray-300">Overtime Date</label>
@@ -260,9 +256,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Leave Request</h2>
-            {backendMessage && (
-              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
-            )}
             <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 gap-4">
               <InputField
                 type="date"
@@ -306,9 +299,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Time Adjustment Request</h2>
-            {backendMessage && (
-              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
-            )}
             {/* Time Adjustment Date */}
             <div className="space-y-2">
               <label className="block text-sm text-gray-300">Adjustment Date</label>
@@ -357,9 +347,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return (
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Schedule Change Request</h2>
-            {backendMessage && (
-              <div className="text-sm text-white bg-green-600 p-2 rounded">{backendMessage}</div>
-            )}
             <div className="space-y-4">
               <InputField
                 type="date"
@@ -435,6 +422,17 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
           </div>
         </div>
       </div>
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

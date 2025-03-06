@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Menu, X, Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AccountSettings = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -15,7 +17,7 @@ const AccountSettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const userId = 3; // Hardcoded user ID for demo purposes
+  const userId = 5; // Hardcoded user ID for demo purposes
 
   // Update time every second
   useEffect(() => {
@@ -34,9 +36,11 @@ const AccountSettings = () => {
           setEmail(response.data.data.email);
         } else {
           console.error('User not found:', response.data.message);
+          toast.error(response.data.message || 'User not found');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        toast.error('Error fetching user data');
       }
     };
 
@@ -115,10 +119,11 @@ const AccountSettings = () => {
 
       if (response.data.profilePicture) {
         setProfilePic(`http://localhost:8080/${response.data.profilePicture}`);
+        toast.success('Profile picture updated successfully!');
       }
     } catch (error) {
       console.error("Error uploading profile picture:", error);
-      alert("Failed to upload profile picture. Please try again.");
+      toast.error("Failed to upload profile picture. Please try again.");
     }
   };
 
@@ -126,19 +131,19 @@ const AccountSettings = () => {
     try {
       const response = await axios.put(`http://localhost:8080/users/updateUserEmail/${userId}`, { email });
       if (response.data.successful) {
-        alert('Email updated successfully!');
+        toast.success('Email updated successfully!');
       } else {
-        alert(response.data.message || 'Failed to update email. Please try again.');
+        toast.error(response.data.message || 'Failed to update email. Please try again.');
       }
     } catch (error) {
       console.error('Error updating email:', error);
-      alert(error.response?.data?.message || 'An error occurred. Please try again later.');
+      toast.error(error.response?.data?.message || 'An error occurred. Please try again later.');
     }
   };
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -150,16 +155,16 @@ const AccountSettings = () => {
       });
 
       if (response.data.successful) {
-        alert('Password updated successfully!');
+        toast.success('Password updated successfully!');
         setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        alert(response.data.message || 'Failed to update password.');
+        toast.error(response.data.message || 'Failed to update password.');
       }
     } catch (error) {
       console.error('Error updating password:', error);
-      alert(error.response?.data?.message || 'An error occurred. Please try again.');
+      toast.error(error.response?.data?.message || 'An error occurred. Please try again later.');
     }
   };
 
@@ -366,6 +371,18 @@ const AccountSettings = () => {
           onClick={() => setIsNavOpen(false)}
         />
       )}
+
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={1100}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };
