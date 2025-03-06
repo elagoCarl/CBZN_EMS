@@ -16,6 +16,8 @@ import Page404 from "./Components/page404.jsx";
 import Page403 from "./Components/page403.jsx"
 // import ProtectedRoutes from "./Components/protectedRoutes.jsx";
 import SchedulePage from "./Components/schedPage.jsx";
+import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
+import PageUiFallback from "./Components/pageUiFallBack";
 
 
 function App() {
@@ -23,12 +25,14 @@ function App() {
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
    {/* Protected Routes
           <Route path="/protectedRoutes" element={<ProtectedRoutes isAuthenticated={isAuthenticated} />} /> */}
-
  
   return (
     <>
       <Router>
+        <ErrorBoundary>
         <Routes>
+
+          {/*Main Routes*/}
           <Route path="/" element={<LoginPage  />} />
           <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
@@ -36,7 +40,7 @@ function App() {
           <Route path="/accSettings" element={<AccountSettings />} />
           <Route path="/attendanceList" element={<AttendanceList />} />
           <Route path="/deptPage" element={<DeptPage />} />
-          <Route path="/myAttendance" element={<MyAttendance />} />
+          <Route path="/myAttendance" element={<PageUiFallback> <MyAttendance/> </PageUiFallback>} />
           <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
@@ -47,7 +51,9 @@ function App() {
           <Route path="/403" element={<Page403 />} />
           <Route path="/schedulePage" element={<SchedulePage />} />
           </Routes>
+          </ErrorBoundary>
       </Router>
+      
     </>
   )
 }
