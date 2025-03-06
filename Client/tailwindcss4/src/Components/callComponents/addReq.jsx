@@ -120,23 +120,24 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return;
       }
 
-      try {
-        const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
-          user_id: 1,               // Replace with actual user id
-          date: timeAdjustDate,     // e.g., "2025-03-03"
-          from_datetime: fromTime,  // e.g., "08:00"
-          to_datetime: toTime,      // e.g., "17:00"
-          reason: timeAdjustReason, // Reason must be non-empty
-        });
-        setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
-        if (onRequestAdded) onRequestAdded(response.data);
-        resetForm();
-        setActiveRequest(null);
-        onClose();
-      } catch (error) {
-        console.error("Error submitting time adjustment request:", error);
-        setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
-      }
+      // Replace the existing time adjustment submission code with this:
+try {
+  const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
+    user_id: 1,               // Replace with actual user id
+    date: timeAdjustDate,     // e.g., "2025-03-03"
+    from_datetime: timeAdjustFrom, // Send the full datetime string e.g., "2025-03-03T08:00"
+    to_datetime: timeAdjustTo,     // Send the full datetime string e.g., "2025-03-03T17:00"
+    reason: timeAdjustReason, // Reason must be non-empty
+  });
+  setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
+  if (onRequestAdded) onRequestAdded(response.data);
+  resetForm();
+  setActiveRequest(null);
+  onClose();
+} catch (error) {
+  console.error("Error submitting time adjustment request:", error);
+  setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
+}
     } else if (activeRequest === 'leave') {
       // Leave Request
       const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
@@ -171,7 +172,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return;
       }
       try {
-        const response = await axios.post('http://localhost:8080/overtime/addOvertime', {
+        const response = await axios.post('http://localhost:8080/OTrequests/addOvertimeReq', {
           user_id: 1, // Replace with actual user id
           date: overtimeDate,    // 'YYYY-MM-DD'
           start_time: startTime,   // 'HH:mm'

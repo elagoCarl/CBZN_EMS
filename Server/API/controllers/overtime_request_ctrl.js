@@ -212,7 +212,7 @@ const cancelOvertimeRequest = async (req, res) => {
         });
     }
 };
-
+0
 const getAllOTReqsByUser = async (req, res) => {
     try {
         const reqs = await OvertimeRequest.findAll({
@@ -234,7 +234,7 @@ const getAllOTReqsByUser = async (req, res) => {
                 {
                     model: Schedule,
                     as: 'schedule',
-                    attributes: ['id', 'title', 'In', 'Out']
+                    attributes: ['id', 'title', 'schedule']
                 }
 
             ],
