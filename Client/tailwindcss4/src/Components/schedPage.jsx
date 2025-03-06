@@ -175,15 +175,17 @@ const SchedulePage = () => {
                         <Edit className="w-4 h-4" />
                       </button>
                       <div>
-                        <h3 className="font-medium text-white mb-2 text-base">{schedule.title}</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-medium text-white text-base">{schedule.title}</h3>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                            }`}
+                          >
+                            {schedule.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
                         {renderScheduleDetails(schedule.schedule)}
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium mt-2 ${
-                            schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                          }`}
-                        >
-                          {schedule.isActive ? 'Active' : 'Inactive'}
-                        </span>
                       </div>
                     </div>
                   ))}
