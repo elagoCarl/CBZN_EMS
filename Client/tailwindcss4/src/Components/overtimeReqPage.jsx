@@ -13,6 +13,9 @@ const OvertimeReqPage = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [requestData, setRequestData] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    
+    
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -27,6 +30,9 @@ const OvertimeReqPage = () => {
         const fetchOTRequests = async () => {
             try {
                 setLoading(true);
+                const userId = 6
+                const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+                setCurrentUser(user.data.data);
 
                 const { data } = await axios.get('http://localhost:8080/OTrequests/getAllOvertimeReq');
                 setRequestData(Array.isArray(data.data) ? data.data : []);
@@ -64,6 +70,12 @@ const OvertimeReqPage = () => {
         };
     }, []);
 
+    const initiateAction = (id, type) => {
+        setSelectedRequestId(id);
+        type === 'approve' ? setShowApproveConfirm(true) : setShowRejectConfirm(true);
+      };
+    
+
     // Modified to show confirmation modal
     const initiateApprove = (id) => {
         setSelectedRequestId(id);
@@ -77,22 +89,22 @@ const OvertimeReqPage = () => {
     };
 
     // Actual approve action after confirmation
-    const handleApprove = () => {
-        setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
-        ));
-        setShowApproveConfirm(false);
-        setSelectedRequestId(null);
-    };
+    // const handleApprove = () => {
+    //     setRequestData(requestData.map(req =>
+    //         req.id === selectedRequestId ? { ...req, status: 'approved' } : req
+    //     ));
+    //     setShowApproveConfirm(false);
+    //     setSelectedRequestId(null);
+    // };
 
-    // Actual reject action after confirmation
-    const handleReject = () => {
-        setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
-        ));
-        setShowRejectConfirm(false);
-        setSelectedRequestId(null);
-    };
+    // // Actual reject action after confirmation
+    // const handleReject = () => {
+    //     setRequestData(requestData.map(req =>
+    //         req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
+    //     ));
+    //     setShowRejectConfirm(false);
+    //     setSelectedRequestId(null);
+    // };
 
     // Function to handle cancellation of a request
     const handleCancel = (id) => {
@@ -172,12 +184,14 @@ const OvertimeReqPage = () => {
                     <div><p className="text-xs sm:text-sm font-medium text-gray-400">End of Overtime</p><p className="text-white"> {formatDateTime(request.end_time)}</p></div>
                     <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p><p className="text-white">{request.reason || 'No reason provided'}</p></div>
                 </div>
+                
                 <div className="space-y-4">
-                <h3 className="text-green-500 font-semibold text-sm sm:text-base mb-2">Overtime Request Details</h3>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Shift</p>
-                    <p className="text-white"> {request.user?.name || "—"}
+                    <p className="text-xs sm:text-sm font-medium text-gray-400 pt-7">Current Shift</p>
+                    <p className="text-white mt-[-12px]"> {request.user?.name || "Unknown User"}
                       
                     </p>
+                    
+                   
                     {(request.reviewer || request.review_date) ? (
                         <>
                             {request.review_date && <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed On</p><p className="text-white">{formatDate(request.review_date)}</p></div>}
@@ -186,6 +200,7 @@ const OvertimeReqPage = () => {
                     ) : <p className="text-gray-400 italic">Not yet reviewed</p>}
                 </div>
             </div>
+           
         );
     }
 
@@ -256,55 +271,21 @@ const OvertimeReqPage = () => {
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-            <Sidebar /> {/* Mobile Nav Toggle */}
-
-            {/* Approve Confirmation Modal */}
-            {showApproveConfirm && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
-                        <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
-                        <p className="text-gray-300 mb-6">
-                            Are you sure you want to approve the overtime request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={handleApprove}
-                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center">
-                                <Check className="w-4 h-4 mr-2" /> Yes, Approve
-                            </button>
-                            <button
-                                onClick={closeModals}
-                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Reject Confirmation Modal */}
-            {showRejectConfirm && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
-                        <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
-                        <p className="text-gray-300 mb-6">
-                            Are you sure you want to reject the overtime request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={handleReject}
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors flex items-center">
-                                <XCircle className="w-4 h-4 mr-2" /> Yes, Reject
-                            </button>
-                            <button
-                                onClick={closeModals}
-                                className="px-4 py-2 bg-[#363636] text-white rounded hover:bg-[#404040] transition-colors">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+          <Sidebar />
+          {showApproveConfirm && (
+            <ApproveConfirmModal
+              requestName={'Time Adjustment'}
+              onConfirm={updateRequest('approved')}
+              onCancel={closeModals}
+            />
+          )}
+          {showRejectConfirm && (
+            <RejectConfirmModal
+              requestName={'Time Adjustment'}
+              onConfirm={updateRequest('rejected')}
+              onCancel={closeModals}
+            />
+          )}
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
@@ -318,6 +299,7 @@ const OvertimeReqPage = () => {
                 <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                         <button
+                           
                             onClick={() => setActiveFilter('all')}
                             className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'all'
                                 ? 'bg-green-600 text-white'
@@ -354,7 +336,7 @@ const OvertimeReqPage = () => {
                             Rejected
                         </button>
                         <button
-                            onClick={() => setActiveFilter('canceled')}
+                            onClick={() => setActiveFilter('cancelled')}
                             className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'canceled'
                                 ? 'bg-green-600 text-white'
                                 : 'bg-[#363636] text-white hover:bg-[#404040]'

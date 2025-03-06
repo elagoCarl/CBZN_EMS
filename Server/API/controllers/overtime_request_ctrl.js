@@ -85,6 +85,18 @@ const getAllOvertimeRequests = async (req, res) => {
                     model: User,
                     as: 'reviewer', // User who reviewed the adjustment
                     attributes: ['name']
+                },
+
+                {
+                            model: SchedUser,
+                            attributes: ['effectivity_date'],
+                            include: [
+                                {
+                                    model: Schedule,
+                                    attributes: ['title', 'weekday', 'in', 'out']
+                                }
+                            ]
+                 
                 }
             ]
         });
@@ -142,6 +154,7 @@ const updateOvertimeRequest = async (req, res) => {
                 message: "A mandatory field is missing."
             });
         }
+
         const reviewer = await User.findByPk(reviewer_id);
         if (!reviewer) {
             return res.status(404).json({
@@ -150,25 +163,29 @@ const updateOvertimeRequest = async (req, res) => {
             });
         }
 
-        const adjustment = await OvertimeRequest.findByPk(req.params.id);
-        if (!adjustment) {
+        const OTrequest = await OvertimeRequest.findByPk(req.params.id);
+        if (!OTrequest) {
             return res.status(404).json({
                 successful: false,
                 message: "Overtime request not found."
             });
         }
 
-        if (status === 'approved' || status === 'rejected') {
-            adjustment.reviewer_id = reviewer_id;
-            adjustment.status = status;
-            adjustment.review_date = dayjs().format('YYYY-MM-DD');
-            await adjustment.save();
+        // Normalize status case (if needed)
+        const formattedStatus = status.toLowerCase(); // Convert to lowercase
 
-            return res.status(200).json({ message: "Overtime request updated.", data: adjustment });
+        if (formattedStatus === "approved" || formattedStatus === "rejected") {
+            OTrequest.reviewer_id = reviewer_id;
+            OTrequest.status = formattedStatus; // Save lowercase value
+            OTrequest.review_date = dayjs().format("YYYY-MM-DD");
+
+            await OTrequest.save();
+
+            return res.status(200).json({ message: "Overtime request updated.", data: OTrequest });
         } else {
             return res.status(400).json({
                 successful: false,
-                message: "Invalid status. Status should be either 'Approved' or 'Rejected."
+                message: "Invalid status. Status should be either 'approved' or 'rejected'."
             });
         }
     } catch (err) {
