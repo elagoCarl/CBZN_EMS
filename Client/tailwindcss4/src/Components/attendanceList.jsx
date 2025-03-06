@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import { Search} from "lucide-react";
-import Sidebar from "../Components/callComponents/sidebar.jsx"
-=======
 import React, { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import axios from 'axios';
 import dayjs from 'dayjs';
 import Sidebar from "./callComponents/sidebar.jsx";
->>>>>>> dccd3b4cf218c66aacb7a086f88956312d3fdc95
 
 const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState("");
