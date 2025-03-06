@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post('/addTimeAdjustment', timeAdjust.addTimeAdjustment);
 router.get('/getAllTimeAdjustment', timeAdjust.getAllTimeAdjustments)
-router.get('/getAllTimeADjustmentByUser/:id', timeAdjust.getAllTimeAdjustmentsByUser)
+router.get('/getAllTimeAdjustmentByUser/:id', timeAdjust.getAllTimeAdjustmentsByUser)
 router.put('/updateTimeAdjustment/:id', timeAdjust.updateTimeAdjustment);
 router.delete('/cancelTimeAdjustment/:id', timeAdjust.cancelTimeAdjustment);
 

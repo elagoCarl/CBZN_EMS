@@ -1,4 +1,4 @@
-const { Attendance, User, Schedule } = require("../models"); // Ensure models match
+const { Attendance, User, Schedule, SchedUser } = require("../models"); // Ensure models match
 const util = require("../../utils"); // Utility functions if needed
 const dayjs = require('dayjs'); // Date validation
 const { Op } = require("sequelize");
@@ -10,7 +10,7 @@ const addAttendance = async (req, res) => {
   try {
     const { weekday, isRestDay, date, time_in, site, UserId } = req.body;
 
-    // 1) Validate mandatory fields.
+    // 1. Validate mandatory fields.
     if (!util.checkMandatoryFields([weekday, isRestDay, date, UserId])) {
       return res.status(400).json({
         successful: false,
@@ -18,59 +18,52 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // 2) Validate that the provided date matches the provided weekday.
-    const actualWeekday = dayjs(date).format('dddd');
-    if (actualWeekday !== weekday) {
+    // 2. Validate that the provided date matches the weekday.
+    if (dayjs(date).format('dddd') !== weekday) {
       return res.status(400).json({
         successful: false,
-        message: `The provided date (${date}) corresponds to ${actualWeekday}, not ${weekday}.`
+        message: `The provided date (${date}) does not correspond to ${weekday}.`
       });
     }
 
-    // 3) Fetch the user along with their active schedule.
-    const user = await User.findByPk(UserId, {
-      include: [{
-        model: Schedule,
-        where: { isActive: true },
-        required: true
-      }]
-    });
-
-    if (!user || !user.Schedule) {
-      return res.status(404).json({
-        successful: false,
-        message: "User schedule not found."
-      });
-    }
-
-    // 4) Check for duplicate attendance for the same user and date.
-    const existingAttendance = await Attendance.findOne({
-      where: { UserId, date }
-    });
-    if (existingAttendance) {
+    // 3. Check for duplicate attendance for the same user and date.
+    const duplicate = await Attendance.findOne({ where: { UserId, date } });
+    if (duplicate) {
       return res.status(400).json({
         successful: false,
         message: "Attendance for this day already exists."
       });
     }
 
-    // 5) Retrieve the shift (if any) for the provided weekday.
-    const scheduleForDay = user.Schedule.schedule[weekday];
+    // 4. Retrieve the effective schedule via SchedUser.
+    const schedUser = await SchedUser.findOne({
+      where: {
+        user_id: UserId,
+        effectivity_date: { [Op.lte]: date }
+      },
+      order: [['effectivity_date', 'DESC']],
+      include: [{ model: Schedule, where: { isActive: true }, required: true }]
+    });
+    if (!schedUser || !schedUser.Schedule) {
+      return res.status(404).json({
+        successful: false,
+        message: "Effective schedule not found for user."
+      });
+    }
+
+    // 5. Get the shift for the given weekday.
+    const scheduleForDay = schedUser.Schedule.schedule[weekday];
     const hasShift = scheduleForDay && scheduleForDay.In;
 
-    // 6) Handle based on whether this is a rest day or not.
+    // 6. Process attendance based on rest day vs non-rest day.
     if (isRestDay) {
-      // For rest days:
-      // If a shift exists for that day, disallow marking it as a rest day.
       if (hasShift) {
         return res.status(400).json({
           successful: false,
           message: `Attendance cannot be marked as a rest day because a shift is defined for ${weekday}.`
         });
       }
-
-      // Create rest day attendance with time_in and site forced to null.
-      const attendanceData = {
+      const newAttendance = await Attendance.create({
         weekday,
         isRestDay: true,
         site: null,
@@ -78,90 +71,66 @@ const addAttendance = async (req, res) => {
         time_in: null,
         time_out: null,
         UserId
-      };
-
-      const newAttendance = await Attendance.create(attendanceData);
+      });
       return res.status(201).json({
         successful: true,
         message: "Rest day attendance recorded successfully.",
         data: newAttendance
       });
     } else {
-      // For non-rest days:
-      // Ensure a shift exists.
       if (!hasShift) {
         return res.status(400).json({
           successful: false,
-          message: `No shift defined for ${weekday} in the user's schedule.`
+          message: `No shift defined for ${weekday} in the effective schedule.`
         });
       }
-
-      // time_in must be provided.
       if (!time_in) {
         return res.status(400).json({
           successful: false,
           message: "Time in is required for non-rest days."
         });
       }
-
-      // Validate time_in format: "YYYY-MM-DD HH:mm"
       if (!dayjs(time_in, "YYYY-MM-DD HH:mm", true).isValid()) {
         return res.status(400).json({
           successful: false,
           message: "time_in must be in 'YYYY-MM-DD HH:mm' format."
         });
       }
-
-      // Validate that the date part of time_in matches the provided date.
-      const timeInDate = dayjs(time_in, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD");
-      if (timeInDate !== date) {
+      if (dayjs(time_in, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD") !== date) {
         return res.status(400).json({
           successful: false,
-          message: `The date part of time_in (${timeInDate}) does not match the provided date (${date}).`
+          message: `The date part of time_in does not match the provided date (${date}).`
         });
       }
 
-      // If the site is Onsite, enforce a 15-minute grace period around the scheduled "In" time.
+      // Validate clock-in window based on site.
+      const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
+      const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
+      let lowerBound, upperBound;
+
       if (site === "Onsite") {
-        const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
-        const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
-
-        const lowerBound = scheduledTime.subtract(15, "minute");
-        const upperBound = scheduledTime.add(15, "minute");
-
-        if (clockInTime.isBefore(lowerBound) || clockInTime.isAfter(upperBound)) {
-          return res.status(400).json({
-            successful: false,
-            message: `For Onsite attendance, clock-in time must be within 15 minutes of the scheduled start time (${scheduleForDay.In}). Allowed window is from ${lowerBound.format("HH:mm")} to ${upperBound.format("HH:mm")}.`
-          });
-        }
+        lowerBound = scheduledTime.subtract(15, "minute");
+        upperBound = scheduledTime.add(15, "minute");
+      } else if (site === "Remote") {
+        lowerBound = scheduledTime.subtract(15, "minute");
+        upperBound = scheduledTime.add(1, "minute");
       }
-      if (site === "Remote") {
-        const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
-        const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
-
-        const lowerBound = scheduledTime.subtract(15, "minute");
-        const upperBound = scheduledTime.add(1, "minute");
-
-        if (clockInTime.isBefore(lowerBound) || clockInTime.isAfter(upperBound)) {
-          return res.status(400).json({
-            successful: false,
-            message: `For Remote attendance, clock-in time must be within 15 minutes of the scheduled start time (${scheduleForDay.In}). Allowed window is from ${lowerBound.format("HH:mm")} to ${upperBound.format("HH:mm")}.`
-          });
-        }
+      if (lowerBound && (clockInTime.isBefore(lowerBound) || clockInTime.isAfter(upperBound))) {
+        return res.status(400).json({
+          successful: false,
+          message: `For ${site} attendance, clock-in time must be within ${site === "Onsite" ? "15 minutes" : "1 minute"} of the scheduled start time (${scheduleForDay.In}). Allowed window is from ${lowerBound.format("HH:mm")} to ${upperBound.format("HH:mm")}.`
+        });
       }
-      // Create non-rest day attendance.
-      const attendanceData = {
+
+      const newAttendance = await Attendance.create({
         weekday,
         isRestDay: false,
-        site: site,
+        site,
         date,
         time_in,
         time_out: null,
         UserId
-      };
-
-      const newAttendance = await Attendance.create(attendanceData);
+      });
       return res.status(201).json({
         successful: true,
         message: "Attendance recorded successfully.",
@@ -176,8 +145,6 @@ const addAttendance = async (req, res) => {
     });
   }
 };
-
-
 // Get Attendance by ID
 const getAttendanceById = async (req, res) => {
   try {
@@ -212,7 +179,7 @@ const getAttendanceById = async (req, res) => {
 const getAllAttendances = async (req, res) => {
   try {
     const attendances = await Attendance.findAll({
-      include: [{ model: User, attributes: ['id', 'name'] }],
+      include: [{ model: User, attributes: ['id', 'name', 'employment_status'] }],
       order: [['time_in', 'DESC']]
     });
     if (!attendances || attendances.length === 0) {
@@ -326,8 +293,8 @@ const getAttendancesByUserId = async (req, res) => {
     const attendances = await Attendance.findAll({ where: { UserId: req.params.id } });
 
     if (!attendances || attendances.length === 0) {
-      return res.status(404).json({
-        successful: false,
+      return res.status(200).json({
+        successful: true,
         message: "No attendance records found for this user."
       });
     }
@@ -345,6 +312,7 @@ const getAttendancesByUserId = async (req, res) => {
     });
   }
 };
+
 
 // Export all functions
 module.exports = {

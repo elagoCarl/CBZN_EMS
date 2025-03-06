@@ -10,12 +10,16 @@ import AttendanceList from './Components/attendanceList.jsx';
 import ReqPage from './Components/reqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
-import TimeAdjustmentPage from "./Components/timeAdjusmentPAge.jsx";
+import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
+<<<<<<< HEAD
 import Page404 from "./Components/page404.jsx"; 
 import Page403 from "./Components/page403.jsx"
 // import ProtectedRoutes from "./Components/protectedRoutes.jsx";
+=======
+import SchedulePage from "./Components/schedPage.jsx";
+>>>>>>> dccd3b4cf218c66aacb7a086f88956312d3fdc95
 
 
 function App() {
@@ -43,11 +47,18 @@ function App() {
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+<<<<<<< HEAD
 
           {/* Catch-all 404 Route */}
           <Route path="*" element={<Page404 />} />
           <Route path="/403" element={<Page403 />} />
       </Routes>
+=======
+          <Route path="/schedulePage" element={<SchedulePage />} />
+
+
+        </Routes>
+>>>>>>> dccd3b4cf218c66aacb7a086f88956312d3fdc95
       </Router>
     </>
   )
