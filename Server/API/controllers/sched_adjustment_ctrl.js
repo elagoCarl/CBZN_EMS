@@ -1,9 +1,8 @@
-const { ScheduleAdjustment, User } = require('../models');
+const { ScheduleAdjustment, User, JobTitle, Department } = require('../models');
 const util = require('../../utils');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
-
 
 const addSchedAdjustment = async (req, res) => {
     try {
@@ -30,14 +29,6 @@ const addSchedAdjustment = async (req, res) => {
             return res.status(400).json({
                 successful: false,
                 message: "Invalid time format. Use HH:MM."
-            });
-        }
-
-        // Validate reason length
-        if (reason.length < 5) {
-            return res.status(400).json({
-                successful: false,
-                message: "Reason must be at least 5 characters long."
             });
         }
 
@@ -109,11 +100,36 @@ const updateSchedAdjustment = async (req, res) => {
 
 const getAllSchedAdjustments = async (req, res) => {
     try {
-        const adjustments = await ScheduleAdjustment.findAll();
+        const adjustments = await ScheduleAdjustment.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'user', // User who requested the adjustment
+                    attributes: ['name'],
+                    include: [
+                        {
+                            model: JobTitle,
+                            attributes: ['name'],
+                            include: [
+                                {
+                                    model: Department,
+                                    attributes: ['name']
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    model: User,
+                    as: 'reviewer', // User who reviewed the adjustment
+                    attributes: ['name']
+                }
+            ],
+            order: [['createdAt', 'DESC']] // Order from latest to oldest
+        });
         return res.status(200).json({ successful: true, data: adjustments });
-    } catch (error) {
-        console.error("Error fetching schedule adjustments:", error);
-        return res.status(500).json({ message: "Internal server error." });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
 };
 
@@ -134,8 +150,49 @@ const getSchedAdjustmentById = async (req, res) => {
         console.error("Error fetching schedule adjustment by ID:", error);
         return res.status(500).json({ message: "Internal server error." });
     }
-}
+};
 
+const getAllSchedAdjustmentByUser = async (req, res) => {
+    try {
+        const adjustments = await ScheduleAdjustment.findAll({
+            where: {
+                user_id: req.params.id
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                }
+            ],
+            order: [['date', 'DESC']]
+        });
+        if (!adjustments || adjustments.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No adjustments found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+}
 
 const cancelSchedAdjustment = async (req, res) => {
     try {
@@ -163,5 +220,6 @@ module.exports = {
     updateSchedAdjustment,
     getAllSchedAdjustments,
     getSchedAdjustmentById,
+    getAllSchedAdjustmentByUser,
     cancelSchedAdjustment
 };

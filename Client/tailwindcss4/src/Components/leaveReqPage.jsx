@@ -1,66 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { LogOut, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { LogOut, X, ChevronDown, ChevronUp, Check, XCircle, Search } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
+import axios from 'axios';
 
 const LeaveReqPage = () => {
+    const reviewer_id = 3;
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
-    const [currentTime, setCurrentTime] = useState(new Date());
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
-    const [currentUser, setCurrentUser] = useState("John Doe"); // Simulating current logged-in user
+    const [requestData, setRequestData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [modals, setModals] = useState({
+        approve: false,
+        reject: false,
+        selectedRequestId: null
+    });
+    const [reviewers, setReviewers] = useState([]);
 
-    // Add states for confirmation modals
-    const [showApproveConfirm, setShowApproveConfirm] = useState(false);
-    const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-    const [selectedRequestId, setSelectedRequestId] = useState(null);
+    useEffect(() => {
+        const fetchReviewers = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/users/getAllUsers'); // Adjust endpoint if necessary
+                setReviewers(response.data.data);
+            } catch (error) {
+                console.error("Error fetching reviewers:", error);
+            }
+        };
 
-    const [requestData, setRequestData] = useState([
-        {
-            id: 1,
-            name: "John Doe",
-            type: 'leave',
-            date: '2025-02-15',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-15',
-                currentShift: '09:00 - 17:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '12:00 - 20:00',
-                changeReason: 'Medical appointment conflicts with current schedule'
-            }
-        },
-        {
-            id: 2,
-            name: "Jane Smith",
-            type: 'leave',
-            date: '2025-02-16',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-16',
-                currentShift: '12:00 - 20:00',
-                requestedDate: '2025-02-18',
-                requestedShift: '09:00 - 17:00',
-                changeReason: 'Personal commitment requires morning shift on original day'
-            }
-        },
-        {
-            id: 3,
-            name: "Mike Johnson",
-            type: 'leave',
-            date: '2025-02-17',
-            status: 'pending',
-            details: {
-                currentDate: '2025-02-17',
-                currentShift: '08:00 - 16:00',
-                requestedDate: '2025-02-17',
-                requestedShift: '14:00 - 22:00',
-                changeReason: 'Need to swap to afternoon shift for coursework'
-            }
-        }
-    ]);
+        fetchReviewers();
+    }, []);
 
-    // Handle window resize with debounce for better performance
+
+    // Handle window resize with debounce
     useEffect(() => {
         const handleResize = () => {
             clearTimeout(window.resizeTimer);
@@ -76,109 +48,97 @@ const LeaveReqPage = () => {
         };
     }, []);
 
-    // Clock update
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
+    // Fetch leave requests
+    const fetchLeaveRequests = useCallback(async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/leaveRequest/getAllLeaveRequests');
+            setRequestData(response.data.data);
+        } catch (error) {
+            console.error("Error fetching leave requests:", error);
+        }
     }, []);
 
-    // Format date and time
-    const formatDate = (date) => {
-        const parts = date
-            .toLocaleDateString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-            })
-            .split("/");
-        return (
-            <div className="text-center">
-                {parts[0]}
-                <span className="text-green-500">/</span>
-                {parts[1]}
-                <span className="text-green-500">/</span>
-                {parts[2]}
-            </div>
-        );
-    };
-
-    const formatTime = (date) => {
-        const timeString = date.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true,
-        });
-
-        const [time, period] = timeString.split(" ");
-        return (
-            <span className="text-white bg-black/40 rounded-xl px-4 sm:px-5 flex flex-1 items-center justify-center">
-                {time} <span className="text-green-500 ml-2">{period}</span>
-            </span>
-        );
-    };
+    // Fetch leave requests on component mount
+    useEffect(() => {
+        fetchLeaveRequests();
+    }, [fetchLeaveRequests]);
 
     const toggleRow = (id) => {
-        if (expandedRow === id) {
-            setExpandedRow(null);
-        } else {
-            setExpandedRow(id);
+        setExpandedRow(expandedRow === id ? null : id);
+    };
+
+    // Modal management functions
+    const openModal = (type, requestId) => {
+        setModals({
+            approve: type === 'approve',
+            reject: type === 'reject',
+            selectedRequestId: requestId
+        });
+    };
+
+    const closeModals = () => {
+        setModals({
+            approve: false,
+            reject: false,
+            selectedRequestId: null
+        });
+    };
+
+    // Handle request status update
+    const updateRequestStatus = useCallback(async (status) => {
+        const { selectedRequestId } = modals;
+
+        try {
+            const selectedRequest = requestData.find(req => req.id === selectedRequestId);
+            if (!selectedRequest) {
+                console.error("Request not found!");
+                return;
+            }
+
+            await axios.put(`http://localhost:8080/leaveRequest/updateLeaveRequest/${selectedRequestId}`, {
+                status,
+                reviewer_id,
+                user_id: selectedRequest.user_id
+            });
+
+            // Optimistically update the UI
+            setRequestData(prevData =>
+                prevData.map(req =>
+                    req.id === selectedRequestId
+                        ? { ...req, status, reviewer_id }
+                        : req
+                )
+            );
+
+            closeModals();
+        } catch (error) {
+            console.error(`Error ${status === 'approved' ? 'approving' : 'rejecting'} request:`, error);
+            closeModals();
         }
-    };
+    }, [modals, requestData, reviewer_id]);
 
-    // Modified to show confirmation modal
-    const initiateApprove = (id) => {
-        setSelectedRequestId(id);
-        setShowApproveConfirm(true);
-    };
+    const handleApprove = () => updateRequestStatus('approved');
+    const handleReject = () => updateRequestStatus('rejected');
 
-    // Modified to show confirmation modal
-    const initiateReject = (id) => {
-        setSelectedRequestId(id);
-        setShowRejectConfirm(true);
-    };
-
-    // Actual approve action after confirmation
-    const handleApprove = () => {
-        setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'approved' } : req
-        ));
-        setShowApproveConfirm(false);
-        setSelectedRequestId(null);
-    };
-
-    // Actual reject action after confirmation
-    const handleReject = () => {
-        setRequestData(requestData.map(req =>
-            req.id === selectedRequestId ? { ...req, status: 'rejected' } : req
-        ));
-        setShowRejectConfirm(false);
-        setSelectedRequestId(null);
-    };
-
-    // Function to handle cancellation of a request
+    // Handle cancellation of a request
     const handleCancel = (id) => {
         setRequestData(requestData.map(req =>
             req.id === id ? { ...req, status: 'canceled' } : req
         ));
     };
 
-    // Function to close any open modals
-    const closeModals = () => {
-        setShowApproveConfirm(false);
-        setShowRejectConfirm(false);
-        setSelectedRequestId(null);
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
     };
 
+    // UI Helper functions
     const renderTypeIcon = (type) => {
-        switch (type) {
-            case 'leave':
-                return <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
-            default:
-                return null;
+        if (type === 'leave') {
+            return <LogOut className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
         }
+        return null;
     };
 
     const formatStatus = (status) => {
@@ -186,63 +146,131 @@ const LeaveReqPage = () => {
     };
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case 'approved':
-                return 'text-green-500';
-            case 'rejected':
-                return 'text-red-500';
-            case 'canceled':
-                return 'text-gray-500';
-            case 'pending':
-                return 'text-yellow-500';
-            default:
-                return 'text-gray-400';
-        }
+        const colors = {
+            approved: 'text-green-500',
+            rejected: 'text-red-500',
+            canceled: 'text-gray-500',
+            pending: 'text-yellow-500'
+        };
+        return colors[status] || 'text-gray-400';
     };
 
+    // Render Details Content
     const renderDetailsContent = (request) => {
+        const reviewer = reviewers.find(user => user.id === request.reviewer_id);
+    
+        // For pending requests (status is not approved or rejected)
+        if (request.status !== 'approved' && request.status !== 'rejected') {
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-base">
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Start Date</p>
+                        <p className="text-white">{request.start_date}</p>
+                    </div>
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">End Date</p>
+                        <p className="text-white">{request.end_date}</p>
+                    </div>
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Type</p>
+                        <p className="text-white capitalize">{request.type}</p>
+                    </div>
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
+                        <p className="text-white">{request.reason}</p>
+                    </div>
+                </div>
+            );
+        }
+    
+        // For approved or rejected requests
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Date</p>
-                    <p className="text-white">{request.details.currentDate}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-base">
+                {/* Column 1: Request Details */}
+                <div className="space-y-4">
+                    <p className="text-sm sm:text-base font-semibold text-green-500">Request Details</p>
+                    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Start Date</p>
+                        <p className="text-white">{request.start_date}</p>
+                    </div>
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">End Date</p>
+                        <p className="text-white">{request.end_date}</p>
+                    </div>
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
+                        <p className="text-white">{request.reason}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Current Shift</p>
-                    <p className="text-white">{request.details.currentShift}</p>
-                </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Date</p>
-                    <p className="text-white">{request.details.requestedDate}</p>
-                </div>
-                <div>
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Requested Shift</p>
-                    <p className="text-white">{request.details.requestedShift}</p>
-                </div>
-                <div className="sm:col-span-2">
-                    <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
-                    <p className="text-white">{request.details.changeReason}</p>
+    
+                {/* Column 2: Review Details */}
+                <div className="space-y-4">
+                    <p className="text-sm sm:text-base font-semibold text-green-500">Review Details</p>
+                    
+                    {(request.Reviewer || reviewer) && (
+                        <div>
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed by</p>
+                            <p className="text-white">{(request.Reviewer && request.Reviewer.name) || (reviewer && reviewer.name)}</p>
+                        </div>
+                    )}
+    
+                    {request.review_date && (
+                        <div>
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">Review Date</p>
+                            <p className="text-white">{request.review_date}</p>
+                        </div>
+                    )}
+    
+                    <div>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Type</p>
+                        <p className="text-white capitalize">{request.type}</p>
+                    </div>
                 </div>
             </div>
-        );
+        );
     };
+    
+    // Memoized filtered requests
+    const filteredRequests = useMemo(() => {
+        // First filter by status
+        const statusFiltered = activeFilter === 'all'
+            ? requestData
+            : requestData.filter(req => req.status === activeFilter);
 
-    const filteredRequests = activeFilter === 'all'
-        ? requestData
-        : requestData.filter(req => req.status === activeFilter);
+        // Then filter by search query if present
+        if (!searchQuery.trim()) return statusFiltered;
+
+        return statusFiltered.filter(req => {
+            const userName = req.User?.name || '';
+            return userName.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+    }, [activeFilter, requestData, searchQuery]);
 
     // Responsive pagination
-    const getRequestsPerPage = () => {
+    const requestsPerPage = useMemo(() => {
         if (windowWidth < 640) return 5;     // Mobile
         if (windowWidth < 1024) return 8;    // Tablet
-        return 12;                         // Desktop
-    };
+        return 12;                           // Desktop
+    }, [windowWidth]);
 
-    const requestsPerPage = getRequestsPerPage();
     const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
-    const indexOfLastRequest = currentPage * requestsPerPage;
-    const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
-    const currentRequests = filteredRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+
+    useEffect(() => {
+        // Reset to page 1 when filter changes
+        setCurrentPage(1);
+    }, [activeFilter]);
+
+    const currentRequests = useMemo(() => {
+        const indexOfLastRequest = currentPage * requestsPerPage;
+        const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+        return filteredRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+    }, [currentPage, filteredRequests, requestsPerPage]);
 
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -254,7 +282,9 @@ const LeaveReqPage = () => {
     };
 
     // Determine which pagination buttons to show
-    const getPaginationButtons = () => {
+    const paginationButtons = useMemo(() => {
+        if (totalPages <= 1) return [];
+
         // For small screens or few pages, show minimal pagination
         if (windowWidth < 640 || totalPages <= 5) {
             return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -273,25 +303,34 @@ const LeaveReqPage = () => {
             buttons = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
         }
         return buttons;
-    };
+    }, [currentPage, totalPages, windowWidth]);
 
     // Helper to get the request name for the confirmation modal
     const getRequestName = (id) => {
         const request = requestData.find(req => req.id === id);
-        return request ? request.name : '';
+        return request && request.User ? request.User.name : '';
     };
+
+    // Filter buttons for cleaner rendering
+    const filterButtons = [
+        { label: 'All Requests', value: 'all' },
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+        { label: 'Canceled', value: 'canceled' }
+    ];
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
-            <Sidebar /> {/* Mobile Nav Toggle */}
+            <Sidebar />
 
             {/* Approve Confirmation Modal */}
-            {showApproveConfirm && (
+            {modals.approve && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
                     <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
                         <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
                         <p className="text-gray-300 mb-6">
-                            Are you sure you want to approve the leave request from <span className="text-green-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                            Are you sure you want to approve the leave request from <span className="text-green-500 font-medium">{getRequestName(modals.selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -310,12 +349,12 @@ const LeaveReqPage = () => {
             )}
 
             {/* Reject Confirmation Modal */}
-            {showRejectConfirm && (
+            {modals.reject && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
                     <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
                         <h3 className="text-xl font-bold text-red-500 mb-4">Confirm Rejection</h3>
                         <p className="text-gray-300 mb-6">
-                            Are you sure you want to reject the leave request from <span className="text-red-500 font-medium">{getRequestName(selectedRequestId)}</span>?
+                            Are you sure you want to reject the leave request from <span className="text-red-500 font-medium">{getRequestName(modals.selectedRequestId)}</span>?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -335,69 +374,43 @@ const LeaveReqPage = () => {
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
-                {/* Page header with responsive layout */}
-                <header className="flex flex-col md:flex-row justify-between items-center mb-6">
+                {/* Page header */}
+                <header className="mb-6">
                     <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
                         Leave <span className="text-white"> Requests </span>
                     </h1>
-                    <div className="flex flex-col items-center">
-                        <div className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 text-white">
-                            {formatDate(currentTime)}
-                        </div>
-                        <div className="text-lg md:text-[clamp(1.5rem,4vw,4rem)]">
-                            {formatTime(currentTime)}
-                        </div>
-                    </div>
                 </header>
 
-                {/* Filters - Scrollable on mobile */}
+                {/* Filters row with search - Responsive layout */}
                 <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
+                    {/* Status filters - Scrollable on mobile */}
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
-                        <button
-                            onClick={() => setActiveFilter('all')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'all'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            All Requests
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('pending')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'pending'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Pending
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('approved')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'approved'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Approved
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('rejected')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'rejected'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Rejected
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('canceled')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'canceled'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Canceled
-                        </button>
+                        {filterButtons.map(button => (
+                            <button
+                                key={button.value}
+                                onClick={() => setActiveFilter(button.value)}
+                                className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === button.value
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                    }`}
+                            >
+                                {button.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Search input - Right aligned */}
+                    <div className="relative w-full md:w-64 lg:w-72">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="w-full pl-10 pr-4 py-2 bg-[#363636] text-white rounded-lg border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-400 text-sm"
+                        />
                     </div>
                 </div>
 
@@ -416,7 +429,7 @@ const LeaveReqPage = () => {
                                             Name
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Request Date
+                                            Requested Date
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
                                             Status
@@ -425,7 +438,6 @@ const LeaveReqPage = () => {
                                             Details
                                         </th>
                                         <th scope="col" className="text-white py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-left">
-                                            Actions
                                         </th>
                                     </tr>
                                 </thead>
@@ -433,7 +445,7 @@ const LeaveReqPage = () => {
                                     {currentRequests.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
-                                                No leave requests found
+                                                {searchQuery ? 'No matching leave requests found' : 'No leave requests found'}
                                             </td>
                                         </tr>
                                     ) : (
@@ -447,12 +459,12 @@ const LeaveReqPage = () => {
                                                         <div className="flex items-center">
                                                             {renderTypeIcon(request.type)}
                                                             <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
-                                                                {request.name}
+                                                                {request.User?.name || 'Unknown User'}
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-gray-300 hidden sm:table-cell">
-                                                        {request.date}
+                                                        {new Date(request.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' })}
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                                                         <span className={`text-xs sm:text-sm font-medium ${getStatusColor(request.status)}`}>
@@ -477,26 +489,25 @@ const LeaveReqPage = () => {
                                                             )}
                                                         </button>
                                                     </td>
-                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
-                                                        <div className="flex items-center justify-end gap-2">
+                                                    <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
+                                                        <div className="flex justify-end gap-2">
                                                             {/* Admin actions for pending requests */}
                                                             {request.status === 'pending' && (
                                                                 <>
                                                                     <button
-                                                                        onClick={() => initiateApprove(request.id)}
-                                                                        className="bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 transition-colors flex items-center"
+                                                                        onClick={() => openModal('approve', request.id)}
+                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28"
                                                                     >
-                                                                        <Check className="w-3 h-3 mr-1" /> Approve
+                                                                        <Check className="w-4 h-4 mr-2" /> Approve
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => initiateReject(request.id)}
-                                                                        className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors flex items-center"
+                                                                        onClick={() => openModal('reject', request.id)}
+                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28"
                                                                     >
-                                                                        <XCircle className="w-3 h-3 mr-1" /> Reject
+                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
                                                                     </button>
                                                                 </>
                                                             )}
-
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -534,8 +545,8 @@ const LeaveReqPage = () => {
                                 onClick={() => currentPage > 1 && paginate(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === 1
-                                    ? 'bg-[#2b2b2b] text-gray-500 cursor-not-allowed'
-                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                        ? 'bg-[#2b2b2b] text-gray-500 cursor-not-allowed'
+                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
                                     }`}
                                 aria-label="Previous page"
                             >
@@ -544,7 +555,7 @@ const LeaveReqPage = () => {
 
                             {/* Page numbers */}
                             <div className="flex gap-1 overflow-x-auto max-w-[60vw] sm:max-w-none hide-scrollbar">
-                                {getPaginationButtons().map((page, index) => (
+                                {paginationButtons.map((page, index) => (
                                     <React.Fragment key={index}>
                                         {page === '...' ? (
                                             <span className="px-2 py-1 text-gray-400 text-xs sm:text-sm">...</span>
@@ -552,8 +563,8 @@ const LeaveReqPage = () => {
                                             <button
                                                 onClick={() => paginate(page)}
                                                 className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm min-w-[24px] sm:min-w-[32px] ${currentPage === page
-                                                    ? 'bg-green-600 text-white'
-                                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                                        ? 'bg-green-600 text-white'
+                                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
                                                     }`}
                                                 aria-current={currentPage === page ? 'page' : undefined}
                                                 aria-label={`Page ${page}`}
@@ -570,8 +581,8 @@ const LeaveReqPage = () => {
                                 onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
                                 disabled={currentPage === totalPages}
                                 className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === totalPages
-                                    ? 'bg-[#2b2b2b] text-gray-500 cursor-not-allowed'
-                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                        ? 'bg-[#2b2b2b] text-gray-500 cursor-not-allowed'
+                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
                                     }`}
                                 aria-label="Next page"
                             >
