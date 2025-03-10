@@ -70,7 +70,7 @@ const getAllLeaveRequests = async (req, res) => {
             include: [
                 {
                     model: User,
-                    as: 'User', // Match the alias in the model
+                    as: 'user', // Match the alias in the model
                     attributes: ['name'] // Fetch only the 'name' field
                 }
             ]

@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         status: {
-            type: DataTypes.ENUM('pending', 'approved', 'rejceted', 'cancelled'),
+            type: DataTypes.ENUM('pending', 'approved', 'rejected', 'cancelled'),
             allowNull: false,
             defaultValue: 'pending'
         },
@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
         OvertimeRequest.belongsTo(models.User, {
             foreignKey: 'user_id',
             as: 'user'
+        });
+
+        OvertimeRequest.belongsTo(models.Schedule, {
+            foreignKey: 'schedule_id',  // Ensure this foreign key exists in your DB
+            as: 'schedule'
         });
     };
 
