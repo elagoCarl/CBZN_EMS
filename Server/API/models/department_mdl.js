@@ -9,14 +9,14 @@ module.exports = (sequelize, DataTypes) => {
         },
         isActive: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false
+            defaultValue: true
         }
     }, {
         timestamps: true
     });
 
     Department.associate = (models) => {
-        Department.hasMany(models.User, {
+        Department.hasMany(models.JobTitle, {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
         });

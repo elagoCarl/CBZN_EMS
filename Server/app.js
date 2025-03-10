@@ -13,6 +13,7 @@ const app = express();
 
 
 //IMPORT ALL ROUTERS NEEDED
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const schedule_rtr = require('./API/routers/schedule_rtr');
 const user_rtr = require('./API/routers/user_rtr');
@@ -20,6 +21,13 @@ const attendance_rtr = require('./API/routers/attendance_rtr');
 const department_rtr = require('./API/routers/department_rtr')
 const user_info_rtr = require('./API/routers/user_info_rtr')
 const emgncy_contact_rtr = require('./API/routers/emgncy_contact_rtr')
+const sched_adjustment_rtr = require('./API/routers/sched_adjustment_rtr')
+const job_title_rtr = require ('./API/routers/job_title_rtr')
+const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
+const time_adjustment_rtr = require('./API/routers/timeAdjustment_rtr');
+const leave_request_rtr = require('./API/routers/leave_request_rtr');
+const cutoff_rtr = require('./API/routers/cutoff_rtr');
+const sched_user_rtr = require('./API/routers/sched_user_rtr');
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -42,6 +50,16 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 5
 //content-type: application/json
 app.use(bodyParser.json({ limit: "50mb" }));
 
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({ message: "File too large. Max size is 2MB." });
+      }
+  } else if (err) {
+      return res.status(400).json({ message: err.message });
+  }
+  next();
+});
 
 //
 // app.use((req, res, next)=>{
@@ -90,12 +108,21 @@ app.use((req, res, next) => {
 
 
 //MIDDLEWARE FOR THE ROUTERS
+app.use("/uploads", express.static("uploads"));
+app.use('/schedUser', sched_user_rtr);
 app.use('/schedule', schedule_rtr);
 app.use('/users', user_rtr);
 app.use('/attendance', attendance_rtr);
 app.use('/department', department_rtr)
 app.use('/userInfo', user_info_rtr)
 app.use('/emgncyContact', emgncy_contact_rtr)
+app.use('/schedAdjustment', sched_adjustment_rtr)
+app.use('/jobtitle', job_title_rtr)
+app.use('/OTrequests', overtime_request_rtr)
+app.use('/timeAdjustment', time_adjustment_rtr);
+app.use('/leaveRequest', leave_request_rtr)
+app.use('/cutoff', cutoff_rtr)
+
 
 
 //ERROR MIDDLEWARES

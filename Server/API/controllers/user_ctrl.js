@@ -1,14 +1,64 @@
 const { User, Session } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
+
+const uploadProfilePic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // New profile picture path (relative)
+        await user.update({ profilePicture: req.file.buffer });
+
+        return res.status(200).json({
+            message: "Profile picture updated successfully"
+        });
+
+    } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+const getProfilePic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+
+        if (!user || !user.profilePicture) {
+            return res.status(404).json({ error: "Profile picture not found" });
+        }
+
+        // Set response headers for the correct image type
+        res.setHeader("Content-Type", "image/jpeg");
+        res.send(user.profilePicture);
+    } catch (error) {
+        console.error("Error fetching profile picture:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
 
 
 // const nodemailer = require('nodemailer');
-const { USER,
+    const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET } = process.env
@@ -90,28 +140,15 @@ const generateAccessToken = async (req, res, next) => {
     }
 };
 
-
 const addUser = async (req, res, next) => {
-    try {
-        const {
-<<<<<<<<< Temporary merge branch 1
-            companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title, birthdate, DepartmentId
-=========
-            employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
->>>>>>>>> Temporary merge branch 2
-        } = req.body;
+    const t = await User.sequelize.transaction(); // Start transaction
 
-        const DefaultPassword = "UserPass123"; // Default password      
+    try {
+        const { employeeId, name, email, isAdmin, employment_status } = req.body;
+        const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
-<<<<<<<<< Temporary merge branch 1
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title, birthdate, DepartmentId])) {
-=========
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
->>>>>>>>> Temporary merge branch 2
+        if (!util.checkMandatoryFields([employeeId, name, email])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -128,6 +165,14 @@ const addUser = async (req, res, next) => {
 
         // Check if the email already exists
         const existingEmail = await User.findOne({ where: { email } });
+        const existingEmployeeId = await User.findOne({ where: { employeeId } });
+        
+        if (existingEmployeeId) {
+            return res.status(406).json({
+                successful: false,
+                message: "Employee ID already exists. Please provide a different Employee ID."
+            });
+        }
         if (existingEmail) {
             return res.status(406).json({
                 successful: false,
@@ -135,43 +180,20 @@ const addUser = async (req, res, next) => {
             });
         }
 
+        // Create new user with a hashed password
+        const newUser = await User.create(
+            {
+                employeeId,
+                name,
+                email,
+                password: DefaultPassword,
+                isAdmin: isAdmin || false, // Default to false if not provided
+                employment_status: employment_status || 'Employee' // Default to 'Employee'
+            },
+            { transaction: t }
+        );
 
-        // Check if department exists
-        const existingDepartment = await Department.findByPk(DepartmentId   );
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
-
-        
-
-        // Create and save the new user
-        const newUser = await User.create({
-            employeeId,
-            first_name,
-            surname,
-<<<<<<<<< Temporary merge branch 1
-            middle_initial,
-            birthdate,
-=========
-            middle_name,
->>>>>>>>> Temporary merge branch 2
-            email,
-            contact_number,
-            address,
-            job_title,
-            birthdate,
-            departmentId,
-            password: DefaultPassword,
-<<<<<<<<< Temporary merge branch 1
-            isAdmin: false,
-            DepartmentId: DepartmentId
-=========
-            isAdmin
->>>>>>>>> Temporary merge branch 2
-        });
+        await t.commit(); // Commit transaction
 
         return res.status(201).json({
             successful: true,
@@ -190,17 +212,9 @@ const addUser = async (req, res, next) => {
     }
 };
 
-const updateUserById = async (req, res, next) => {
+const updateUserEmail = async (req, res, next) => {
     try {
-        const {
-<<<<<<<<< Temporary merge branch 1
-            companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title, status
-=========
-            employeeId, first_name, surname, middle_name,
-            email, contact_number, address, job_title, birthdate, departmentId, isAdmin
->>>>>>>>> Temporary merge branch 2
-        } = req.body;
+        const { email } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);
@@ -212,12 +226,114 @@ const updateUserById = async (req, res, next) => {
         }
 
         // Validate mandatory fields
-<<<<<<<<< Temporary merge branch 1
-        if (!util.checkMandatoryFields([companyId, username, first_name, surname, middle_initial,
-            email, contact_number, address, job_title, birthdate, department_id])) {
-=========
-        if (!util.checkMandatoryFields([employeeId, first_name, surname, middle_name, email, contact_number, address, job_title, birthdate, departmentId, isAdmin])) {
->>>>>>>>> Temporary merge branch 2
+        if (!util.checkMandatoryFields([email])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        // Validate email format
+        if (!util.validateEmail(email)) {
+            return res.status(406).json({
+                successful: false,
+                message: "Email format is invalid."
+            });
+        }
+
+        // Check if the email is already in use by another user
+        const existingEmail = await User.findOne({
+            where: {
+                email,
+                id: { [Op.ne]: req.params.id }
+            }
+        });
+        if (existingEmail) {
+            return res.status(406).json({
+                successful: false,
+                message: "Email is already in use by another user."
+            });
+        }
+
+        // Update user email
+        await user.update({ email });
+
+        return res.status(200).json({
+            successful: true,
+            message: "User email updated successfully."
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
+const updateUserPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { password: old_password, new_password, confirm_password } = req.body;
+
+        if (!util.checkMandatoryFields([old_password, new_password, confirm_password])){
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        // Find user by ID
+        const user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ 
+                successful: false, 
+                message: "User not found." 
+            });
+        }
+
+        // Verify old password
+        const isMatch = await bcrypt.compare(old_password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ 
+                successful: false, 
+                message: "Old password is incorrect." 
+            });
+        }
+        
+        // Update user's password
+        await user.update({ password: new_password });
+
+        return res.status(200).json({ 
+            successful: true, 
+            message: "Password updated successfully." 
+        });
+
+    } catch (error) {
+        console.error("Error updating password:", error);
+        return res.status(500).json({ 
+            successful: false, 
+            message: "An unexpected error occurred. Please try again later." 
+        });
+    }
+};
+
+const updateUserById = async (req, res, next) => {
+    try {
+        const { name, email, isAdmin, employment_status } = req.body;
+
+        // Check if the user exists
+        const user = await User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(404).json({
+                successful: false,
+                message: "User not found."
+            });
+        }
+
+        // Validate mandatory fields
+        if (!util.checkMandatoryFields([name, email])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -246,48 +362,12 @@ const updateUserById = async (req, res, next) => {
             });
         }
 
-<<<<<<<<< Temporary merge branch 1
-        // Check if the username is already in use by another user
-        const existingUsername = await User.findOne({ where: { username, id: { [Op.ne]: id } } });
-        if (existingUsername) {
-            return res.status(406).json({
-                successful: false,
-                message: "Username is already in use by another user."
-            });
-        }
-
-        // Check if the department exists
-        const existingDepartment = await Department.findByPk(DepartmentId);
-        if (!existingDepartment) {
-            return res.status(404).json({
-                successful: false,
-                message: "Department not found."
-            });
-        }
-=========
->>>>>>>>> Temporary merge branch 2
         // Update user data
         await user.update({
-            employeeId,
-            first_name,
-            surname,
-<<<<<<<<< Temporary merge branch 1
-            middle_initial,
-            birthdate,
-=========
-            middle_name,
->>>>>>>>> Temporary merge branch 2
+            name,
             email,
-            contact_number,
-            address,
-            job_title,
-<<<<<<<<< Temporary merge branch 1
-            department_id
-=========
-            birthdate,
-            departmentId,
-            isAdmin
->>>>>>>>> Temporary merge branch 2
+            isAdmin: isAdmin || user.isAdmin, // Only update if provided
+            employment_status: employment_status || user.employment_status // Default to existing status if not provided
         });
 
         return res.status(200).json({
@@ -299,7 +379,7 @@ const updateUserById = async (req, res, next) => {
         console.error(err);
         return res.status(500).json({
             successful: false,
-            message: err.message || "An unexpected error occurred."
+            message: err
         });
     }
 };
@@ -532,15 +612,16 @@ const getAllUsers = async (req, res, next) => {
     }
 }
 
-
-
->>>>>>>>> Temporary merge branch 2
 module.exports = {
     addUser,
     getUserById,
+    updateUserEmail,    
+    updateUserPassword,
     updateUserById,
     loginUser,
     logoutUser,
     forgotPass,
-    getAllUsers
+    getAllUsers,
+    uploadProfilePic,
+    getProfilePic
 }

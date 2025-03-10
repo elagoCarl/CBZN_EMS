@@ -6,13 +6,20 @@ const addUserInfo = async (req, res, next) => {
     try {
         const {
             age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation, UserId
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
         } = req.body;
 
         // Check if any mandatory fields are missing
-        if (!util.checkMandatoryFields([age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by, father_name, father_occupation, UserId])) {
+        if (!util.checkMandatoryFields([
+            age, city_add, provincial_add, birthdate, civil_status,
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
+        ])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -40,8 +47,10 @@ const addUserInfo = async (req, res, next) => {
         // Create UserInfo
         await UserInfo.create({
             age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation, UserId
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            height, weight, religion, citizenship, no_of_children,
+            mother_name, mother_occupation, mother_employed_by, UserId
         });
 
         return res.status(201).json({
@@ -52,19 +61,22 @@ const addUserInfo = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({
             successful: false,
-            message: error.message || "An unexpected error occurred."
+            message: error
         });
     }
 };
 
 
 
+
 const updateUserInfo = async (req, res, next) => {
     try {
         const {
-            age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation, UserId
+            UserId, age, city_add, provincial_add, birthdate, civil_status,
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            mother_name, mother_occupation, mother_employed_by,
+            height, weight, religion, citizenship, no_of_children
         } = req.body;
 
         // Check if UserId is provided
@@ -76,8 +88,13 @@ const updateUserInfo = async (req, res, next) => {
         }
 
         // Check if any mandatory fields are missing
-        if (!util.checkMandatoryFields([age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by, father_name, father_occupation])) {
+        if (!util.checkMandatoryFields([
+            age, city_add, provincial_add, birthdate, civil_status,
+            name_of_spouse, spouse_occupation, spouse_employed_by,
+            father_name, father_occupation, father_employed_by,
+            mother_name, mother_occupation, mother_employed_by,
+            height, weight, religion, citizenship, no_of_children
+        ])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -102,11 +119,27 @@ const updateUserInfo = async (req, res, next) => {
             });
         }
 
-        // Update the UserInfo
+        // Update the UserInfo with all fields
         await userInfo.update({
-            age, city_add, provincial_add, birthdate, civil_status,
-            name_of_spouse, spouse_occupation, employed_by,
-            father_name, father_occupation
+            age,
+            city_add,
+            provincial_add,
+            birthdate,
+            civil_status,
+            name_of_spouse,
+            spouse_occupation,
+            spouse_employed_by,
+            father_name,
+            father_occupation,
+            father_employed_by,
+            mother_name,
+            mother_occupation,
+            mother_employed_by,
+            height,
+            weight,
+            religion,
+            citizenship,
+            no_of_children
         });
 
         return res.status(200).json({

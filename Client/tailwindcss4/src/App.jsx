@@ -1,15 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
-import EmployeeHome from './Components/employHome.jsx';
-import AddUser from './Components/callComponents/addUser.jsx';
-<<<<<<<<< Temporary merge branch 1
-=========
-import ViewEmployee from "./Components/viewEmploy.jsx";
-
->>>>>>>>> Temporary merge branch 2
-import AdminEms from './Components/admin_Ems.jsx'
 import ForgotPass from './Components/forgotPass.jsx';
-
+import ManageUsers from './Components/manageUsers.jsx';
+import MyAttendance from "./Components/myAttendance.jsx";
+import Sidebar from './Components/callComponents/sidebar.jsx';
+import AccountSettings from './Components/accSettings.jsx';
+import AttendanceList from './Components/attendanceList.jsx';
+import ReqPage from './Components/reqPage.jsx';
+import DeptPage from "./Components/departmentPage.jsx";
+import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
+import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
+import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
+import LeaveReqPage from "./Components/leaveReqPage.jsx";
+import SchedulePage from "./Components/schedPage.jsx";
 
 
 function App() {
@@ -18,14 +21,23 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/employeeHome" element={<EmployeeHome />} />
-          <Route path="/addUser" element={<AddUser />} />
-          {/* <Route path="/attendancePage" element={<AttendancePage />} /> */}
-          <Route path="/adminEms" element={<AdminEms />} />
+          <Route path="/reqPage" element={<ReqPage />} />
           <Route path="/forgotPass" element={<ForgotPass />} />
-          <Route path="/editUser" element={<EditUser/>} />
->>>>>>>>> Temporary merge branch 2
-      </Routes>
+          <Route path="/manageUsers" element={<ManageUsers />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
+          <Route path="/accSettings" element={<AccountSettings />} />
+          <Route path="/attendanceList" element={<AttendanceList />} />
+          <Route path="/deptPage" element={<DeptPage />} />
+          <Route path="/myAttendance" element={<MyAttendance />} />
+          <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
+          <Route path="/sidebar" element={<Sidebar />} />
+          <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
+          <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
+          <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+          <Route path="/schedulePage" element={<SchedulePage />} />
+
+
+        </Routes>
       </Router>
     </>
   )

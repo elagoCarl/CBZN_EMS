@@ -1,92 +1,230 @@
-import { useRef, useEffect } from "react";
-import PropTypes from "prop-types";
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '../Img/CBZN-Logo.png';
+import {
+    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X
+} from 'lucide-react';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
-    const sidebarRef = useRef(null);
+const Sidebar = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [expandedItem, setExpandedItem] = useState(null);
+    const profileRef = useRef(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
+    // Handle screen resize and close mobile menu on larger screens
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-                toggleSidebar(false);
+        const handleResize = () => {
+            if (window.innerWidth >= 768) {
+                setIsMobileMenuOpen(false);
             }
         };
 
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+    // Close profile dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsProfileOpen(false);
+            }
         };
-    }, [isOpen, toggleSidebar]);
 
-    const menuItems = [
-        { label: "HOME", href: "#" },
-        { label: "DASHBOARD", href: "#" },
-        { label: "DEPARTMENTS", href: "#" },
-        { label: "CAREERS", href: "#" },
-        { label: "REPORTS", href: "#" },
-        { label: "USERS", href: "#" },
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Close mobile menu when clicking on overlay
+    const closeMobileMenu = () => {
+        setIsMobileMenuOpen(false);
+    };
+
+    // Toggle dropdown menu
+    const toggleDropdown = (itemName) => {
+        setExpandedItem(expandedItem === itemName ? null : itemName);
+    };
+
+    // Handle navigation
+    const handleNavigation = (path) => {
+        navigate(path);
+        closeMobileMenu();
+    };
+
+    // Check if a path is active
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
+
+    // Neutral icon color
+    const iconColor = "#9ca3af"; // Gray-400
+
+    // Navigation items with Lucide icons and paths
+    const navigationItems = [
+        { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
+        { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
+        { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
+        {
+            name: 'Requests',
+            icon: <FileText size={20} color={iconColor} />,
+            subItems: [
+                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> }, //overtime
+                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={18} color={iconColor} /> }, //leave
+                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarClock size={18} color={iconColor} /> }, //time-adjustments
+                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={18} color={iconColor} /> } //schedule-change
+            ]
+        },
     ];
 
     return (
-        <div
-            ref={sidebarRef}
-            className={`fixed right-0 top-0 flex flex-col h-screen bg-black w-64 p-6 justify-between shadow-lg transform transition-transform duration-300 ${isOpen ? "translate-x-0" : "translate-x-full"
-                }`}
-        >
-            <div className="mb-8 text-center">
-                <h2 className="text-lg xl:text-3xl lg:text-2xl md:text-xl sm:text-lg font-semibold text-white tracking-wide">
-                    NAVIGATION
-                </h2>
-            </div>
+        <>
+            {/* Mobile Menu Button */}
+            <button
+                className={`md:hidden fixed top-5 ${isMobileMenuOpen ? 'left-44' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex justify-center items-center transition-all duration-300 cursor-pointer bg-gray-800`}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+            >
+                {isMobileMenuOpen ? <X size={24} color="white" /> : <Menu size={24} color="white" />}
+            </button>
 
-            <nav>
-                <ul className="flex flex-col gap-4">
-                    {menuItems.map((item) => (
-                        <li key={item.label} className="flex justify-center">
-                            <a
-                                href={item.href}
-                                className="relative py-3 text-center text-lg font-medium text-white transition duration-300 hover:text-green-500"
-                            >
-                                {item.label}
-                                {item.label === "REPORTS" && (
-                                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></div>
-                                )}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+            {/* Overlay for mobile */}
+            {isMobileMenuOpen && (
+                <div
+                    className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+                    onClick={closeMobileMenu}
+                    aria-hidden="true"
+                />
+            )}
 
-            <div>
-                <button
-                    className="flex items-center justify-center w-full py-3 text-lg font-medium text-white transition duration-300 border border-transparent rounded-md bg-gray-950 hover:text-green-500 hover:border-green-500"
-                    onClick={() => toggleSidebar(false)}
+            {/* Sidebar Container */}
+            <div className="md:block">
+                <aside
+                    className={`
+                        fixed md:relative w-64 bg-black flex flex-col min-h-screen 
+                        transition-all duration-300 ease-in-out z-45
+                        md:translate-x-0 
+                        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                        shadow-lg
+                    `}
+                    aria-label="Sidebar navigation"
                 >
-                    <svg
-                        className="w-6 h-6 mr-2"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                    >
-                        <path
-                            d="M13 9l-3 3m0 0l3 3m-3-3h8M7 16a4 4 0 01-4-4 4 4 0 014-4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    </svg>
-                    LOGOUT
-                </button>
-            </div>
-        </div>
-    );
-};
+                    {/* Logo Section */}
+                    <div className="p-6 border-b border-[#363636]">
+                        <div className="w-full flex justify-baseline items-center cursor-pointer" onClick={() => handleNavigation('/')}>
+                            <img src={logo} alt="CBZN Logo" className="h-8 w-auto" />
+                        </div>
+                    </div>
 
-Sidebar.propTypes = {
-    isOpen: PropTypes.bool.isRequired,
-    toggleSidebar: PropTypes.func.isRequired,
+                    {/* Navigation Links */}
+                    <nav className="flex-1 px-4 py-6 overflow-y-auto">
+                        <ul className="space-y-4 text-sm font-semibold">
+                            {navigationItems.map((item) => (
+                                <li key={item.name}>
+                                    {!item.subItems ? (
+                                        <button
+                                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
+                                                ${isActive(item.path)
+                                                    ? 'text-green-500 bg-gray-900'
+                                                    : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                            onClick={() => handleNavigation(item.path)}
+                                        >
+                                            {item.icon}
+                                            <span className="text-left">{item.name}</span>
+                                        </button>
+                                    ) : (
+                                        <div>
+                                            <button
+                                                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
+                                                    ${item.subItems.some(subItem => isActive(subItem.path))
+                                                        ? 'text-green-500 bg-gray-900'
+                                                        : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                                onClick={() => toggleDropdown(item.name)}
+                                                aria-expanded={expandedItem === item.name}
+                                                aria-controls={`dropdown-${item.name}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {item.icon}
+                                                    <span>{item.name}</span>
+                                                </div>
+                                                <ChevronDown
+                                                    size={16}
+                                                    color={iconColor}
+                                                    className={`transition-transform duration-200 ${expandedItem === item.name ? 'rotate-180' : ''}`}
+                                                />
+                                            </button>
+
+                                            {/* Dropdown Menu */}
+                                            <div
+                                                id={`dropdown-${item.name}`}
+                                                className={`
+                                                    mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
+                                                    ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
+                                                `}
+                                            >
+                                                {item.subItems.map((subItem) => (
+                                                    <button
+                                                        key={subItem.name}
+                                                        className={`w-full text-left flex items-center gap-2 text-sm px-3 py-2 rounded-md transition-all duration-200
+                                                            ${isActive(subItem.path)
+                                                                ? 'text-green-500 bg-gray-900'
+                                                                : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
+                                                        onClick={() => handleNavigation(subItem.path)}
+                                                    >
+                                                        {subItem.icon}
+                                                        <span>{subItem.name}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    {/* Profile Section */}
+                    <div className="p-4 border-t border-[#363636] relative" ref={profileRef}>
+                        <button
+                            className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-900 transition-all duration-200"
+                            onClick={() => setIsProfileOpen(!isProfileOpen)}
+                            aria-expanded={isProfileOpen}
+                            aria-haspopup="true"
+                        >
+                            <div className="w-10 h-10 bg-[#363636] rounded-full flex items-center justify-center text-white">
+                                A
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-white font-medium">ADMIN</span>
+                                <span className="text-gray-400 text-xs">ADMIN@CBZN.COM</span>
+                            </div>
+                        </button>
+
+                        {/* Profile Dropdown */}
+                        {isProfileOpen && (
+                            <div className="absolute left-4 right-4 bottom-full mb-2 bg-[#2b2b2b] text-white rounded-lg shadow-lg overflow-hidden">
+                                <button
+                                    className="w-full text-left px-4 py-3 hover:bg-red-600 transition-colors duration-200 flex items-center gap-2"
+                                    onClick={() => {
+                                        setIsProfileOpen(false);
+                                        closeMobileMenu();
+                                        // Add logout logic here
+                                        handleNavigation('/');
+                                    }}
+                                >
+                                    <LogOut size={16} color={iconColor} />
+                                    Log Out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </aside>
+            </div>
+        </>
+    );
 };
 
 export default Sidebar;
