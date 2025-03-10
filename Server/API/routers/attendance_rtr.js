@@ -7,5 +7,6 @@ router.get('/getAttendance/:id', Attendance.getAttendanceById)
 router.get('/getAllAttendances', Attendance.getAllAttendances)
 router.put('/updateAttendance', Attendance.updateAttendance)
 router.get('/getAttendanceByUser/:id', Attendance.getAttendancesByUserId)
+router.get('/getAllAttendanceCutoffByUser/:id', Attendance.getAllAttendanceCutoffByUser)
 
 module.exports = router;

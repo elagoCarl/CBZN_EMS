@@ -313,6 +313,41 @@ const getAttendancesByUserId = async (req, res) => {
   }
 };
 
+const getAllAttendanceCutoffByUser = async (req, res) => {
+  try {
+      const { cutoff_start, cutoff_end } = req.body;
+
+      const adjustments = await Attendance.findAll({
+          where: {
+              UserId: req.params.id,
+              date: {
+                  [Op.between]: [cutoff_start, cutoff_end]
+              }
+          },
+          order: [['date', 'DESC']]
+      });
+
+      if (!adjustments || adjustments.length === 0) {
+          return res.status(200).json({
+              successful: true,
+              message: "No adjustments found.",
+              count: 0,
+              data: [],
+          });
+      }
+
+      return res.status(200).json({
+          successful: true,
+          data: adjustments
+      });
+  } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+          successful: false,
+          message: err.message || "An unexpected error occurred."
+      });
+  }
+};
 
 // Export all functions
 module.exports = {
@@ -320,5 +355,6 @@ module.exports = {
   getAttendanceById,
   getAllAttendances,
   updateAttendance,
-  getAttendancesByUserId
+  getAttendancesByUserId,
+  getAllAttendanceCutoffByUser
 };

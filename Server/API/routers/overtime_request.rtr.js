@@ -12,6 +12,7 @@ router.put('/updateOvertimeReq/:id', OvertimeRequest.updateOvertimeRequest)
 router.put('/cancelOvertimeReq/:id', OvertimeRequest.cancelOvertimeRequest)
 // router.get('/getOvertimeReqbyUID/:user_id', OvertimeRequest.getOvertimeRequestByUID)
 //router.delete('/deleteOvertimeReq/:id', OvertimeRequest.deleteOvertimeRequest)
+router.get('/getAllOvertimeCutoffByUser/:id', OvertimeRequest.getAllOvertimeCutoffByUser)
 
 
 module.exports = router;

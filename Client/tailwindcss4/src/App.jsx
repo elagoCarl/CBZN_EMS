@@ -13,7 +13,7 @@ import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 import SchedulePage from "./Components/schedPage.jsx";
-
+import DTR from "./Components/DTRpage.jsx";
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
           <Route path="/schedulePage" element={<SchedulePage />} />
-
+          <Route path="/dtr" element={<DTR />} />
 
         </Routes>
       </Router>

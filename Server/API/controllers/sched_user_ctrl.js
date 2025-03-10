@@ -218,12 +218,19 @@ const updateSchedUserByUser = async (req, res) => {
 
 const getSchedUserByUser = async (req, res) => {
   try {
-    const { userId } = req.params; // assuming the URL is /schedUser/getSchedUserByUser/:userId
+    const { userId } = req.params; // assuming URL is /schedUser/getSchedUserByUser/:userId
 
-    // Find one schedule association for the user, optionally ordered by effectivity_date
+    // Find one schedule association for the user, ordered by the most recent effectivity_date,
+    // and include the associated Schedule model
     const schedUser = await SchedUser.findOne({
       where: { user_id: userId },
-      order: [['effectivity_date', 'DESC']] // returns the most recent effectivity_date if more than one exists
+      order: [['effectivity_date', 'DESC']],
+      include: [
+        {
+          model: Schedule,
+          attributes: ['title', 'schedule', 'isActive'] // adjust attributes as needed
+        }
+      ]
     });
 
     if (!schedUser) {
@@ -246,11 +253,118 @@ const getSchedUserByUser = async (req, res) => {
   }
 };
 
+const getSchedUsersByUserCutoff = async (req, res) => {
+  try {
+    const { userId } = req.params; // e.g., /schedUser/getSchedUsersByUserCutoff/:userId
+    const { cutoffStart, cutoffEnd } = req.body;
+
+    if (!userId || !cutoffStart || !cutoffEnd) {
+      return res.status(400).json({
+        successful: false,
+        message: 'userId, cutoffStart, and cutoffEnd are required.'
+      });
+    }
+
+    // 1. Find schedule records for the user within the cutoff period.
+    let schedulesInCutoff = await SchedUser.findAll({
+      where: {
+        user_id: userId,
+        effectivity_date: {
+          [Op.between]: [cutoffStart, cutoffEnd]
+        }
+      },
+      include: [
+        {
+          model: Schedule,
+          attributes: ['title', 'schedule', 'isActive']
+        }
+      ],
+      order: [['effectivity_date', 'ASC']]
+    });
+
+    // Use a Map to avoid duplicates.
+    const combinedMap = new Map();
+
+    if (schedulesInCutoff.length === 0) {
+      // If no schedules exist within the cutoff,
+      // get the latest schedule record effective before the cutoffStart.
+      const latestBeforeCutoff = await SchedUser.findOne({
+        where: {
+          user_id: userId,
+          effectivity_date: {
+            [Op.lt]: cutoffStart
+          }
+        },
+        include: [
+          {
+            model: Schedule,
+            attributes: ['title', 'schedule', 'isActive']
+          }
+        ],
+        order: [['effectivity_date', 'DESC']]
+      });
+
+      if (latestBeforeCutoff) {
+        combinedMap.set(latestBeforeCutoff.id, latestBeforeCutoff);
+      }
+    } else {
+      // Add all schedules found within the cutoff.
+      schedulesInCutoff.forEach(sched => {
+        combinedMap.set(sched.id, sched);
+      });
+
+      // For each schedule effective after the cutoffStart,
+      // fetch the most recent schedule record before its effectivity date.
+      for (const sched of schedulesInCutoff) {
+        if (new Date(sched.effectivity_date) > new Date(cutoffStart)) {
+          const previousSchedule = await SchedUser.findOne({
+            where: {
+              user_id: userId,
+              effectivity_date: {
+                [Op.lt]: sched.effectivity_date
+              }
+            },
+            include: [
+              {
+                model: Schedule,
+                attributes: ['title', 'schedule', 'isActive']
+              }
+            ],
+            order: [['effectivity_date', 'DESC']]
+          });
+
+          if (previousSchedule) {
+            combinedMap.set(previousSchedule.id, previousSchedule);
+          }
+        }
+      }
+    }
+
+    // Convert the Map to an array and sort by effectivity_date ascending.
+    const combinedSchedules = Array.from(combinedMap.values()).sort(
+      (a, b) => new Date(a.effectivity_date) - new Date(b.effectivity_date)
+    );
+
+    return res.status(200).json({
+      successful: true,
+      schedUsers: combinedSchedules
+    });
+  } catch (error) {
+    console.error('Error in getSchedUsersByUserCutoff:', error);
+    return res.status(500).json({
+      successful: false,
+      message: error.message
+    });
+  }
+};
+
+
 // Export the functions
 module.exports = {
   addSchedUser,
   getAllSchedUser,
   getSchedUser,
   updateSchedUserByUser,
-  getSchedUserByUser
+  getSchedUserByUser,
+  getSchedUsersByUserCutoff
 };

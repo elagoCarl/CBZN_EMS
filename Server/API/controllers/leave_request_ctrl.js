@@ -260,7 +260,47 @@ const getAllLeaveRequestsByUser = async (req, res) => {
   };
   
   module.exports = getAllLeaveRequestsByUser;
+
+
+  const getAllLeaveCutoffByUser = async (req, res) => {
+      try {
+          const { cutoff_start, cutoff_end } = req.body;
   
+          const leaveRequests = await LeaveRequest.findAll({
+              where: {
+                  user_id: req.params.id,
+                  status: 'approved',
+                  [Op.and]: [
+                      { start_date: { [Op.lte]: cutoff_end } }, // leave request starts on or before the cutoff end date
+                      { end_date: { [Op.gte]: cutoff_start } }     // leave request ends on or after the cutoff start date
+                  ]
+              },
+              order: [['start_date', 'DESC']]
+          });
+  
+          if (!leaveRequests || leaveRequests.length === 0) {
+              return res.status(200).json({
+                  successful: true,
+                  message: "No leave requests found within the cutoff.",
+                  count: 0,
+                  data: [],
+              });
+          }
+  
+          return res.status(200).json({
+              successful: true,
+              data: leaveRequests
+          });
+      } catch (err) {
+          console.error(err);
+          return res.status(500).json({
+              successful: false,
+              message: err.message || "An unexpected error occurred."
+          });
+      }
+  };
+  
+
 
 // Export the functions
 module.exports = {
@@ -269,5 +309,6 @@ module.exports = {
     getAllLeaveRequests,
     updateLeaveRequest,
     cancelLeaveRequest,
-    getAllLeaveRequestsByUser
+    getAllLeaveRequestsByUser,
+    getAllLeaveCutoffByUser
 };
