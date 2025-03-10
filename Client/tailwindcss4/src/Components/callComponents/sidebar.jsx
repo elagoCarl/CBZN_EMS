@@ -67,6 +67,8 @@ const Sidebar = () => {
         { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
         { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
         { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
+        { name: 'Schedules', icon: <Settings size={20} color={iconColor} />, path: '/schedulePage' },
+        { name: 'Departments & Jobs', icon: <Settings size={20} color={iconColor} />, path: '/deptPage' },
         {
             name: 'Requests',
             icon: <FileText size={20} color={iconColor} />,

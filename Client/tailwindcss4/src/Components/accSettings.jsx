@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Sidebar from "./callComponents/sidebar.jsx"; // Import the Sidebar component as used in MyAttendance
 
 const AccountSettings = () => {
-  const [isNavOpen, setIsNavOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [profilePic, setProfilePic] = useState(null);
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ const AccountSettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const userId = 5; // Hardcoded user ID for demo purposes
+  const userId = 1; // Hardcoded user ID for demo purposes
 
   // Update time every second
   useEffect(() => {
@@ -170,46 +170,8 @@ const AccountSettings = () => {
 
   return (
     <div className="flex h-screen bg-black/90">
-      {/* Mobile Nav Toggle */}
-      <button
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-green-600 text-white hover:bg-green-700"
-      >
-        {isNavOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Sidebar */}
-      <div className={`${isNavOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:relative w-64 bg-black p-6 flex flex-col h-full transition-transform duration-300 ease-in-out z-40`}>
-        <div className="mb-8">
-          <div className="w-full text-white p-4 flex justify-center items-center">
-            <div className="flex items-center h-10 w-auto">
-              <img src={logo} alt="Logo" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col flex-1 justify-center items-center space-y-2">
-          <nav className="w-full space-y-2 text-center font-semibold text-base">
-            <div className="text-gray-400 hover:bg-gray-800 px-4 py-3 rounded cursor-pointer transition-colors">Home</div>
-            <div className="text-gray-400 hover:bg-gray-800 px-4 py-3 rounded cursor-pointer transition-colors">Attendance</div>
-            <div className="text-gray-400 hover:bg-gray-800 px-4 py-3 rounded cursor-pointer transition-colors">Manage Users</div>
-            <div className="text-gray-400 hover:bg-gray-800 px-4 py-3 rounded cursor-pointer transition-colors">Reports</div>
-            <div className="bg-green-800/50 text-green-400 px-4 py-3 rounded cursor-pointer transition-colors">Settings</div>
-            <div className="text-gray-400 hover:bg-gray-800 px-4 py-3 rounded cursor-pointer transition-colors">Help</div>
-          </nav>
-        </div>
-
-        <div className="mt-auto flex items-center space-x-3 p-4 border-t border-gray-800">
-          <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center text-white">
-            <User size={16} />
-          </div>
-          <div>
-            <div className="text-white text-xs font-medium">ADMIN</div>
-            <div className="text-gray-400 text-xs">{email}</div>
-          </div>
-        </div>
-      </div>
+      {/* Use the Sidebar component from MyAttendance */}
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-4 md:p-8 overflow-y-auto">
@@ -364,13 +326,6 @@ const AccountSettings = () => {
           </div>
         </div>
       </div>
-
-      {isNavOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setIsNavOpen(false)}
-        />
-      )}
 
       {/* Toast Notifications */}
       <ToastContainer
