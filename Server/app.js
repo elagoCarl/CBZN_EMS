@@ -4,6 +4,7 @@ const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 // const cookieParser = require('cookie-parser');
 require('dotenv').config()
@@ -11,6 +12,12 @@ require('dotenv').config()
 //INITIALIZE EXPRESS APPLICATION AND STORE TO app
 const app = express();
 
+// Update CORS configuration to allow 'Cache-Control' header
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control']
+}));
 
 //IMPORT ALL ROUTERS NEEDED
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -22,8 +29,8 @@ const department_rtr = require('./API/routers/department_rtr')
 const user_info_rtr = require('./API/routers/user_info_rtr')
 const emgncy_contact_rtr = require('./API/routers/emgncy_contact_rtr')
 const sched_adjustment_rtr = require('./API/routers/sched_adjustment_rtr')
-const job_title_rtr = require ('./API/routers/job_title_rtr')
-const overtime_request_rtr = require ('./API/routers/overtime_request.rtr')
+const job_title_rtr = require('./API/routers/job_title_rtr')
+const overtime_request_rtr = require('./API/routers/overtime_request.rtr')
 const time_adjustment_rtr = require('./API/routers/timeAdjustment_rtr');
 const leave_request_rtr = require('./API/routers/leave_request_rtr');
 const cutoff_rtr = require('./API/routers/cutoff_rtr');
@@ -52,11 +59,11 @@ app.use(bodyParser.json({ limit: "50mb" }));
 
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-          return res.status(400).json({ message: "File too large. Max size is 2MB." });
-      }
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "File too large. Max size is 2MB." });
+    }
   } else if (err) {
-      return res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
   next();
 });

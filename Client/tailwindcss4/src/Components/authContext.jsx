@@ -1,24 +1,44 @@
-// Client/tailwindcss4/src/Components/authContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
+import PropTypes from 'prop-types';
 
-// Create the authentication context
 const AuthContext = createContext();
 
-// AuthProvider component that holds the user state
 export const AuthProvider = ({ children }) => {
-    // Initially, no user is logged in.
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true); // New loading state
+
+    // On app startup, fetch the current user and bypass cache using a query parameter
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:8080/users/getCurrentUser?t=${Date.now()}`, // Cache buster
+                    { withCredentials: true }
+                );
+                if (response.data.successful && response.data.user) {
+                    setUser(response.data.user);
+                }
+            } catch (error) {
+                console.log("User not authenticated or token expired", error);
+            } finally {
+                setLoading(false); // Finished fetching
+            }
+        };
+
+        fetchCurrentUser();
+    }, []);
 
     return (
-        <AuthContext.Provider value={{ user, setUser }}>
+        <AuthContext.Provider value={{ user, setUser, loading }}>
             {children}
         </AuthContext.Provider>
     );
 };
-
-// Custom hook to access the AuthContext in any component
-export const useAuth = () => {
-    return useContext(AuthContext);
+AuthProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
+
+export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;
