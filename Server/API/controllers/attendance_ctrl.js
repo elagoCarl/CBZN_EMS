@@ -8,10 +8,9 @@ dayjs.extend(customParseFormat);
 // Create Attendance === PANULL NG VALUE TIMEOUT SA REQUEST BODY ===
 const addAttendance = async (req, res) => {
   try {
-    // Remove isRestDay from the destructured req.body
     const { weekday, date, time_in, site, UserId } = req.body;
 
-    // Validate mandatory fields (now without isRestDay)
+    // Validate mandatory fields
     if (!util.checkMandatoryFields([weekday, date, UserId])) {
       return res.status(400).json({
         successful: false,
@@ -19,7 +18,7 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Validate that the provided date matches the weekday.
+    // Validate that the provided date matches the weekday
     if (dayjs(date).format('dddd') !== weekday) {
       return res.status(400).json({
         successful: false,
@@ -27,10 +26,10 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Automatically determine if it's a rest day (Saturday or Sunday)
+    // Automatically determine if it's a rest day
     const isRestDay = (weekday === 'Saturday' || weekday === 'Sunday');
 
-    // Check for duplicate attendance for the same user and date.
+    // Check for duplicate attendance for the same user and date
     const duplicate = await Attendance.findOne({ where: { UserId, date } });
     if (duplicate) {
       return res.status(400).json({
@@ -39,7 +38,7 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Retrieve the effective schedule via SchedUser.
+    // Retrieve the effective schedule via SchedUser
     const schedUser = await SchedUser.findOne({
       where: {
         user_id: UserId,
@@ -48,6 +47,7 @@ const addAttendance = async (req, res) => {
       order: [['effectivity_date', 'DESC']],
       include: [{ model: Schedule, where: { isActive: true }, required: true }]
     });
+
     if (!schedUser || !schedUser.Schedule) {
       return res.status(404).json({
         successful: false,
@@ -55,32 +55,38 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Get the shift for the given weekday.
+    // Get the shift for the given weekday
     const scheduleForDay = schedUser.Schedule.schedule[weekday];
     const hasShift = scheduleForDay && scheduleForDay.In;
 
+    // Initialize remarks to null
+    let remarks = null;
+
     if (!isRestDay) {
-      // For working days, a shift must exist.
+      // For working days, a shift must exist
       if (!hasShift) {
         return res.status(400).json({
           successful: false,
           message: `No shift defined for ${weekday} in the effective schedule.`
         });
       }
-      // Time in is required on working days.
+
+      // Time in is required on working days
       if (!time_in) {
         return res.status(400).json({
           successful: false,
           message: "Time in is required for working days."
         });
       }
-      // Validate time_in format and date part.
+
+      // Validate time_in format and date part
       if (!dayjs(time_in, "YYYY-MM-DD HH:mm", true).isValid()) {
         return res.status(400).json({
           successful: false,
           message: "time_in must be in 'YYYY-MM-DD HH:mm' format."
         });
       }
+
       if (dayjs(time_in, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD") !== date) {
         return res.status(400).json({
           successful: false,
@@ -88,44 +94,29 @@ const addAttendance = async (req, res) => {
         });
       }
 
-      // Validate clock-in window based on site.
+      // Validate clock-in window and determine remarks
       const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
       const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
+
       let lowerBound, upperBound;
 
       if (site === "Onsite") {
-        lowerBound = scheduledTime.subtract(15, "minute");
+        lowerBound = scheduledTime.subtract(60, "minute");
         upperBound = scheduledTime.add(15, "minute");
       } else if (site === "Remote") {
         lowerBound = scheduledTime.subtract(15, "minute");
         upperBound = scheduledTime.add(1, "minute");
       }
-      if (lowerBound && (clockInTime.isBefore(lowerBound) || clockInTime.isAfter(upperBound))) {
-        return res.status(400).json({
-          successful: false,
-          message: `For ${site} attendance, clock-in time must be within ${site === "Onsite" ? "15 minutes" : "1 minute"} of the scheduled start time (${scheduleForDay.In}). Allowed window is from ${lowerBound.format("HH:mm")} to ${upperBound.format("HH:mm")}.`
-        });
+
+      // Set remarks to "OnTime" or "Late"
+      if (clockInTime.isAfter(upperBound)) {
+        remarks = "Late";
+      } else {
+        remarks = "OnTime";
       }
-    } else {
-      // For rest days, time_in is optional. If provided, validate its format and date.
-      if (time_in) {
-        if (!dayjs(time_in, "YYYY-MM-DD HH:mm", true).isValid()) {
-          return res.status(400).json({
-            successful: false,
-            message: "time_in must be in 'YYYY-MM-DD HH:mm' format."
-          });
-        }
-        if (dayjs(time_in, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD") !== date) {
-          return res.status(400).json({
-            successful: false,
-            message: `The date part of time_in does not match the provided date (${date}).`
-          });
-        }
-      }
-      // Note: We skip the shift and clock-in window validations for rest days.
     }
 
-    // Create the attendance record with the derived isRestDay value.
+    // Create the attendance record with the derived isRestDay and remarks value
     const newAttendance = await Attendance.create({
       weekday,
       isRestDay,
@@ -133,8 +124,10 @@ const addAttendance = async (req, res) => {
       date,
       time_in: time_in || null,
       time_out: null,
+      remarks,
       UserId
     });
+
     return res.status(201).json({
       successful: true,
       message: isRestDay ? "Rest day attendance recorded successfully." : "Attendance recorded successfully.",
@@ -149,6 +142,8 @@ const addAttendance = async (req, res) => {
     });
   }
 };
+
+
 
 // Get Attendance by ID
 const getAttendanceById = async (req, res) => {
@@ -233,18 +228,13 @@ const updateAttendance = async (req, res) => {
       });
     }
 
-    // Define start and end of the current day
-    const startOfDay = dayjs().startOf('day').format('YYYY-MM-DD HH:mm:ss');
-    const endOfDay = dayjs().endOf('day').format('YYYY-MM-DD HH:mm:ss');
-
-    // Find today's attendance record
+    // Find the latest attendance record for the user that hasn't been timed out
     const attendance = await Attendance.findOne({
       where: {
         UserId,
-        time_in: {
-          [Op.between]: [startOfDay, endOfDay]
-        }
-      }
+        time_out: null
+      },
+      order: [['time_in', 'DESC']]
     });
 
     if (!attendance) {
@@ -252,6 +242,24 @@ const updateAttendance = async (req, res) => {
         successful: false,
         message: "Attendance record not found."
       });
+    }
+
+    // Determine the current date
+    const currentDate = dayjs().format("YYYY-MM-DD");
+
+    // If the found attendance record's date is not the current day,
+    // check if a new attendance record for today exists.
+    // If it does, the previous attendance record should not be timed out.
+    if (attendance.date !== currentDate) {
+      const todayAttendance = await Attendance.findOne({
+        where: { UserId, date: currentDate }
+      });
+      if (todayAttendance) {
+        return res.status(400).json({
+          successful: false,
+          message: "Cannot time out previous attendance after a new time in is detected."
+        });
+      }
     }
 
     // Validate if time_out is a valid datetime format
@@ -263,7 +271,7 @@ const updateAttendance = async (req, res) => {
       });
     }
 
-    // Validate if time_out is earlier than time_in
+    // Validate if time_out is later than time_in
     const timeInDate = dayjs(attendance.time_in);
     if (timeOutDate.isBefore(timeInDate) || timeOutDate.isSame(timeInDate)) {
       return res.status(400).json({
@@ -272,7 +280,7 @@ const updateAttendance = async (req, res) => {
       });
     }
 
-    // Update time_out
+    // Update time_out and save the attendance record
     attendance.time_out = time_out;
     await attendance.save();
 
@@ -290,6 +298,7 @@ const updateAttendance = async (req, res) => {
     });
   }
 };
+
 
 const getAttendancesByUserId = async (req, res) => {
   try {
