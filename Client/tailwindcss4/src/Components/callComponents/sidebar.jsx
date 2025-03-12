@@ -12,18 +12,21 @@ const Sidebar = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
 
-    /* To Change to Employee: MANUALLY COPY  LINE 17 TO 19 AND PASTE IT IN LINE 23 TO 25
-     id: 1,
-    name: 'Employee',
-    email: 'employee@cbzn.com',
-    isAdmin: false
-    */
     const [user, setUser] = useState({
         id: 1,
-        name: 'Admin',
-        email: 'admin@cbzn.com',
-        isAdmin: true
+        name: 'Employee',
+        email: 'Employee@cbzn.com',
+        isAdmin: false
     });
+
+
+    // const [user, setUser] = useState({
+    //     id: 1,
+    //     name: 'Admin',
+    //     email: 'admin@cbzn.com',
+    //     isAdmin: true
+    // });
+
     const location = useLocation();
 
     // Handle screen resize and close mobile menu on larger screens
@@ -108,6 +111,7 @@ const Sidebar = () => {
         { 
             name: 'Requests', icon: <FileText size={20} color={iconColor} />, 
             subItems: [
+                { name: 'Add Request', path: '/reqPage', icon: <PlusCircle size={18} color={iconColor} /> },
                 { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
                 { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
                 { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
@@ -120,7 +124,7 @@ const Sidebar = () => {
         { 
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
-                { name: 'Add Request', path: '/request/addReqPage', icon: <PlusCircle size={18} color={iconColor} /> },
+                { name: 'Add Request', path: '/reqPage', icon: <PlusCircle size={18} color={iconColor} /> },
                 { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
                 { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
                 { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
@@ -211,7 +215,7 @@ const Sidebar = () => {
                                             <div
                                                 id={`dropdown-${item.name}`}
                                                 className={`
-                                                    mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
+                                                    mt-2 ml-8 space-y-1 overflow-hidden transition-all duration-300
                                                     ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
                                                 `}
                                             >

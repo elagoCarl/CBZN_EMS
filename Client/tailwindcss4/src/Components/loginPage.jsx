@@ -40,6 +40,11 @@ const LoginPage = () => {
     }
   };
 
+  // Toggle password visibility function
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/95">
       <div className="fixed top-0 left-0 w-full bg-black text-white p-8 flex justify-between items-center z-50">
@@ -73,9 +78,7 @@ const LoginPage = () => {
               <button
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                onMouseDown={() => setShowPassword(true)}
-                onMouseUp={() => setShowPassword(false)}
-                onMouseLeave={() => setShowPassword(false)}
+                onClick={togglePasswordVisibility}
               >
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
