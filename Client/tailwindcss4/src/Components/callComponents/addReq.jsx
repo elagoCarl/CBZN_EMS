@@ -128,14 +128,14 @@ try {
     to_datetime: timeAdjustTo,     // Send the full datetime string e.g., "2025-03-03T17:00"
     reason: timeAdjustReason, // Reason must be non-empty
   });
-  setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
+  // setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
   if (onRequestAdded) onRequestAdded(response.data);
   resetForm();
   setActiveRequest(null);
   onClose();
 } catch (error) {
   console.error("Error submitting time adjustment request:", error);
-  setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
+  // setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
 }
     } else if (activeRequest === 'leave') {
       // Leave Request
