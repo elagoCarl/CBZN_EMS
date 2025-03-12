@@ -240,7 +240,15 @@ const getAllOvertimeCutoffByUser = async (req, res) => {
     try {
         const { cutoff_start, cutoff_end } = req.body;
 
+        if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
         const adjustments = await OvertimeRequest.findAll({
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
             where: {
                 user_id: req.params.id,
                 status: 'approved',

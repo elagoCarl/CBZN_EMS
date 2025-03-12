@@ -7,5 +7,5 @@ router.get('/getAllSchedUsers', SchedUser.getAllSchedUser);
 router.get('/getSchedUserById/:id', SchedUser.getSchedUser);
 router.put('/updateSchedUserByUser/:userId', SchedUser.updateSchedUserByUser);
 router.get('/getSchedUserByUser/:userId', SchedUser.getSchedUserByUser);
-router.get('/getSchedUsersByUserCutoff/:userId', SchedUser.getSchedUsersByUserCutoff);
+router.post('/getSchedUsersByUserCutoff/:userId', SchedUser.getSchedUsersByUserCutoff);
 module.exports = router;

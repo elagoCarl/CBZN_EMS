@@ -256,21 +256,22 @@ const getSchedUserByUser = async (req, res) => {
 const getSchedUsersByUserCutoff = async (req, res) => {
   try {
     const { userId } = req.params; // e.g., /schedUser/getSchedUsersByUserCutoff/:userId
-    const { cutoffStart, cutoffEnd } = req.body;
+    const { cutoff_start, cutoff_end } = req.body;
 
-    if (!userId || !cutoffStart || !cutoffEnd) {
-      return res.status(400).json({
-        successful: false,
-        message: 'userId, cutoffStart, and cutoffEnd are required.'
-      });
-    }
+    if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
+                return res.status(400).json({
+                    successful: false,
+                    message: "A mandatory field is missing."
+                });
+            }
 
     // 1. Find schedule records for the user within the cutoff period.
     let schedulesInCutoff = await SchedUser.findAll({
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       where: {
         user_id: userId,
         effectivity_date: {
-          [Op.between]: [cutoffStart, cutoffEnd]
+          [Op.between]: [cutoff_start, cutoff_end]
         }
       },
       include: [
@@ -289,10 +290,11 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       // If no schedules exist within the cutoff,
       // get the latest schedule record effective before the cutoffStart.
       const latestBeforeCutoff = await SchedUser.findOne({
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
         where: {
           user_id: userId,
           effectivity_date: {
-            [Op.lt]: cutoffStart
+            [Op.lt]: cutoff_start
           }
         },
         include: [
@@ -316,7 +318,7 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       // For each schedule effective after the cutoffStart,
       // fetch the most recent schedule record before its effectivity date.
       for (const sched of schedulesInCutoff) {
-        if (new Date(sched.effectivity_date) > new Date(cutoffStart)) {
+        if (new Date(sched.effectivity_date) > new Date(cutoff_start)) {
           const previousSchedule = await SchedUser.findOne({
             where: {
               user_id: userId,

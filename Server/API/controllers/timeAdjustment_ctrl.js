@@ -1,5 +1,6 @@
 const { TimeAdjustment, User, JobTitle, Department } = require('../models');
 const dayjs = require('dayjs');
+const { Op } = require('sequelize')
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
 const utils = require('../../utils');
@@ -234,8 +235,15 @@ const cancelTimeAdjustment = async (req, res) => {
 const getAllTimeAdjustmentCutoffByUser = async (req, res) => {
     try {
         const { cutoff_start, cutoff_end } = req.body;
+        if (!utils.checkMandatoryFields([cutoff_start, cutoff_end])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
 
         const adjustments = await TimeAdjustment.findAll({
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
             where: {
                 user_id: req.params.id,
                 status: 'approved',

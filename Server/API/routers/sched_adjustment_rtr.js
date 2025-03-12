@@ -8,6 +8,6 @@ router.get('/getAllSchedAdjustmentByUser/:id', SchedAdjustment.getAllSchedAdjust
 router.get('/getSchedAdjustmentById/:id', SchedAdjustment.getSchedAdjustmentById);
 router.put('/updateSchedAdjustment/:id', SchedAdjustment.updateSchedAdjustment);
 router.put('/cancelSchedAdjustment/:id', SchedAdjustment.cancelSchedAdjustment);
-router.get('/getAllSchedAdjustmentCutoffByUser/:id', SchedAdjustment.getAllSchedChangeCutoffByUser);
+router.post('/getAllSchedAdjustmentCutoffByUser/:id', SchedAdjustment.getAllSchedChangeCutoffByUser);
 
 module.exports = router;

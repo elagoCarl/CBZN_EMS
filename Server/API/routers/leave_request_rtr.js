@@ -5,11 +5,10 @@ const router = express.Router();
 router.post('/addLeaveRequest', leaveRequest.addLeaveRequest);
 router.get('/getLeaveRequest/:id', leaveRequest.getLeaveRequest);
 router.get('/getAllLeaveRequests', leaveRequest.getAllLeaveRequests);
-router.get('/getAllLeaveReqsByUser/:id', leaveRequest.getAllLeaveRequestsByUser);
 router.put('/updateLeaveRequest/:id', leaveRequest.updateLeaveRequest);
 router.put('/cancelLeaveRequest/:id', leaveRequest.cancelLeaveRequest);
 // router.delete('/deleteLeaveRequest/:id', leaveRequest.deleteLeaveRequest);
-router.get('/getAllLeaveRequestCutoffByUser/:id', leaveRequest.getAllLeaveCutoffByUser);
+router.post('/getAllLeaveRequestCutoffByUser/:id', leaveRequest.getAllLeaveCutoffByUser);
 
 
 module.exports = router;

@@ -8,7 +8,6 @@ import axios from 'axios';
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 
-// Updated cutoffs with direct start and end dates
 const cutoffs = [
   { id: 1, start_date: '2025-02-16', end_date: '2025-03-15' },
   { id: 2, start_date: '2025-01-16', end_date: '2025-02-15' }
@@ -16,11 +15,8 @@ const cutoffs = [
 
 const DTR = () => {
   const today = dayjs('2025-03-10');
-  const defaultCutoff = cutoffs
-    .filter(c => dayjs(today).isBetween(dayjs(c.start_date).subtract(1, 'day'), dayjs(c.end_date), null, '[]'))
-    .sort((a, b) => dayjs(b.end_date).diff(dayjs(a.end_date)))[0] || cutoffs[0];
 
-  const [selectedCutoffId, setSelectedCutoffId] = useState(defaultCutoff?.id);
+  const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -36,6 +32,13 @@ const DTR = () => {
   const [requests, setRequests] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [scheduleUsers, setScheduleUsers] = useState([]);
+  const [overtimeRequests, setOvertimeRequests] = useState([]);
+
+  // Define currentCutoff here, before it's used in the useEffect hook
+  const currentCutoff = useMemo(
+    () => cutoffs.find(c => c.id === selectedCutoffId),
+    [selectedCutoffId]
+  );
 
   // Fetch users data from API
   useEffect(() => {
@@ -43,7 +46,7 @@ const DTR = () => {
       try {
         setLoading(true);
         const response = await axios.get('http://localhost:8080/users/getAllUsersWithJob');
-        
+
         if (response.data.successful) {
           // Transform the data to match our existing structure
           const transformedUsers = response.data.data.map(user => ({
@@ -52,11 +55,11 @@ const DTR = () => {
             employee_id: user.id, // Using id as employee_id for now
             job_title_id: user.JobTitle?.id || null
           }));
-          
+
           // Extract job titles and departments
           const extractedJobTitles = [];
           const extractedDepartments = [];
-          
+
           response.data.data.forEach(user => {
             if (user.JobTitle) {
               // Add job title if not already in the list
@@ -67,10 +70,10 @@ const DTR = () => {
                   dept_id: user.JobTitle.Department?.id
                 });
               }
-              
+
               // Add department if not already in the list
-              if (user.JobTitle.Department && 
-                  !extractedDepartments.find(d => d.id === user.JobTitle.Department.id)) {
+              if (user.JobTitle.Department &&
+                !extractedDepartments.find(d => d.id === user.JobTitle.Department.id)) {
                 extractedDepartments.push({
                   id: user.JobTitle.Department.id,
                   name: user.JobTitle.Department.name
@@ -78,7 +81,7 @@ const DTR = () => {
               }
             }
           });
-          
+
           setUsers(transformedUsers);
           setJobTitles(extractedJobTitles);
           setDepartments(extractedDepartments);
@@ -91,42 +94,197 @@ const DTR = () => {
         setLoading(false);
       }
     };
-    
+
     fetchUsers();
-    
-    // For demonstration, load some sample data for other collections
-    // In a real app, you would fetch these from separate API endpoints
-    setAttendanceData([
-      { user_id: 1, date: '2025-03-01', time_in: '8:00 AM', time_out: '5:00 PM', totalHours: 8, remarks: '' },
-      { user_id: 1, date: '2025-03-02', time_in: '8:30 AM', time_out: '5:30 PM', totalHours: 8, remarks: 'Late' },
-      { user_id: 2, date: '2025-03-01', time_in: '7:45 AM', time_out: '4:45 PM', totalHours: 8, remarks: '' }
-    ]);
-    
-    setRequests([
-      { id: 1, user_id: 1, date: '2025-03-03', type: 'Leave', status: 'Approved', reason: 'Sick Leave' },
-      { id: 2, user_id: 1, date: '2025-03-04', type: 'TimeAdjustment', status: 'Approved', time_in: '9:00 AM', time_out: '6:00 PM' }
-    ]);
-    
-    setSchedules([
-      { id: 1, title: 'Regular Schedule', schedule: JSON.stringify({
-        Monday: { start: '08:00:00', end: '17:00:00' },
-        Tuesday: { start: '08:00:00', end: '17:00:00' },
-        Wednesday: { start: '08:00:00', end: '17:00:00' },
-        Thursday: { start: '08:00:00', end: '17:00:00' },
-        Friday: { start: '08:00:00', end: '17:00:00' }
-      })}
-    ]);
-    
-    setScheduleUsers([
-      { user_id: 1, sched_id: 1 },
-      { user_id: 2, sched_id: 1 }
-    ]);
+
+    // Initialize with empty data for other collections
+    setAttendanceData([]);
+    setRequests([]);
+    setSchedules([]);
+    setScheduleUsers([]);
+    setOvertimeRequests([]);
   }, []);
 
-  const currentCutoff = useMemo(
-    () => cutoffs.find(c => c.id === selectedCutoffId) || defaultCutoff,
-    [selectedCutoffId, defaultCutoff]
-  );
+  // Fetch attendance data and schedule data when user and cutoff are selected
+  useEffect(() => {
+    const fetchAttendanceAndSchedule = async () => {
+      if (!selectedUser || !currentCutoff) return;
+
+      setLoading(true);
+      try {
+        // Prepare request body with cutoff dates
+        const requestBody = {
+          cutoff_start: currentCutoff.start_date,
+          cutoff_end: currentCutoff.end_date
+        };
+
+        // Fetch attendance data
+        const attendanceResponse = await axios.post(
+          `http://localhost:8080/attendance/getAllAttendanceCutoffbyuser/${selectedUser.id}`,
+          requestBody
+        );
+
+        // Fetch time adjustment data
+        const timeAdjustmentResponse = await axios.post(
+          `http://localhost:8080/timeadjustment/getAllTimeAdjustmentCutoffByUser/${selectedUser.id}`,
+          requestBody
+        );
+
+        // Process attendance data
+        let transformedAttendance = [];
+        if (attendanceResponse.data.successful) {
+          transformedAttendance = attendanceResponse.data.data.map(record => {
+            // Extract time parts from ISO string
+            const timeIn = record.time_in ? dayjs(record.time_in).format('h:mm A') : '';
+            const timeOut = record.time_out ? dayjs(record.time_out).format('h:mm A') : '';
+
+            // Calculate total hours if both time_in and time_out exist
+            let totalHours = 0;
+            if (record.time_in && record.time_out) {
+              totalHours = dayjs(record.time_out).diff(dayjs(record.time_in), 'hour', true);
+            }
+
+            return {
+              id: record.id,
+              user_id: selectedUser.id,
+              date: record.date,
+              weekday: record.weekday,
+              isRestDay: record.isRestDay,
+              site: record.site || 'Onsite',
+              time_in: timeIn,
+              time_out: timeOut,
+              totalHours: parseFloat(totalHours.toFixed(2)),
+              remarks: record.remarks || '',
+              isTimeAdjustment: false
+            };
+          });
+        }
+
+        // Process time adjustment data
+        let timeAdjustments = [];
+        if (timeAdjustmentResponse.data.successful) {
+          timeAdjustments = timeAdjustmentResponse.data.data.map(adjustment => {
+            // Extract time parts from ISO string
+            const timeIn = adjustment.time_in ? dayjs(adjustment.time_in).format('h:mm A') : '';
+            const timeOut = adjustment.time_out ? dayjs(adjustment.time_out).format('h:mm A') : '';
+
+            // Calculate total hours if both time_in and time_out exist
+            let totalHours = 0;
+            if (adjustment.time_in && adjustment.time_out) {
+              totalHours = dayjs(adjustment.time_out).diff(dayjs(adjustment.time_in), 'hour', true);
+            }
+
+            return {
+              id: adjustment.id,
+              user_id: selectedUser.id,
+              date: adjustment.date,
+              weekday: dayjs(adjustment.date).format('ddd'),
+              isRestDay: false, // Assuming time adjustments are for work days
+              site: 'Onsite',
+              time_in: timeIn,
+              time_out: timeOut,
+              totalHours: parseFloat(totalHours.toFixed(2)),
+              remarks: `Time Adjustment`,
+              isTimeAdjustment: true,
+              adjustment_reason: adjustment.reason
+            };
+          });
+        }
+
+        // Merge attendance and time adjustments, prioritizing time adjustments
+        const mergedRecords = [...transformedAttendance];
+
+        // For each time adjustment, either replace the corresponding attendance record or add it
+        timeAdjustments.forEach(adjustment => {
+          const existingIndex = mergedRecords.findIndex(
+            record => record.date === adjustment.date && !record.isTimeAdjustment
+          );
+
+          if (existingIndex >= 0) {
+            // Replace existing attendance with time adjustment
+            mergedRecords[existingIndex] = adjustment;
+          } else {
+            // Add new time adjustment record
+            mergedRecords.push(adjustment);
+          }
+        });
+
+        // Sort by date
+        mergedRecords.sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+
+        setAttendanceData(mergedRecords);
+
+        // Fetch overtime data
+        const overtimeResponse = await axios.post(
+          `http://localhost:8080/OTrequests/getAllOvertimeCutoffByUser/${selectedUser.id}`,
+          requestBody
+        );
+
+        if (overtimeResponse.data.successful) {
+          const transformedOvertimeRequests = overtimeResponse.data.data.map(ot => {
+            // Format start and end times
+            const startTime = dayjs(ot.start_time).format('h:mm A');
+            const endTime = dayjs(ot.end_time).format('h:mm A');
+
+            // Calculate additional hours
+            const additionalHours = dayjs(ot.end_time).diff(dayjs(ot.start_time), 'hour', true);
+
+            return {
+              id: ot.id,
+              user_id: ot.user_id,
+              date: ot.date,
+              start_time: startTime,
+              end_time: endTime,
+              additionalHours: parseFloat(additionalHours.toFixed(2)),
+              reason: ot.reason,
+              status: ot.status.charAt(0).toUpperCase() + ot.status.slice(1) // Capitalize status
+            };
+          });
+
+          setOvertimeRequests(transformedOvertimeRequests);
+        } else {
+          setOvertimeRequests([]);
+        }
+
+        // Continue with fetching schedule data as before
+        const scheduleResponse = await axios.post(
+          `http://localhost:8080/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`,
+          requestBody
+        );
+
+        if (scheduleResponse.data.successful) {
+          // Process schedule data
+          const userSchedules = scheduleResponse.data.schedUsers.map(item => ({
+            user_id: item.user_id,
+            sched_id: item.schedule_id,
+            effectivity_date: item.effectivity_date
+          }));
+
+          // Extract unique schedules
+          const uniqueSchedules = [];
+          scheduleResponse.data.schedUsers.forEach(item => {
+            if (!uniqueSchedules.find(s => s.id === item.schedule_id)) {
+              uniqueSchedules.push({
+                id: item.schedule_id,
+                title: item.Schedule.title,
+                schedule: JSON.stringify(item.Schedule.schedule),
+                isActive: item.Schedule.isActive
+              });
+            }
+          });
+
+          setSchedules(uniqueSchedules);
+          setScheduleUsers(userSchedules);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendanceAndSchedule();
+  }, [selectedUser, currentCutoff]);
 
   // Merge attendance records with approved requests for the selected user
   const combinedData = useMemo(() => {
@@ -169,8 +327,8 @@ const DTR = () => {
     if (!currentCutoff) return combinedData;
     return combinedData.filter(r => {
       const recordDate = dayjs(r.date);
-      return recordDate.isAfter(dayjs(currentCutoff.start_date).subtract(1, 'day')) && 
-             recordDate.isBefore(dayjs(currentCutoff.end_date).add(1, 'day'));
+      return recordDate.isAfter(dayjs(currentCutoff.start_date).subtract(1, 'day')) &&
+        recordDate.isBefore(dayjs(currentCutoff.end_date).add(1, 'day'));
     });
   }, [combinedData, currentCutoff]);
 
@@ -179,50 +337,40 @@ const DTR = () => {
     const jobTitle = jobTitles.find(j => j.id === user.job_title_id);
     return jobTitle?.name || 'Unknown Position';
   };
-  
+
   const getDepartment = user => {
     if (!user) return 'Unknown Department';
     const job = jobTitles.find(j => j.id === user.job_title_id);
     return job ? departments.find(d => d.id === job.dept_id)?.name || 'Unknown Department' : 'Unknown Department';
   };
-  
+
+  // Instead of returning the detailed shift timing, just return the schedule title
   const getUserSchedule = user => {
     if (!user) return 'No schedule assigned';
     const su = scheduleUsers.find(s => s.user_id === user.id);
     return su ? schedules.find(s => s.id === su.sched_id)?.title || 'Unknown Schedule' : 'No schedule assigned';
   };
-  
+
+  // This function is now not used since we render only the title, so it can be removed or left for future use.
   const getShiftForDate = (date, user) => {
-    if (!user) return 'No schedule';
-    const day = dayjs(date).format('dddd');
-    const su = scheduleUsers.find(s => s.user_id === user.id);
-    if (!su) return 'No schedule';
-    const sched = schedules.find(s => s.id === su.sched_id);
-    if (!sched) return 'No schedule';
-    try {
-      const schObj = JSON.parse(sched.schedule);
-      const daySch = schObj[day];
-      if (!daySch) return 'Rest Day';
-      const formatTime = t => {
-        const [h, m] = t.substring(0, 5).split(':');
-        const hour = parseInt(h);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        return `${hour % 12 || 12}:${m} ${ampm}`;
-      };
-      return `${formatTime(daySch.start)} - ${formatTime(daySch.end)}`;
-    } catch {
-      return 'Invalid schedule';
-    }
+    return getUserSchedule(user);
   };
-  
+
   const getOvertimeForDate = date =>
-    requests.filter(r => r.type === 'Overtime' && r.date === date && r.status === 'Approved' && r.user_id === selectedUser?.id);
+    overtimeRequests.filter(r =>
+      r.date === date &&
+      r.status === 'Approved' &&
+      r.user_id === selectedUser?.id
+    );
 
   const { regularHours, overtimeHours } = useMemo(() => {
     const reg = filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0);
-    const ot = filteredData.reduce((sum, r) => sum + getOvertimeForDate(r.date).reduce((s, ot) => s + (ot.additionalHours || 0), 0), 0);
+    const ot = filteredData.reduce((sum, r) => {
+      const dateOvertimes = getOvertimeForDate(r.date);
+      return sum + dateOvertimes.reduce((s, ot) => s + (ot.additionalHours || 0), 0);
+    }, 0);
     return { regularHours: reg, overtimeHours: ot };
-  }, [filteredData, selectedUser]);
+  }, [filteredData, selectedUser, overtimeRequests]);
 
   // Format cutoff period as a readable string
   const formatCutoffLabel = cutoff => {
@@ -232,7 +380,7 @@ const DTR = () => {
   const filteredCutoffs = cutoffs.filter(c =>
     formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       const title = getJobTitle(u);
@@ -278,9 +426,7 @@ const DTR = () => {
                         {filteredUsers.map(u => (
                           <div
                             key={u.id}
-                            className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${
-                              u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'
-                            }`}
+                            className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'}`}
                             onClick={() => {
                               setSelectedUser(u);
                               setIsUserDropdownOpen(false);
@@ -323,9 +469,7 @@ const DTR = () => {
                         {filteredCutoffs.map(c => (
                           <div
                             key={c.id}
-                            className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${
-                              c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white'
-                            }`}
+                            className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white'}`}
                             onClick={() => {
                               setSelectedCutoffId(c.id);
                               setIsDropdownOpen(false);
@@ -376,16 +520,13 @@ const DTR = () => {
                       <span className="text-gray-400 text-sm">Position:</span>
                       <span className="ml-2 text-white">{getJobTitle(selectedUser)}</span>
                     </div>
-                    <div className="flex items-center">
-                      <span className="text-gray-400 text-sm">Schedule:</span>
-                      <span className="ml-2 text-white">{getUserSchedule(selectedUser)}</span>
-                    </div>
+                    {/* Schedule detail removed as requested */}
                   </div>
                 </div>
                 <table className="w-full text-sm text-left">
                   <thead className="bg-[#363636] text-white">
                     <tr>
-                      {['Date', 'Work Shift', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Remarks'].map((h, i) => (
+                      {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Remarks'].map((h, i) => (
                         <th key={i} className="px-4 py-3 border-b border-white/10">
                           {h}
                         </th>
@@ -397,7 +538,10 @@ const DTR = () => {
                       <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                          {r.isRestDay ? 'REST DAY' : r.shift || getShiftForDate(r.date, selectedUser)}
+                          {r.isRestDay ? 'REST DAY' : getUserSchedule(selectedUser)}
+                        </td>
+                        <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          {r.site || 'Office'}
                         </td>
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">{r.time_in}</td>
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">{r.time_out}</td>
@@ -405,30 +549,35 @@ const DTR = () => {
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">
                           {getOvertimeForDate(r.date).length > 0
                             ? getOvertimeForDate(r.date).map((ot, j) => (
-                                <div key={j} className="text-xs">
-                                  <span className="font-medium text-green-400">{ot.additionalHours.toFixed(2)} hrs</span>
-                                  <span className="text-gray-500 ml-1">({ot.start_time}-{ot.end_time})</span>
-                                </div>
-                              ))
+                              <div key={j} className="text-xs">
+                                <span className="font-medium text-green-400">{ot.additionalHours.toFixed(2)} hrs</span>
+                                <span className="text-gray-500 ml-1">({ot.start_time}-{ot.end_time})</span>
+                              </div>
+                            ))
                             : '0.00'}
                         </td>
                         <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                          {r.requestType ? (
-                            <div className="flex items-center">
-                              <span className="mr-1">{r.remarks}</span>
-                              <span className="inline-block ml-1 px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">
+                          <div className="flex items-center">
+                            <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isTimeAdjustment
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : r.remarks.toLowerCase().includes('late')
+                                ? 'bg-orange-500/20 text-orange-400'
+                                : 'bg-green-500/20 text-green-400'
+                              }`}>
+                              {r.remarks}
+                            </span>
+                            {r.requestType && (
+                              <span className="inline-block ml-2 px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-md">
                                 {r.requestType}
                               </span>
-                            </div>
-                          ) : (
-                            r.remarks
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan="7" className="px-4 py-8 text-center text-gray-400">
+                        <td colSpan="8" className="px-4 py-8 text-center text-gray-400">
                           No records found for the selected period
                         </td>
                       </tr>
@@ -436,7 +585,7 @@ const DTR = () => {
                   </tbody>
                   <tfoot>
                     <tr className="font-bold bg-[#363636] text-white">
-                      <td colSpan="4" className="px-4 py-3 border-t border-white/10 text-right">
+                      <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">
                         Total Hours:
                       </td>
                       <td className="px-4 py-3 border-t border-white/10 text-green-400">{regularHours.toFixed(2)}</td>

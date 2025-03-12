@@ -161,7 +161,7 @@ const deleteLeaveRequest = async (req, res) => {
 
 
         // Dont allow deletion of approved leave requests
-        if(leaveRequest.status !== 'pending'){
+        if (leaveRequest.status !== 'pending') {
             return res.status(400).json({ successful: false, error: 'Approved leave requests cannot be deleted.' });
         }
 
@@ -220,86 +220,93 @@ const cancelLeaveRequest = async (req, res) => {
 
 const getAllLeaveRequestsByUser = async (req, res) => {
     try {
-      const leaveRequests = await LeaveRequest.findAll({
-        where: { user_id: req.params.id },
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['id', 'name']
-          },
-          {
-            model: User,
-            as: 'reviewer',
-            attributes: ['id', 'name']
-          }
-        ],
-        order: [['createdAt', 'DESC']]
-      });
-  
-      if (!leaveRequests || leaveRequests.length === 0) {
-        return res.status(200).json({
-          successful: true,
-          message: "No leave requests found.",
-          count: 0,
-          data: []
+        const leaveRequests = await LeaveRequest.findAll({
+            where: { user_id: req.params.id },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                }
+            ],
+            order: [['createdAt', 'DESC']]
         });
-      }
-  
-      return res.status(200).json({
-        successful: true,
-        data: leaveRequests
-      });
+
+        if (!leaveRequests || leaveRequests.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No leave requests found.",
+                count: 0,
+                data: []
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: leaveRequests
+        });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        successful: false,
-        message: error.message || "An unexpected error occurred."
-      });
+        console.error(error);
+        return res.status(500).json({
+            successful: false,
+            message: error.message || "An unexpected error occurred."
+        });
     }
-  };
-  
-  module.exports = getAllLeaveRequestsByUser;
+};
+
+module.exports = getAllLeaveRequestsByUser;
 
 
-  const getAllLeaveCutoffByUser = async (req, res) => {
-      try {
-          const { cutoff_start, cutoff_end } = req.body;
-  
-          const leaveRequests = await LeaveRequest.findAll({
-              where: {
-                  user_id: req.params.id,
-                  status: 'approved',
-                  [Op.and]: [
-                      { start_date: { [Op.lte]: cutoff_end } }, // leave request starts on or before the cutoff end date
-                      { end_date: { [Op.gte]: cutoff_start } }     // leave request ends on or after the cutoff start date
-                  ]
-              },
-              order: [['start_date', 'DESC']]
-          });
-  
-          if (!leaveRequests || leaveRequests.length === 0) {
-              return res.status(200).json({
-                  successful: true,
-                  message: "No leave requests found within the cutoff.",
-                  count: 0,
-                  data: [],
-              });
-          }
-  
-          return res.status(200).json({
-              successful: true,
-              data: leaveRequests
-          });
-      } catch (err) {
-          console.error(err);
-          return res.status(500).json({
-              successful: false,
-              message: err.message || "An unexpected error occurred."
-          });
-      }
-  };
-  
+const getAllLeaveCutoffByUser = async (req, res) => {
+    try {
+        const { cutoff_start, cutoff_end } = req.body;
+        if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        const leaveRequests = await LeaveRequest.findAll({
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+            where: {
+                user_id: req.params.id,
+                status: 'approved',
+                [Op.and]: [
+                    { start_date: { [Op.lte]: cutoff_end } }, // leave request starts on or before the cutoff end date
+                    { end_date: { [Op.gte]: cutoff_start } }     // leave request ends on or after the cutoff start date
+                ]
+            },
+            order: [['start_date', 'DESC']]
+        });
+
+        if (!leaveRequests || leaveRequests.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No leave requests found within the cutoff.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: leaveRequests
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
+
 
 
 // Export the functions
