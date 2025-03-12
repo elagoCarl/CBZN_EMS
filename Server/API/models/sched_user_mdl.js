@@ -9,6 +9,10 @@ module.exports = function (sequelize, DataTypes) {
         }
     }, {
         timestamps: true
-    });
+    })
+    SchedUser.associate = (models) => {
+        SchedUser.belongsTo(models.User, {foreignKey: 'user_id'})
+        SchedUser.belongsTo(models.Schedule, {foreignKey: 'schedule_id'})
+    };
     return SchedUser;
 }

@@ -45,6 +45,9 @@
             foreignKey: 'schedule_id',
             otherKey: 'user_id',
           }),
+          Schedule.hasMany(models.SchedUser, {
+            foreignKey: 'schedule_id',
+            as: 'schedUsers'})
           Schedule.hasMany(models.OvertimeRequest, {
             foreignKey: 'schedule_id',
             as: 'overtimeRequests'
