@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import dayjs from 'dayjs'; // Add dayjs import
+import dayjs from 'dayjs';
 import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import AddReq from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
@@ -15,21 +15,21 @@ const ReqPage = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [isAddReqOpen, setIsAddReqOpen] = useState(false);
     const [isCancelReqOpen, setIsCancelReqOpen] = useState(false);
-    const [selectedRequestId, setSelectedRequestId] = useState(null);
+    const [selectedRequest, setSelectedRequest] = useState(null);
     const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
     const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
     const [requestData, setRequestData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // Format datetime helper function
     const formatDateTime = d => d ? dayjs(d).format('MMM D, YYYY h:mm A') : 'N/A';
 
+    // Updated type filters to consolidate leave types
     const typeFilters = [
         { value: 'all', label: 'All Requests' },
+        { value: 'leave', label: 'Leave' },
         { value: 'overtime', label: 'Overtime' },
-        { value: 'vacation', label: 'Vacation' },
-        { value: 'sick', label: 'Sick' },
-        { value: 'emergency', label: 'Emergency' },
-        { value: 'other', label: 'Other' },
         { value: 'timeadjustment', label: 'Time Adjustment' },
         { value: 'schedule', label: 'Schedule Change' }
     ];
@@ -45,41 +45,52 @@ const ReqPage = () => {
     const getCurrentTypeFilter = () => typeFilters.find(f => f.value === activeFilter);
     const getCurrentStatusFilter = () => statusFilters.find(f => f.value === statusFilter);
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-            try {
-                const [leaveRes, overtimeRes, schedRes, timeAdjRes] = await Promise.all([
-                    axios.get(`http://localhost:8080/leaveRequest/getAllLeaveReqsByUser/${loggedInUserId}`),
-                    axios.get(`http://localhost:8080/OTrequests/getAllOTReqsByUser/${loggedInUserId}`),
-                    axios.get(`http://localhost:8080/schedAdjustment/getAllSchedAdjustmentByUser/${loggedInUserId}`),
-                    axios.get(`http://localhost:8080/timeAdjustment/getAllTimeAdjustmentByUser/${loggedInUserId}`)
-                ]);
+    const fetchRequests = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const [leaveRes, overtimeRes, schedRes, timeAdjRes] = await Promise.all([
+                axios.get(`http://localhost:8080/leaveRequest/getAllLeaveReqsByUser/${loggedInUserId}`),
+                axios.get(`http://localhost:8080/OTrequests/getAllOTReqsByUser/${loggedInUserId}`),
+                axios.get(`http://localhost:8080/schedAdjustment/getAllSchedAdjustmentByUser/${loggedInUserId}`),
+                axios.get(`http://localhost:8080/timeAdjustment/getAllTimeAdjustmentByUser/${loggedInUserId}`)
+            ]);
 
-                let combinedData = [];
-                if (leaveRes.data?.successful) {
-                    // Assume leave requests already have an appropriate type (e.g., vacation, sick, etc.)
-                    combinedData = [...combinedData, ...leaveRes.data.data];
-                }
-                if (overtimeRes.data?.successful) {
-                    const overtimeData = overtimeRes.data.data.map(item => ({ ...item, type: 'overtime' }));
-                    combinedData = [...combinedData, ...overtimeData];
-                }
-                if (schedRes.data?.successful) {
-                    const schedData = schedRes.data.data.map(item => ({ ...item, type: 'schedule' }));
-                    combinedData = [...combinedData, ...schedData];
-                }
-                if (timeAdjRes.data?.successful) {
-                    const timeAdjData = timeAdjRes.data.data.map(item => ({ ...item, type: 'timeadjustment' }));
-                    combinedData = [...combinedData, ...timeAdjData];
-                }
-
-                setRequestData(combinedData);
-                console.log("Requests fetched:", combinedData); 
-            } catch (error) {
-                console.error("Error fetching requests:", error);
+            let combinedData = [];
+            if (leaveRes.data?.successful) {
+                // Add a leaveType property that shows the specific type of leave
+                // while keeping the original type for cancel endpoint determination
+                const leaveData = leaveRes.data.data.map(item => ({
+                    ...item,
+                    leaveType: item.type, // Store original type (vacation, sick, etc.)
+                    type: 'leave'         // Set main type to 'leave' for filtering
+                }));
+                combinedData = [...combinedData, ...leaveData];
             }
-        };
+            if (overtimeRes.data?.successful) {
+                const overtimeData = overtimeRes.data.data.map(item => ({ ...item, type: 'overtime' }));
+                combinedData = [...combinedData, ...overtimeData];
+            }
+            if (schedRes.data?.successful) {
+                const schedData = schedRes.data.data.map(item => ({ ...item, type: 'schedule' }));
+                combinedData = [...combinedData, ...schedData];
+            }
+            if (timeAdjRes.data?.successful) {
+                const timeAdjData = timeAdjRes.data.data.map(item => ({ ...item, type: 'timeadjustment' }));
+                combinedData = [...combinedData, ...timeAdjData];
+            }
 
+            setRequestData(combinedData);
+            console.log("Requests fetched:", combinedData); 
+        } catch (error) {
+            console.error("Error fetching requests:", error);
+            setError("Failed to fetch requests. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchRequests();
     }, [loggedInUserId]);
 
@@ -98,18 +109,74 @@ const ReqPage = () => {
 
     const handleAddReqClick = () => setIsAddReqOpen(true);
     const handleAddReqClose = () => setIsAddReqOpen(false);
-    const handleCancelReqClick = (id) => {
-        setSelectedRequestId(id);
+    
+    const handleCancelReqClick = (request) => {
+        setSelectedRequest(request);
         setIsCancelReqOpen(true);
     };
+    
     const handleCancelReqClose = () => {
         setIsCancelReqOpen(false);
-        setSelectedRequestId(null);
+        setSelectedRequest(null);
     };
-    const handleConfirmCancel = () => {
-        console.log(`Cancelling request with ID: ${selectedRequestId}`);
-        handleCancelReqClose();
+    
+    // Updated to use leaveType for leave requests
+    const getCancelEndpoint = (request) => {
+        const { id, type, leaveType } = request;
+        
+        if (type === 'leave') {
+            return `http://localhost:8080/leaveRequest/cancelLeaveRequest/${id}`;
+        }
+        
+        const endpointMap = {
+            'overtime': `http://localhost:8080/OTrequests/cancelOvertimeRequest/${id}`,
+            'timeadjustment': `http://localhost:8080/timeAdjustment/cancelTimeAdjustment/${id}`,
+            'schedule': `http://localhost:8080/schedAdjustment/cancelSchedAdjustment/${id}`
+        };
+        
+        return endpointMap[type] || '';
     };
+    
+    const handleConfirmCancel = async () => {
+        if (!selectedRequest) return;
+        
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            const endpoint = getCancelEndpoint(selectedRequest);
+            if (!endpoint) {
+                throw new Error(`Unknown request type: ${selectedRequest.type}`);
+            }
+            
+            const response = await axios.put(endpoint);
+            
+            if (response.status === 200) {
+                // Update the local state to reflect the cancelled status
+                setRequestData(prevData => 
+                    prevData.map(item => 
+                        item.id === selectedRequest.id && item.type === selectedRequest.type
+                            ? { ...item, status: 'cancelled' }
+                            : item
+                    )
+                );
+                
+                // Close the modal
+                handleCancelReqClose();
+                
+                // Optional: Show success message
+                console.log(`Request ${selectedRequest.id} cancelled successfully`);
+            } else {
+                throw new Error('Failed to cancel request');
+            }
+        } catch (error) {
+            console.error("Error cancelling request:", error);
+            setError(`Failed to cancel request: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const toggleRow = (id) => setExpandedRow(expandedRow === id ? null : id);
 
     const formatStatus = (status) => status.charAt(0).toUpperCase() + status.slice(1);
@@ -120,8 +187,9 @@ const ReqPage = () => {
         pending: 'text-yellow-500'
     }[status] || 'text-gray-400');
 
+    // Updated to show leaveType for leave requests
     const renderDetailsContent = (request) => {
-        if (['vacation', 'sick', 'emergency', 'other'].includes(request.type)) {
+        if (request.type === 'leave') {
             return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                     <div>
@@ -133,8 +201,8 @@ const ReqPage = () => {
                         <p className="text-white">{request.end_date}</p>
                     </div>
                     <div>
-                        <p className="text-xs sm:text-sm font-medium text-gray-400">Type</p>
-                        <p className="capitalize text-white">{request.type}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Leave Type</p>
+                        <p className="capitalize text-white">{request.leaveType}</p>
                     </div>
                     <div className="sm:col-span-2">
                         <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
@@ -194,7 +262,7 @@ const ReqPage = () => {
         return detailsMap[request.type] || null;
     };
 
-    // Since all endpoints are now user-specific, this filter ensures only logged-in user requests appear.
+    // Updated filter to handle the consolidated leave type
     const filteredRequests = requestData.filter(req =>
         req.user_id === loggedInUserId &&
         (activeFilter === 'all' || req.type === activeFilter) &&
@@ -233,6 +301,14 @@ const ReqPage = () => {
             )}
         </div>
     );
+
+    // Get the specific leave type for display in the table
+    const getDisplayType = (request) => {
+        if (request.type === 'leave' && request.leaveType) {
+            return request.leaveType;
+        }
+        return request.type;
+    };
 
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
@@ -273,8 +349,21 @@ const ReqPage = () => {
                         Add Request
                     </button>
                 </div>
+                
+                {error && (
+                    <div className="bg-red-600 text-white p-3 rounded-md mb-4">
+                        {error}
+                    </div>
+                )}
+                
                 <div className="bg-[#363636] rounded-md overflow-hidden flex flex-col flex-grow">
                     <div className="overflow-x-auto">
+                        {isLoading && (
+                            <div className="flex justify-center items-center p-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                            </div>
+                        )}
+                        
                         <div className="overflow-y-auto max-h-[calc(100vh-340px)]">
                             <table className="min-w-full">
                                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
@@ -291,7 +380,7 @@ const ReqPage = () => {
                                     {filteredRequests.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="px-4 py-6 text-center text-gray-400 text-sm">
-                                                No requests found
+                                                {isLoading ? 'Loading requests...' : 'No requests found'}
                                             </td>
                                         </tr>
                                     ) : (
@@ -299,11 +388,11 @@ const ReqPage = () => {
                                             <React.Fragment key={index}>
                                                 <tr className={expandedRow === index ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-green-500">
-                                                        {request.id}
+                                                        {index + 1}
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                                                         <span className="text-xs sm:text-sm font-medium text-white capitalize truncate max-w-[80px] sm:max-w-none">
-                                                            {request.type}
+                                                            {getDisplayType(request)}
                                                         </span>
                                                     </td>
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm text-gray-300 hidden sm:table-cell">
@@ -331,8 +420,9 @@ const ReqPage = () => {
                                                     <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
                                                         {request.status === 'pending' && (
                                                             <button
-                                                                onClick={() => handleCancelReqClick(request.id)}
-                                                                className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors"
+                                                                onClick={() => handleCancelReqClick(request)}
+                                                                className="bg-red-600 text-white px-2 py-1 text-xs rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                disabled={isLoading}
                                                             >
                                                                 Cancel
                                                             </button>
@@ -369,9 +459,10 @@ const ReqPage = () => {
                 <CancelReq
                     isOpen={isCancelReqOpen}
                     onClose={handleCancelReqClose}
-                    message="Are you sure you want to cancel your request?"
+                    message={`Are you sure you want to cancel your ${selectedRequest?.leaveType || selectedRequest?.type} request?`}
                     onConfirm={handleConfirmCancel}
-                    requestId={selectedRequestId}
+                    requestId={selectedRequest?.id}
+                    isLoading={isLoading}
                 />
             </main>
         </div>

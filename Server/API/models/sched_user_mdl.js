@@ -10,5 +10,11 @@ module.exports = function (sequelize, DataTypes) {
     }, {
         timestamps: true
     });
+
+    // Add this association:
+    SchedUser.associate = (models) => {
+        SchedUser.belongsTo(models.Schedule, { foreignKey: 'schedule_id' });
+    };
+
     return SchedUser;
 }

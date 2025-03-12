@@ -7,6 +7,7 @@ router.get('/getLeaveRequest/:id', leaveRequest.getLeaveRequest);
 router.get('/getAllLeaveRequests', leaveRequest.getAllLeaveRequests);
 router.get('/getAllLeaveReqsByUser/:id', leaveRequest.getAllLeaveRequestsByUser);
 router.put('/updateLeaveRequest/:id', leaveRequest.updateLeaveRequest);
+router.put('/cancelLeaveRequest/:id', leaveRequest.cancelLeaveRequest);
 // router.delete('/deleteLeaveRequest/:id', leaveRequest.deleteLeaveRequest);
 
 
