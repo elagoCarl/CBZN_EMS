@@ -243,7 +243,7 @@ const ReqPage = () => {
                     <div>
                         <p className="text-xs sm:text-sm font-medium text-gray-400">New Schedule</p>
                         <p className="text-white">
-                            Time In: {formatDateTime(request.time_in)} | Time Out: {formatDateTime(request.time_out)}
+                            Time In: {request.time_in} | Time Out: {request.time_out}
                         </p>
                     </div>
                     <div className="sm:col-span-2">
