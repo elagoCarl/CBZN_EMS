@@ -8,5 +8,6 @@ router.get('/getAllTimeAdjustmentByUser/:id', timeAdjust.getAllTimeAdjustmentsBy
 router.put('/updateTimeAdjustment/:id', timeAdjust.updateTimeAdjustment);
 router.delete('/cancelTimeAdjustment/:id', timeAdjust.cancelTimeAdjustment);
 router.put('/cancelTimeAdjustment/:id', timeAdjust.cancelTimeAdjustment);
+router.post('/getAllTimeAdjustmentCutoffByUser/:id', timeAdjust.getAllTimeAdjustmentCutoffByUser);
 
 module.exports = router;
