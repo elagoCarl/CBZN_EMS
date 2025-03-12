@@ -22,6 +22,7 @@ app.use(cors({
 //IMPORT ALL ROUTERS NEEDED
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+require('./API/cron/cutoff_cron.js'); // Run the cron job
 const schedule_rtr = require('./API/routers/schedule_rtr');
 const user_rtr = require('./API/routers/user_rtr');
 const attendance_rtr = require('./API/routers/attendance_rtr');

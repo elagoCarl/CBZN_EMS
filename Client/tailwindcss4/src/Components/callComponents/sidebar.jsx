@@ -1,13 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import logo from '../Img/CBZN-Logo.png';
 import {
-    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays,
-    CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X
+    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarRange, ChevronDown, LogOut, Menu, X, PlusCircle
 } from 'lucide-react';
-// Import AuthContext hook (adjust the path if needed)
-import { useAuth } from '../../Components/authContext'; // adjust the path as needed
 
 const Sidebar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,8 +11,20 @@ const Sidebar = () => {
     const profileRef = useRef(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
+
+    /* To Change to Employee: MANUALLY COPY  LINE 17 TO 19 AND PASTE IT IN LINE 23 TO 25
+     id: 1,
+    name: 'Employee',
+    email: 'employee@cbzn.com',
+    isAdmin: false
+    */
+    const [user, setUser] = useState({
+        id: 1,
+        name: 'Admin',
+        email: 'admin@cbzn.com',
+        isAdmin: true
+    });
     const location = useLocation();
-    const { user, setUser } = useAuth(); // Get logged-in user data
 
     // Handle screen resize and close mobile menu on larger screens
     useEffect(() => {
@@ -25,7 +33,7 @@ const Sidebar = () => {
                 setIsMobileMenuOpen(false);
             }
         };
-
+        
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -42,6 +50,29 @@ const Sidebar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    //toFetchwetherUserIsAuthenticated Employee or Admin: API CALLS DO NOT REMOVE COMMENTED CODE
+//     useEffect(() => {
+//     const userId = 7; // Replace with actual user ID from auth context or localStorage
+
+//     const fetchUserData = async () => {
+//         try {
+//             const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+//             if (response.data && response.data.successful) {
+//                 const user = response.data.data;
+//                 setUserData(user);
+
+//                 // Ensure isAdmin is a boolean
+//                 setUserRole(user.isAdmin === "true" || user.isAdmin === true);
+//             }
+//         } catch (error) {
+//             console.error("Error fetching user data:", error);
+//         }
+//     };
+
+//     if (userId) fetchUserData();
+// }, []);
+
+
     // Close mobile menu when clicking on overlay
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
@@ -55,47 +86,48 @@ const Sidebar = () => {
     // Handle navigation
     const handleNavigation = (path) => {
         navigate(path);
-        closeMobileMenu();
+        setIsMobileMenuOpen(false);
     };
 
     // Check if a path is active
-    const isActive = (path) => location.pathname === path;
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
 
     // Neutral icon color
-    const iconColor = "#9ca3af";
+    const iconColor = "#9ca3af"; // Gray-400
 
-    // Navigation items with Lucide icons and paths
-    const navigationItems = [
+    // Navigation items with Lucide icons and paths - conditionally defined based on user role
+    const navigationItems = user.isAdmin ? [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
         { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
         { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
         { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
         { name: 'Schedules', icon: <Settings size={20} color={iconColor} />, path: '/schedulePage' },
-        { name: 'Departments & Jobs', icon: <Settings size={20} color={iconColor} />, path: '/deptPage' },
-        {
-            name: 'Requests',
-            icon: <FileText size={20} color={iconColor} />,
+        { name: 'Departments & Jobs', icon: <Settings size={20} color={iconColor} />, path: '/departmentsJobs' },
+        { 
+            name: 'Requests', icon: <FileText size={20} color={iconColor} />, 
             subItems: [
-                { name: 'OT Request', path: '/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
-                { name: 'Leave Request', path: '/leaveReqPage', icon: <CalendarDays size={18} color={iconColor} /> },
-                { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarClock size={18} color={iconColor} /> },
-                { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={18} color={iconColor} /> }
+                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
-        },
-    ];
-
-    // Logout function integrated into Sidebar
-    const handleLogout = async () => {
-        try {
-            await axios.post("http://localhost:8080/users/logoutUser", {}, { withCredentials: true });
-            // Clear the AuthContext on logout
-            setUser(null);
-            navigate('/'); // Redirect to login page after logout
-        } catch (error) {
-            console.error("Error logging out:", error);
-            // Optionally display an error notification
         }
-    };
+    ] : [
+        { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
+        { 
+            name: 'Requests', icon: <FileText size={20} color={iconColor} />,
+            subItems: [
+                { name: 'Add Request', path: '/request/addReqPage', icon: <PlusCircle size={18} color={iconColor} /> },
+                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
+            ]
+        }
+    ];
 
     return (
         <>
@@ -122,12 +154,12 @@ const Sidebar = () => {
             <div className="md:block">
                 <aside
                     className={`
-            fixed md:relative w-64 bg-black flex flex-col min-h-screen 
-            transition-all duration-300 ease-in-out z-45
-            md:translate-x-0 
-            ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-            shadow-lg
-          `}
+                        fixed md:relative w-64 bg-black flex flex-col min-h-screen 
+                        transition-all duration-300 ease-in-out z-45
+                        md:translate-x-0 
+                        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                        shadow-lg
+                    `}
                     aria-label="Sidebar navigation"
                 >
                     {/* Logo Section */}
@@ -145,7 +177,7 @@ const Sidebar = () => {
                                     {!item.subItems ? (
                                         <button
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
-                        ${isActive(item.path)
+                                                ${isActive(item.path)
                                                     ? 'text-green-500 bg-gray-900'
                                                     : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                             onClick={() => handleNavigation(item.path)}
@@ -157,7 +189,7 @@ const Sidebar = () => {
                                         <div>
                                             <button
                                                 className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
-                          ${item.subItems.some(subItem => isActive(subItem.path))
+                                                    ${item.subItems.some(subItem => isActive(subItem.path))
                                                         ? 'text-green-500 bg-gray-900'
                                                         : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                                 onClick={() => toggleDropdown(item.name)}
@@ -179,15 +211,15 @@ const Sidebar = () => {
                                             <div
                                                 id={`dropdown-${item.name}`}
                                                 className={`
-                          mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
-                          ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
-                        `}
+                                                    mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
+                                                    ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
+                                                `}
                                             >
                                                 {item.subItems.map((subItem) => (
                                                     <button
                                                         key={subItem.name}
                                                         className={`w-full text-left flex items-center gap-2 text-sm px-3 py-2 rounded-md transition-all duration-200
-                              ${isActive(subItem.path)
+                                                            ${isActive(subItem.path)
                                                                 ? 'text-green-500 bg-gray-900'
                                                                 : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
                                                         onClick={() => handleNavigation(subItem.path)}
@@ -206,6 +238,12 @@ const Sidebar = () => {
 
                     {/* Profile Section */}
                     <div className="p-4 border-t border-[#363636] relative" ref={profileRef}>
+                        {/* <button 
+                            className="w-full text-center mt-4 py-2 bg-gray-800 text-white rounded-md"
+                            onClick={() => setUser(prev => ({...prev, isAdmin: !prev.isAdmin}))}
+                        >
+                            Toggle Role (Current: {user.isAdmin ? 'Admin' : 'Employee'})
+                        </button> */}
                         <button
                             className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-gray-900 transition-all duration-200"
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -213,15 +251,11 @@ const Sidebar = () => {
                             aria-haspopup="true"
                         >
                             <div className="w-10 h-10 bg-[#363636] rounded-full flex items-center justify-center text-white">
-                                {user && user.first_name ? user.first_name.charAt(0).toUpperCase() : 'A'}
+                                {user.isAdmin ? 'A' : 'E'}
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-white font-medium">
-                                    {user ? `${user.first_name || ''} ${user.surname || ''}`.trim() : "ADMIN"}
-                                </span>
-                                <span className="text-gray-400 text-xs">
-                                    {user?.email || "ADMIN@CBZN.COM"}
-                                </span>
+                                <span className="text-white font-medium">{user.name.toUpperCase()}</span>
+                                <span className="text-gray-400 text-xs">{user.email.toUpperCase()}</span>
                             </div>
                         </button>
 
@@ -233,7 +267,8 @@ const Sidebar = () => {
                                     onClick={() => {
                                         setIsProfileOpen(false);
                                         closeMobileMenu();
-                                        handleLogout();
+                                        // Add logout logic here
+                                        handleNavigation('/');
                                     }}
                                 >
                                     <LogOut size={16} color={iconColor} />
