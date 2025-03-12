@@ -12,7 +12,7 @@ const Sidebar = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
 
-    /* To Change to Employee
+    /* To Change to Employee: MANUALLY COPY  LINE 17 TO 19 AND PASTE IT IN LINE 23 TO 25
      id: 1,
     name: 'Employee',
     email: 'employee@cbzn.com',
@@ -50,7 +50,7 @@ const Sidebar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    //toFetchwetherUserIsAuthenticated Employee or Admin: API CALLS REMOVE COMMENTED CODE
+    //toFetchwetherUserIsAuthenticated Employee or Admin: API CALLS DO NOT REMOVE COMMENTED CODE
 //     useEffect(() => {
 //     const userId = 7; // Replace with actual user ID from auth context or localStorage
 
