@@ -443,10 +443,17 @@ const loginUser = async (req, res, next) => {
         });
 
         console.log("LOGGED IN, Tokens saved successfully");
+        console.log("UserRRRRRRRRRRRRRRRRRRR: ", user);
 
         // Set cookies with the JWT tokens
         res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 60 * 60 * 1000 });
         res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: (60 * 60 * 24 * 30) * 1000 });
+        
+        if (user.profilePicture) {
+            const base64Image = Buffer.from(user.profilePicture).toString('base64');
+            // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
+            user.profilePicture = `data:image/png;base64,${base64Image}`;
+        }
 
         return res.status(201).json({
             successful: true,
@@ -454,8 +461,11 @@ const loginUser = async (req, res, next) => {
             userEmail: user.email,
             userPassword: user.password,
             user: user.id,
+            profilePicture: user.profilePicture,
+            isAdmin: user.isAdmin,
+            employment_status: user.employment_status,
             accessToken: accessToken,
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
         });
 
     } catch (err) {
@@ -628,7 +638,7 @@ const getCurrentUser = async (req, res, next) => {
         const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
         // Query the user by primary key and return non-sensitive fields
         const user = await User.findByPk(decoded.id, {
-            attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status']
+            attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
         });
         if (!user) {
             return res.status(404).json({
@@ -636,6 +646,12 @@ const getCurrentUser = async (req, res, next) => {
                 message: 'User not found'
             });
         }
+        if (user.profilePicture) {
+            const base64Image = Buffer.from(user.profilePicture).toString('base64');
+            // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
+            user.profilePicture = `data:image/png;base64,${base64Image}`;
+        }
+
         return res.status(200).json({
             successful: true,
             user

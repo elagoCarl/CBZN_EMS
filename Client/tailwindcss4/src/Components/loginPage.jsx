@@ -32,8 +32,11 @@ const LoginPage = () => {
           email: response.data.userEmail,
           first_name: response.data.first_name, // if provided
           surname: response.data.surname,         // if provided
+          isAdmin: response.data.isAdmin,
+          profilePicture: response.data.profilePicture
         });
         navigate('/myAttendance'); // Redirect on successful login
+        console.log('Login successful:', response);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
