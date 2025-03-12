@@ -20,6 +20,7 @@ const Sidebar = () => {
                 setIsMobileMenuOpen(false);
             }
         };
+        
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
