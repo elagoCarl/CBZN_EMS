@@ -4,7 +4,6 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../Components/Img/CBZN-Logo.png';
 
-
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +24,11 @@ const LoginPage = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     }
+  };
+
+  // Toggle password visibility function
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -60,14 +64,9 @@ const LoginPage = () => {
                 required
               />
               <button
-                //src={icon}
-                //alt="Show Password"
-                //className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer w-5 h-5 hover:bg-gray-600 rounded-3xl duration-300"
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                onMouseDown={() => setShowPassword(true)}
-                onMouseUp={() => setShowPassword(false)}
-                onMouseLeave={() => setShowPassword(false)}
+                onClick={togglePasswordVisibility}
               >
                 {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
@@ -92,4 +91,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage;

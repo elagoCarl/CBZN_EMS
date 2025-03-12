@@ -1,22 +1,24 @@
-const { Cutoff } = require('../models'); 
+// Server\API\controllers\cutoff_ctrl.js
+
+const { Cutoff, Attendance } = require('../models');
+const { Op } = require('sequelize');
 
 // 2.1. Add a new Cutoff
-const addCutoff = async (req, res, next) => {
+const addCutoff = async (req, res) => {
   try {
-    const { cutoff_date, effective_for, remarks } = req.body;
+    const { start_date, cutoff_date, remarks } = req.body;
 
-    // Validate required fields
-    if (!cutoff_date || !effective_for) {
+    if (!start_date || !cutoff_date) {
       return res.status(400).json({
         successful: false,
-        message: "cutoff_date and effective_for are required."
+        message: "start_date and cutoff_date are required."
       });
     }
 
     // Create the new cutoff record
     const newCutoff = await Cutoff.create({
+      start_date,
       cutoff_date,
-      effective_for,
       remarks
     });
 
@@ -34,11 +36,10 @@ const addCutoff = async (req, res, next) => {
 };
 
 // 2.2. Get a Cutoff by ID
-const getCutoffById = async (req, res, next) => {
+const getCutoffById = async (req, res) => {
   try {
-    const id = req.params.id; // e.g., /getCutoffById/1
+    const id = req.params.id; // e.g. /getCutoffById/1
 
-    // Validate ID
     if (!id) {
       return res.status(400).json({
         successful: false,
@@ -46,14 +47,7 @@ const getCutoffById = async (req, res, next) => {
       });
     }
 
-    // Find the cutoff by primary key
     const cutoff = await Cutoff.findByPk(id);
-    if (!cutoff) {
-      return res.status(404).json({
-        successful: false,
-        message: "Cutoff not found."
-      });
-    }
 
     return res.status(200).json({
       successful: true,
@@ -68,10 +62,10 @@ const getCutoffById = async (req, res, next) => {
 };
 
 // 2.3. Update an existing Cutoff
-const updateCutoff = async (req, res, next) => {
+const updateCutoff = async (req, res) => {
   try {
-    const id = req.params.id; // e.g., /updateCutoff/1
-    const { cutoff_date, effective_for, remarks } = req.body;
+    const id = req.params.id; // e.g. /updateCutoff/1
+    const { start_date, cutoff_date, remarks } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -80,7 +74,6 @@ const updateCutoff = async (req, res, next) => {
       });
     }
 
-    // Find the existing cutoff record
     const cutoff = await Cutoff.findByPk(id);
     if (!cutoff) {
       return res.status(404).json({
@@ -89,12 +82,11 @@ const updateCutoff = async (req, res, next) => {
       });
     }
 
-    // Update only the fields provided
+    // Update only fields provided
+    if (start_date !== undefined) cutoff.start_date = start_date;
     if (cutoff_date !== undefined) cutoff.cutoff_date = cutoff_date;
-    if (effective_for !== undefined) cutoff.effective_for = effective_for;
     if (remarks !== undefined) cutoff.remarks = remarks;
 
-    // Save changes
     await cutoff.save();
 
     return res.status(200).json({
@@ -110,8 +102,55 @@ const updateCutoff = async (req, res, next) => {
   }
 };
 
+// 2.4. Get Attendance within a given Cutoff
+const getAttendancesByCutoff = async (req, res) => {
+  try {
+    const id = req.params.id; // e.g., /getAttendancesByCutoff/1
+
+    if (!id) {
+      return res.status(400).json({
+        successful: false,
+        message: "Cutoff ID is required."
+      });
+    }
+
+    // Find the cutoff
+    const cutoff = await Cutoff.findByPk(id);
+    if (!cutoff) {
+      return res.status(404).json({
+        successful: false,
+        message: "Cutoff not found."
+      });
+    }
+
+    // The date range is [start_date, cutoff_date]
+    const startDate = cutoff.start_date;   // e.g., "2025-02-17"
+    const endDate = cutoff.cutoff_date;    // e.g., "2025-03-16"
+
+    // Fetch attendance records within this range
+    const attendances = await Attendance.findAll({
+      where: {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      }
+    });
+
+    return res.status(200).json({
+      successful: true,
+      data: attendances
+    });
+  } catch (error) {
+    return res.status(500).json({
+      successful: false,
+      message: error.message || "An unexpected error occurred."
+    });
+  }
+};
+
 module.exports = {
   addCutoff,
   getCutoffById,
-  updateCutoff
+  updateCutoff,
+  getAttendancesByCutoff
 };
