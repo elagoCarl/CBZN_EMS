@@ -616,7 +616,7 @@ const getAllUsersWithJob = async (req, res, next) => {
     try {
         const users = await User.findAll({
             where: { employment_status: { [Op.ne]: 'Inactive' } }, // only get not inactive users
-            attributes: ['id', 'name'], // select only these attributes
+            attributes: ['id', 'name', 'isAdmin'], // select only these attributes
             include: [
                 {
                     model: JobTitle,
