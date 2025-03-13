@@ -9,6 +9,7 @@ router.put('/updateLeaveRequest/:id', leaveRequest.updateLeaveRequest);
 router.put('/cancelLeaveRequest/:id', leaveRequest.cancelLeaveRequest);
 // router.delete('/deleteLeaveRequest/:id', leaveRequest.deleteLeaveRequest);
 router.post('/getAllLeaveRequestCutoffByUser/:id', leaveRequest.getAllLeaveCutoffByUser);
+router.get('/getAllLeaveRequestsByUser/:id', leaveRequest.getAllLeaveRequestsByUser);
 
 
 module.exports = router;
