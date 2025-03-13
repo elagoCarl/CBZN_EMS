@@ -148,9 +148,40 @@ const getAttendancesByCutoff = async (req, res) => {
   }
 };
 
+const getAllCutoff = async (req, res) => {
+  try {
+      const cutoffs = await Cutoff.findAll({
+          attributes: ['id', 'start_date', 'cutoff_date'],
+          order: [['start_date', 'DESC']],
+      });
+
+      if (!cutoffs || cutoffs.length === 0) {
+          return res.status(200).json({
+              successful: true,
+              message: "No cutoffs found.",
+              count: 0,
+              data: [],
+          });
+      }
+
+      return res.status(200).json({
+          successful: true,
+          message: "Successfully retrieved all cutoffs.",
+          data: cutoffs,
+      });
+  } catch (error) {
+      return res.status(500).json({
+          successful: false,
+          message: `Error retrieving cutoffs: ${error.message}`,
+      });
+  }
+};
+
+
 module.exports = {
   addCutoff,
   getCutoffById,
   updateCutoff,
-  getAttendancesByCutoff
+  getAttendancesByCutoff,
+  getAllCutoff
 };

@@ -18,6 +18,7 @@ import Page403 from "./Components/page403.jsx"
 import SchedulePage from "./Components/schedPage.jsx";
 import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
 import PageUiFallback from "./Components/pageUiFallBack";
+import DTR from "./Components/DTRpage.jsx";
 
 
 function App() {
@@ -45,6 +46,9 @@ function App() {
           <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
           <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
           <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+
+          <Route path="/schedulePage" element={<SchedulePage />} />
+          <Route path="/dtr" element={<DTR />} />
 
           {/* Catch-all 404 Route */}
           <Route path="*" element={<Page404 />} />

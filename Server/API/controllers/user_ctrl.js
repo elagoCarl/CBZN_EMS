@@ -1,4 +1,4 @@
-const { User, Session } = require('../models'); // Ensure model name matches exported model
+const { User, Session, JobTitle, Department } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
@@ -612,6 +612,48 @@ const getAllUsers = async (req, res, next) => {
     }
 }
 
+const getAllUsersWithJob = async (req, res, next) => {
+    try {
+        const users = await User.findAll({
+            where: { employment_status: { [Op.ne]: 'Inactive' } }, // only get not inactive users
+            attributes: ['id', 'name', 'isAdmin'], // select only these attributes
+            include: [
+                {
+                    model: JobTitle,
+                    attributes: ['id','name'], // include job title name
+                    include: [
+                        {
+                            model: Department,
+                            attributes: ['id','name'] // include department name
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!users || users.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No user found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        res.status(200).json({
+            successful: true,
+            message: "Retrieved all users.",
+            data: users
+        });
+    } catch (err) {
+        res.status(500).json({
+            successful: false,
+            message: err.message
+        });
+    }
+};
+
+
 module.exports = {
     addUser,
     getUserById,
@@ -623,5 +665,6 @@ module.exports = {
     forgotPass,
     getAllUsers,
     uploadProfilePic,
-    getProfilePic
+    getProfilePic,
+    getAllUsersWithJob
 }

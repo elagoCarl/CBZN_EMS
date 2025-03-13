@@ -39,23 +39,19 @@
 
         }, { timestamps: true });
 
-        Schedule.associate = (models) => {
-            Schedule.hasMany(models.User, {});
-
-            Schedule.hasMany(models.OvertimeRequest, {
-                foreignKey: 'schedule_id',
-                as: 'overtimeRequests'
-            });
-        }
-
-        
-
     Schedule.associate = (models) => {
         Schedule.belongsToMany(models.User, {
             through: models.SchedUser,
             foreignKey: 'schedule_id',
             otherKey: 'user_id',
-          });
+          }),
+          Schedule.hasMany(models.SchedUser, {
+            foreignKey: 'schedule_id',
+            as: 'schedUsers'})
+          Schedule.hasMany(models.OvertimeRequest, {
+            foreignKey: 'schedule_id',
+            as: 'overtimeRequests'
+        });
     }
 
     return Schedule;
