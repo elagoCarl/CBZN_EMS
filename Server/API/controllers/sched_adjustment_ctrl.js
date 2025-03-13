@@ -227,6 +227,7 @@ const getAllSchedChangeCutoffByUser = async (req, res) => {
         }
 
         const adjustments = await ScheduleAdjustment.findAll({
+            attributes: {exclude: ['createdAt', 'updatedAt']},
             where: {
                 user_id: req.params.id,
                 status: 'approved',
