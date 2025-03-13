@@ -1,4 +1,5 @@
 const { ScheduleAdjustment, User, JobTitle, Department } = require('../models');
+const { Op } = require('sequelize')
 const util = require('../../utils');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
@@ -215,11 +216,55 @@ const cancelSchedAdjustment = async (req, res) => {
     }
 }
 
+const getAllSchedChangeCutoffByUser = async (req, res) => {
+    try {
+        const { cutoff_start, cutoff_end } = req.body;
+        if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
+            return res.status(400).json({
+                successful: false,
+                message: "A mandatory field is missing."
+            });
+        }
+
+        const adjustments = await ScheduleAdjustment.findAll({
+            attributes: {exclude: ['createdAt', 'updatedAt']},
+            where: {
+                user_id: req.params.id,
+                status: 'approved',
+                date: {
+                    [Op.between]: [cutoff_start, cutoff_end]
+                }
+            },
+            order: [['date', 'DESC']]
+        });
+
+        if (!adjustments || adjustments.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No adjustments found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            successful: true,
+            data: adjustments
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            successful: false,
+            message: err.message || "An unexpected error occurred."
+        });
+    }
+};
 module.exports = {
     addSchedAdjustment,
     updateSchedAdjustment,
     getAllSchedAdjustments,
     getSchedAdjustmentById,
     getAllSchedAdjustmentByUser,
-    cancelSchedAdjustment
+    cancelSchedAdjustment,
+    getAllSchedChangeCutoffByUser
 };

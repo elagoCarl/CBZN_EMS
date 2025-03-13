@@ -1,7 +1,7 @@
-const { User, Session } = require('../models'); // Ensure model name matches exported model
+const { User, Session, JobTitle, Department } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
@@ -12,7 +12,7 @@ const { get } = require('http');
 const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_SECRET } = process.env
+    REFRESH_TOKEN_SECRET } = process.env;
 
 
 //nodemailer
@@ -117,8 +117,6 @@ const uploadProfilePic = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
-
-
 
 const getProfilePic = async (req, res) => {
     try {
@@ -546,7 +544,6 @@ const forgotPass = async (req, res) => {
             });
         }
 
-
         // Generate a random temporary password
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
         const tempPassword = `CBZN!${randomNumber}!uSeR`;
@@ -618,7 +615,7 @@ const getAllUsers = async (req, res, next) => {
             message: err.message
         });
     }
-}
+};
 
 const getCurrentUser = async (req, res, next) => {
     // Set header to prevent caching
@@ -667,7 +664,46 @@ const getCurrentUser = async (req, res, next) => {
     }
 };
 
+const getAllUsersWithJob = async (req, res, next) => {
+    try {
+        const users = await User.findAll({
+            where: { employment_status: { [Op.ne]: 'Inactive' } }, // only get not inactive users
+            attributes: ['id', 'name', 'isAdmin'], // select only these attributes
+            include: [
+                {
+                    model: JobTitle,
+                    attributes: ['id','name'], // include job title name
+                    include: [
+                        {
+                            model: Department,
+                            attributes: ['id','name'] // include department name
+                        }
+                    ]
+                }
+            ]
+        });
 
+        if (!users || users.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No user found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        res.status(200).json({
+            successful: true,
+            message: "Retrieved all users.",
+            data: users
+        });
+    } catch (err) {
+        res.status(500).json({
+            successful: false,
+            message: err.message
+        });
+    }
+};
 
 module.exports = {
     addUser,
@@ -682,4 +718,5 @@ module.exports = {
     uploadProfilePic,
     getProfilePic,
     getCurrentUser,
-}
+    getAllUsersWithJob
+};

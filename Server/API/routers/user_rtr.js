@@ -15,7 +15,7 @@ router.get('/getAllUsers', user_ctrl.getAllUsers);
 router.get('/getProfilePic/:id', user_ctrl.getProfilePic)
 router.get('/getCurrentUser', user_ctrl.getCurrentUser)
 router.get('/test', (req, res) => res.status(200).json({ message: "Test endpoint works" }));
-
+router.get('/getAllUsersWithJob', user_ctrl.getAllUsersWithJob)
 router.post('/uploadProfilePicture/:id', upload.single('profilePic'), user_ctrl.uploadProfilePic);
 
 

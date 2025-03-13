@@ -50,7 +50,7 @@ const ReqPage = () => {
         setError(null);
         try {
             const [leaveRes, overtimeRes, schedRes, timeAdjRes] = await Promise.all([
-                axios.get(`http://localhost:8080/leaveRequest/getAllLeaveReqsByUser/${loggedInUserId}`),
+                axios.get(`http://localhost:8080/leaveRequest/getAllLeaveRequestsByUser/${loggedInUserId}`),
                 axios.get(`http://localhost:8080/OTrequests/getAllOTReqsByUser/${loggedInUserId}`),
                 axios.get(`http://localhost:8080/schedAdjustment/getAllSchedAdjustmentByUser/${loggedInUserId}`),
                 axios.get(`http://localhost:8080/timeAdjustment/getAllTimeAdjustmentByUser/${loggedInUserId}`)
@@ -81,7 +81,7 @@ const ReqPage = () => {
             }
 
             setRequestData(combinedData);
-            console.log("Requests fetched:", combinedData); 
+            console.log("Requests fetched:", combinedData);
         } catch (error) {
             console.error("Error fetching requests:", error);
             setError("Failed to fetch requests. Please try again.");
@@ -109,61 +109,61 @@ const ReqPage = () => {
 
     const handleAddReqClick = () => setIsAddReqOpen(true);
     const handleAddReqClose = () => setIsAddReqOpen(false);
-    
+
     const handleCancelReqClick = (request) => {
         setSelectedRequest(request);
         setIsCancelReqOpen(true);
     };
-    
+
     const handleCancelReqClose = () => {
         setIsCancelReqOpen(false);
         setSelectedRequest(null);
     };
-    
+
     // Updated to use leaveType for leave requests
     const getCancelEndpoint = (request) => {
         const { id, type, leaveType } = request;
-        
+
         if (type === 'leave') {
             return `http://localhost:8080/leaveRequest/cancelLeaveRequest/${id}`;
         }
-        
+
         const endpointMap = {
             'overtime': `http://localhost:8080/OTrequests/cancelOvertimeRequest/${id}`,
             'timeadjustment': `http://localhost:8080/timeAdjustment/cancelTimeAdjustment/${id}`,
             'schedule': `http://localhost:8080/schedAdjustment/cancelSchedAdjustment/${id}`
         };
-        
+
         return endpointMap[type] || '';
     };
-    
+
     const handleConfirmCancel = async () => {
         if (!selectedRequest) return;
-        
+
         setIsLoading(true);
         setError(null);
-        
+
         try {
             const endpoint = getCancelEndpoint(selectedRequest);
             if (!endpoint) {
                 throw new Error(`Unknown request type: ${selectedRequest.type}`);
             }
-            
+
             const response = await axios.put(endpoint);
-            
+
             if (response.status === 200) {
                 // Update the local state to reflect the cancelled status
-                setRequestData(prevData => 
-                    prevData.map(item => 
+                setRequestData(prevData =>
+                    prevData.map(item =>
                         item.id === selectedRequest.id && item.type === selectedRequest.type
                             ? { ...item, status: 'cancelled' }
                             : item
                     )
                 );
-                
+
                 // Close the modal
                 handleCancelReqClose();
-                
+
                 // Optional: Show success message
                 console.log(`Request ${selectedRequest.id} cancelled successfully`);
             } else {
@@ -349,13 +349,13 @@ const ReqPage = () => {
                         Add Request
                     </button>
                 </div>
-                
+
                 {error && (
                     <div className="bg-red-600 text-white p-3 rounded-md mb-4">
                         {error}
                     </div>
                 )}
-                
+
                 <div className="bg-[#363636] rounded-md overflow-hidden flex flex-col flex-grow">
                     <div className="overflow-x-auto">
                         {isLoading && (
@@ -363,7 +363,7 @@ const ReqPage = () => {
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
                             </div>
                         )}
-                        
+
                         <div className="overflow-y-auto max-h-[calc(100vh-340px)]">
                             <table className="min-w-full">
                                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">

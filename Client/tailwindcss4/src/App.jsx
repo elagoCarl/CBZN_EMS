@@ -21,6 +21,7 @@ import ProtectedRoute from './Components/protectedRoute.jsx';
 import { AuthProvider } from "./Components/authContext"; // adjust path as needed
 import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
 import PageUiFallback from "./Components/pageUiFallBack";
+import DTR from "./Components/DTRpage.jsx";
 
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                 {/* Catch-all 404 Route */}
                 <Route path="*" element={<Page404 />} />
                 <Route path="/403" element={<Page403 />} />
+                <Route path="/dtr" element={<DTR />} />
               </Route>
             </Routes >
           </ErrorBoundary >
