@@ -5,8 +5,16 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
+
+  // Clear error when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage("");
+    }
+  }, [isOpen]);
 
   // Fetch schedule options when modal opens
   useEffect(() => {
@@ -155,7 +163,11 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       onClose();
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Failed to update user.');
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Failed to update user.");
+      }
     }
   };
 
@@ -167,7 +179,6 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         { name: 'name', placeholder: 'Full Name', type: 'text' },
         { name: 'email', placeholder: 'Email Address', type: 'email' },
         { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        // Updated JobTitleId field options using jobTitleOptions state
         { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
         { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
       ]
@@ -297,6 +308,13 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          {/* Sticky error message */}
+          {errorMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
+              {errorMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {formSections.map((section, index) => (
               <div key={index} className="space-y-4">

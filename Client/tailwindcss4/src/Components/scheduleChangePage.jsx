@@ -5,8 +5,11 @@ import axios from 'axios';
 import Sidebar from "./callComponents/sidebar.jsx";
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
+import { useAuth } from '../Components/authContext.jsx';
 
 const ScheduleChangePage = () => {
+  const { user } = useAuth();
+  console.log("userid: ", user.id)
   const [expandedRow, setExpandedRow] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -24,7 +27,7 @@ const ScheduleChangePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const userId = 2
+        const userId = user.id
         const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
         setCurrentUser(user.data.data);
         const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
@@ -69,7 +72,7 @@ const ScheduleChangePage = () => {
 
   const updateRequest = status => async () => {
     try {
-      
+
       // Send the update request to the backend endpoint.
       await axios.put(
         `http://localhost:8080/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
@@ -78,16 +81,16 @@ const ScheduleChangePage = () => {
           reviewer_id: currentUser.id,
         }
       );
-      
+
       const today = dayjs().format('YYYY-MM-DD');
       setRequestData(requestData.map(req =>
         req.id === selectedRequestId
-          ? { 
-              ...req, 
-              status, 
-              review_date: today,
-              reviewer: { id: currentUser.id, name: currentUser.name } 
-            }
+          ? {
+            ...req,
+            status,
+            review_date: today,
+            reviewer: { id: currentUser.id, name: currentUser.name }
+          }
           : req
       ));
       closeModals();
@@ -275,26 +278,26 @@ const ScheduleChangePage = () => {
                               </button>
                             </td>
                             <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap flex place-content-center">
-                                                        <div className="flex justify-end gap-2">
-                                                            {/* Admin actions for pending requests */}
-                                                            {request.status === 'pending' && (
-                                                                <>
-                                                                    <button
-                                                                         onClick={() => initiateAction(request.id, 'approve')}
-                                                                        className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
-                                                                    >
-                                                                        <Check className="w-4 h-4 mr-2" /> Approve
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => initiateAction(request.id, 'reject')}
-                                                                        className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
-                                                                    >
-                                                                        <XCircle className="w-4 h-4 mr-2" /> Reject
-                                                                    </button>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </td>
+                              <div className="flex justify-end gap-2">
+                                {/* Admin actions for pending requests */}
+                                {request.status === 'pending' && (
+                                  <>
+                                    <button
+                                      onClick={() => initiateAction(request.id, 'approve')}
+                                      className="bg-green-600 text-white px-4 py-2 text-sm rounded hover:bg-green-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                    >
+                                      <Check className="w-4 h-4 mr-2" /> Approve
+                                    </button>
+                                    <button
+                                      onClick={() => initiateAction(request.id, 'reject')}
+                                      className="bg-red-600 text-white px-4 py-2 text-sm rounded hover:bg-red-700 transition-colors flex items-center justify-center w-28" // Add fixed width
+                                    >
+                                      <XCircle className="w-4 h-4 mr-2" /> Reject
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
                           </tr>
                           {expandedRow === request.id && (
                             <tr>

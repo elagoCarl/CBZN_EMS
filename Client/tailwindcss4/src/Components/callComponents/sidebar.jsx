@@ -29,6 +29,7 @@ const Sidebar = () => {
 
     // Get user, setUser, and loading from AuthContext
     const { user, setUser, loading } = useAuth();
+    console.log("User: ", user)
 
     const iconColor = "#9ca3af";
 
@@ -85,10 +86,10 @@ const Sidebar = () => {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
                 { name: 'Add Request', path: '/reqPage', icon: <PlusCircle size={18} color={iconColor} /> },
-                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
-                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
-                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
-                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
+                { name: 'OT Request', path: '/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
         }
     ] : [
@@ -98,10 +99,10 @@ const Sidebar = () => {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
                 { name: 'Add Request', path: '/reqPage', icon: <PlusCircle size={18} color={iconColor} /> },
-                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
-                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
-                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
-                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
+                { name: 'OT Request', path: '/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
         }
     ];

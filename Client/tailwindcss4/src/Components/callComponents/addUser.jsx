@@ -5,6 +5,7 @@ import axios from 'axios';
 
 const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
 
@@ -29,6 +30,8 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
 
     if (isOpen) {
       fetchSchedules();
+      // Clear error message when modal opens
+      setErrorMessage("");
     }
   }, [isOpen]);
 
@@ -111,7 +114,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
 
       // Create schedule-user association
       await axios.post('http://localhost:8080/schedUser/addSchedUser', {
-        schedule_id: formData.schedule, // the schedule id selected
+        schedule_id: formData.schedule,
         user_id: userId,
         effectivity_date: formData.effectivity_date
       });
@@ -120,7 +123,12 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       onClose();
     } catch (error) {
       console.error('Error adding user:', error);
-      alert('Failed to add user.');
+      // Display error message from response if available
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Failed to add user.");
+      }
     }
   };
 
@@ -143,7 +151,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
           name: 'schedule',
           type: 'select',
           placeholder: 'Select Schedule',
-          options: scheduleOptions // now contains objects with value and label
+          options: scheduleOptions
         },
         { name: 'effectivity_date', placeholder: 'Effectivity Date', type: 'date' }
       ]
@@ -212,7 +220,6 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
           >
             <option value="">{field.placeholder}</option>
             {field.options.map(opt => {
-              // Check if option is an object or a string
               if (typeof opt === 'object') {
                 return (
                   <option key={opt.value} value={opt.value} className="bg-gray-800">
@@ -261,6 +268,13 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          {/* Sticky error message */}
+          {errorMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
+              {errorMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {formSections.map((section, index) => (
               <div key={index} className="space-y-4">
