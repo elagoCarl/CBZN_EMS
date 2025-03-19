@@ -5,12 +5,14 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isBetween from 'dayjs/plugin/isBetween';
 import axios from 'axios';
+import EditCutoffModal from "./callComponents/editCutoff.jsx";
+
+
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 
 const DTR = () => {
   const today = dayjs('2025-03-10');
-  const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -29,6 +31,9 @@ const DTR = () => {
   const [scheduleAdjustments, setScheduleAdjustments] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
+  const [isEditCutoffModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [selectedCutoffId, setSelectedCutoffId] = useState(null);
+
 
   const currentCutoff = useMemo(() => cutoffs.find(c => c.id === selectedCutoffId), [selectedCutoffId, cutoffs]);
 
@@ -498,6 +503,25 @@ const DTR = () => {
       );
     }), [users, userSearchTerm, jobTitles, departments]);
 
+    const handleEditCutoff = (id) => {
+      const cutoffToEdit = cutoffs.find(cutoff => cutoff.id === id);
+      if (cutoffToEdit) {
+        setSelectedCutoffId(cutoffToEdit.id);
+        setIsEditUserModalOpen(true);
+      }
+    };
+  
+    const handleCloseEditModal = () => {
+      setIsEditUserModalOpen(false);
+      setSelectedCutoffId(null);
+    };
+
+    const handleCutoffUpdated = () => {
+      fetchCutoffs();
+      handleCloseEditModal();
+    };
+  
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
@@ -576,8 +600,10 @@ const DTR = () => {
                     </div>
                   )}
                 </div>
-                <button className="bg-green-500 text-white text-sm rounded-md px-3 py-1.5 hover:bg-green-600" >
-                    Edit
+                <button className="bg-green-500 text-white text-sm rounded-md px-3 py-1.5 hover:bg-green-600" 
+                onClick={() =>handleEditCutoff(cutoffs)}
+                    >
+                      Edit
                   </button>
               </div>
             </div>
@@ -697,6 +723,13 @@ const DTR = () => {
           </div>
         </div>
       </div>
+
+       <EditCutoffModal
+              isOpen={isEditCutoffModalOpen}
+              onClose={handleCloseEditModal}
+              cutoffId={selectedCutoffId}
+              onCutoffUpdated={handleCutoffUpdated}
+            />
     </div>
   );
 };
