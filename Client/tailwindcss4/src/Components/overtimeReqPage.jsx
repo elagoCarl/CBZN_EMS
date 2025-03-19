@@ -19,11 +19,8 @@ const OvertimeReqPage = () => {
     const [requestData, setRequestData] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
 
-
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-
-
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -51,11 +48,6 @@ const OvertimeReqPage = () => {
         };
         fetchOTRequests();
     }, []);
-
-
-
-
-
 
     // Handle window resize with debounce for better performance
     useEffect(() => {
@@ -202,11 +194,6 @@ const OvertimeReqPage = () => {
         );
     }
 
-
-
-
-
-
     const filteredRequests = activeFilter === 'all'
         ? requestData
         : requestData.filter(req => req.status === activeFilter);
@@ -288,13 +275,12 @@ const OvertimeReqPage = () => {
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 {/* Filters - Scrollable on mobile */}
-                {/* Page header with responsive layout */}
-                <header className="flex flex-col md:flex-row justify-between items-center mb-6">
+                <header className="mb-6">
                     <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
                         Overtime <span className="text-white"> Requests </span>
                     </h1>
                 </header>
-                <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
+                <div className="flex flex-col md:flex-row justify-between gap-4 mt-8 mb-5 font-semibold">
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                         <button
 

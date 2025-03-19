@@ -182,9 +182,9 @@ const ScheduleChangePage = () => {
           onCancel={closeModals}
         />
       )}
-      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6 mt-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500 mb-4 md:mb-0">
+      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
+        <header className="mb-6">
+          <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
             Schedule Change <span className="text-white">Requests</span>
           </h1>
         </header>

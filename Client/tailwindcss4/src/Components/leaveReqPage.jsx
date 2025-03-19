@@ -327,7 +327,7 @@ const LeaveReqPage = () => {
             {/* Approve Confirmation Modal */}
             {modals.approve && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#2b2b2b] rounded-lg p-6 max-w-md w-full shadow-lg">
+                    <div className="bg-[#2b2b2b] rounded-lg  p-6 max-w-md w-full shadow-lg">
                         <h3 className="text-xl font-bold text-green-500 mb-4">Confirm Approval</h3>
                         <p className="text-gray-300 mb-6">
                             Are you sure you want to approve the leave request from <span className="text-green-500 font-medium">{getRequestName(modals.selectedRequestId)}</span>?
@@ -382,7 +382,7 @@ const LeaveReqPage = () => {
                 </header>
 
                 {/* Filters row with search - Responsive layout */}
-                <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
+                <div className="flex flex-col md:flex-row justify-between gap-4 mt-8 mb-5 font-semibold">
                     {/* Status filters - Scrollable on mobile */}
                     <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
                         {filterButtons.map(button => (
