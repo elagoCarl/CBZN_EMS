@@ -15,7 +15,10 @@ import {
     LogOut,
     Menu,
     X,
-    PlusCircle
+    PlusCircle,
+    FileClock,
+    CalendarClock,
+    BriefcaseBusiness 
 } from 'lucide-react';
 import { useAuth } from '../authContext'; // Adjust path if needed
 
@@ -79,9 +82,9 @@ const Sidebar = () => {
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
         { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
         { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
-        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
-        { name: 'Schedules', icon: <Settings size={20} color={iconColor} />, path: '/schedulePage' },
-        { name: 'Departments & Jobs', icon: <Settings size={20} color={iconColor} />, path: '/departmentsJobs' },
+
+        { name: 'Schedules', icon: <FileClock size={20} color={iconColor} />, path: '/schedulePage' },
+        { name: 'Departments & Jobs', icon: <BriefcaseBusiness size={20} color={iconColor} />, path: '/deptPage' },
         {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
@@ -91,7 +94,9 @@ const Sidebar = () => {
                 { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
                 { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
-        }
+        },
+        { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' }
     ] : [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
         { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
