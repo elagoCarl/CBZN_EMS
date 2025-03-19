@@ -576,6 +576,9 @@ const DTR = () => {
                     </div>
                   )}
                 </div>
+                <button className="bg-green-500 text-white text-sm rounded-md px-3 py-1.5 hover:bg-green-600" >
+                    Edit
+                  </button>
               </div>
             </div>
           </div>
