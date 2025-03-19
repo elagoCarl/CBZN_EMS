@@ -108,7 +108,7 @@ const TimeAdjustmentPage = () => {
 
   const formatStatus = status => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
   const getStatusColor = status => {
-    const colors = { approved: 'text-green-500', rejected: 'text-red-500', cancelled: 'text-gray-500', canceled: 'text-gray-500', pending: 'text-yellow-500' };
+    const colors = { approved: 'text-green-500', rejected: 'text-red-500', canceled: 'text-gray-500', pending: 'text-yellow-500' };
     return colors[status] || 'text-gray-400';
   };
 
@@ -135,7 +135,7 @@ const TimeAdjustmentPage = () => {
   const filteredRequests = useMemo(() => {
     if (!Array.isArray(requestData)) return [];
     return requestData.filter(req => {
-      if (activeFilter !== 'all' && !(activeFilter === 'canceled' && req.status === 'cancelled') && req.status !== activeFilter) return false;
+      if (activeFilter !== 'all' && !(activeFilter === 'canceled') && req.status !== activeFilter) return false;
       if (searchQuery.trim()) {
         const userName = req.user?.name?.toLowerCase() || '';
         return userName.includes(searchQuery.toLowerCase());
@@ -193,7 +193,7 @@ const TimeAdjustmentPage = () => {
         </header>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
           <div className="flex overflow-x-auto gap-2 hide-scrollbar">
-            {['all', 'pending', 'approved', 'rejected', 'cancelled'].map(status => (
+            {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => (
               <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
@@ -215,7 +215,7 @@ const TimeAdjustmentPage = () => {
               placeholder="Search..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-md text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
             />
           </div>
         </div>
