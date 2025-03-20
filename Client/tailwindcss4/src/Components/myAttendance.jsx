@@ -8,7 +8,7 @@ import { useAuth } from '../Components/authContext.jsx';
 const MyAttendance = () => {
   const { user } = useAuth();
   console.log("userid: ", user.id)
-  const userId = user.id; // Ideally, this comes from your authentication logic
+  const userId = user.id;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -80,17 +80,21 @@ const MyAttendance = () => {
     try {
       const response = await axios.get(`http://localhost:8080/attendance/getAttendanceByUser/${userId}`);
       if (response.data && response.data.successful && Array.isArray(response.data.data)) {
-        const formattedRecords = response.data.data.map(record => ({
-          id: record.id, // Unique attendance record id
-          date: record.date,
-          day: record.weekday,
-          site: record.site || "-",
-          time_in: record.time_in ? dayjs(record.time_in).format("hh:mm A") : "-",
-          time_out: record.time_out ? formatTimeOut(record.time_out, record.date) : "-",
-          remarks: record.remarks || "-",
-          isRestDay: record.isRestDay ? "Rest Day" : "Work"
-        }));
+        const formattedRecords = response.data.data
+          .map(record => ({
+            id: record.id,
+            date: record.date,
+            day: record.weekday,
+            site: record.site || "-",
+            time_in: record.time_in ? dayjs(record.time_in).format("hh:mm A") : "-",
+            time_out: record.time_out ? formatTimeOut(record.time_out, record.date) : "-",
+            remarks: record.remarks || "-",
+            isRestDay: record.isRestDay ? "Rest Day" : "Work"
+          }))
+          .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf()); // Descending order
+
         setAttendanceRecords(formattedRecords);
+
       } else {
         setAttendanceRecords([]);
       }

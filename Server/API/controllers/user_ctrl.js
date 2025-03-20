@@ -140,7 +140,15 @@ const addUser = async (req, res, next) => {
     const t = await User.sequelize.transaction(); // Start transaction
 
     try {
-        const { employeeId, name, email, isAdmin, employment_status } = req.body;
+        const {
+            employeeId,
+            name,
+            email,
+            isAdmin,
+            employment_status,
+            jobTitleId
+        } = req.body;
+
         const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
@@ -159,7 +167,7 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if the email already exists
+        // Check if the email or employeeId already exists
         const existingEmail = await User.findOne({ where: { email } });
         const existingEmployeeId = await User.findOne({ where: { employeeId } });
 
@@ -177,24 +185,27 @@ const addUser = async (req, res, next) => {
         }
 
         // Create new user with a hashed password
-        const newUser = await User.create(
-            {
-                employeeId,
-                name,
-                email,
-                password: DefaultPassword,
-                isAdmin: isAdmin || false, // Default to false if not provided
-                employment_status: employment_status || 'Employee' // Default to 'Employee'
-            },
-            { transaction: t }
-        );
+        const newUser = await User.create({
+            employeeId,
+            name,
+            email,
+            password: DefaultPassword,
+            isAdmin: isAdmin || false,          // Default to false if not provided
+            employment_status: employment_status || 'Employee', // Default to 'Employee'
+            JobTitleId: jobTitleId || null      // Associate job title if provided
+        }, { transaction: t });
 
         await t.commit(); // Commit transaction
 
         return res.status(201).json({
             successful: true,
             message: "Successfully added new user. Verification email sent.",
-            user: { id: newUser.id, name: newUser.name, email: newUser.email } // Returning basic details
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                jobTitleId: newUser.JobTitleId
+            }
         });
 
     } catch (err) {
@@ -207,6 +218,7 @@ const addUser = async (req, res, next) => {
         });
     }
 };
+
 
 const updateUserEmail = async (req, res, next) => {
     try {
@@ -234,6 +246,15 @@ const updateUserEmail = async (req, res, next) => {
             return res.status(406).json({
                 successful: false,
                 message: "Email format is invalid."
+            });
+        }
+
+        // If the new email is the same as the current one, accept the update
+        if (user.email === email) {
+            await user.update({ email });
+            return res.status(200).json({
+                successful: true,
+                message: "User email updated successfully."
             });
         }
 
@@ -267,6 +288,7 @@ const updateUserEmail = async (req, res, next) => {
         });
     }
 };
+
 
 const updateUserPassword = async (req, res) => {
     try {
@@ -317,7 +339,13 @@ const updateUserPassword = async (req, res) => {
 
 const updateUserById = async (req, res, next) => {
     try {
-        const { name, email, isAdmin, employment_status } = req.body;
+        const {
+            name,
+            email,
+            isAdmin,
+            employment_status,
+            jobTitleId
+        } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);
@@ -362,8 +390,9 @@ const updateUserById = async (req, res, next) => {
         await user.update({
             name,
             email,
-            isAdmin: isAdmin || user.isAdmin, // Only update if provided
-            employment_status: employment_status || user.employment_status // Default to existing status if not provided
+            isAdmin: (typeof isAdmin !== 'undefined') ? isAdmin : user.isAdmin,
+            employment_status: employment_status || user.employment_status,
+            JobTitleId: jobTitleId || user.JobTitleId
         });
 
         return res.status(200).json({
@@ -375,7 +404,7 @@ const updateUserById = async (req, res, next) => {
         console.error(err);
         return res.status(500).json({
             successful: false,
-            message: err
+            message: err.message || "An unexpected error occurred."
         });
     }
 };
@@ -430,6 +459,13 @@ const loginUser = async (req, res, next) => {
             return;
         }
 
+        if (user.employment_status === 'Inactive') {
+            return res.status(403).json({
+                successful: false,
+                message: "Your account is inactive. Please contact your administrator."
+            });
+        }
+
         // If user exists and password is correct, proceed with login
         const accessToken = createAccessToken(user.id);
         const refreshToken = createRefreshToken(user.id);
@@ -446,7 +482,7 @@ const loginUser = async (req, res, next) => {
         // Set cookies with the JWT tokens
         res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 60 * 60 * 1000 });
         res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: (60 * 60 * 24 * 30) * 1000 });
-        
+
         if (user.profilePicture) {
             const base64Image = Buffer.from(user.profilePicture).toString('base64');
             // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
@@ -672,11 +708,11 @@ const getAllUsersWithJob = async (req, res, next) => {
             include: [
                 {
                     model: JobTitle,
-                    attributes: ['id','name'], // include job title name
+                    attributes: ['id', 'name'], // include job title name
                     include: [
                         {
                             model: Department,
-                            attributes: ['id','name'] // include department name
+                            attributes: ['id', 'name'] // include department name
                         }
                     ]
                 }
