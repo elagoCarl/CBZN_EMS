@@ -175,8 +175,8 @@ const OvertimeReqPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm sm:text-base">
                 <div className="space-y-4">
                     <h3 className="text-green-500 font-semibold text-sm sm:text-base mb-2">Overtime Request Details</h3>
-                    <div><p className="text-xs sm:text-sm font-medium text-gray-400">Start of Overtime</p><p className="text-white">{formatDateTime(request.start_time)}</p></div>
-                    <div><p className="text-xs sm:text-sm font-medium text-gray-400">End of Overtime</p><p className="text-white"> {formatDateTime(request.end_time)}</p></div>
+                    <div><p className="text-xs sm:text-sm font-medium text-gray-400">Start of Overtime</p><p className="text-white">{(request.start_time)}</p></div>
+                    <div><p className="text-xs sm:text-sm font-medium text-gray-400">End of Overtime</p><p className="text-white"> {(request.end_time)}</p></div>
                     <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p><p className="text-white">{request.reason || 'No reason provided'}</p></div>
                 </div>
 
@@ -184,8 +184,9 @@ const OvertimeReqPage = () => {
                     <h3 className="text-green-500 font-semibold text-sm sm:text-base mb-2">Review Details</h3>
                     {(request.reviewer || request.review_date) ? (
                         <>
-                            {request.review_date && <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed On</p><p className="text-white">{formatDate(request.review_date)}</p></div>}
                             {request.reviewer && <div><p className="text-xs sm:text-sm font-medium text-gray-400">Reviewed By</p><p className="text-white">{request.reviewer.name || 'Unknown'}</p></div>}
+                            {request.review_date && <div><p className="text-xs sm:text-sm font-medium text-gray-400">Review Date</p><p className="text-white">{formatDate(request.review_date)}</p></div>}
+
                         </>
                     ) : <p className="text-gray-400 italic">Not yet reviewed</p>}
                 </div>
@@ -254,6 +255,14 @@ const OvertimeReqPage = () => {
         return request ? request.name : '';
     };
 
+    const filterButtons = [
+        { label: 'All Requests', value: 'all' },
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+        { label: 'Cancelled', value: 'canceled' }
+    ];
+
     return (
         <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
             <Sidebar />
@@ -281,22 +290,18 @@ const OvertimeReqPage = () => {
                 </header>
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
                     <div className="flex overflow-x-auto gap-2 hide-scrollbar">
-                        {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => {
-                            const filterKey = status.toLowerCase();
-                            return (
+                    {filterButtons.map(button => (
                             <button
-                                key={status}
-                                onClick={() => setActiveFilter(filterKey)}
-                                className={`px-3 md:px-4 py-2 md:py-2 rounded-full text-sm md:text-base ${
-                                activeFilter === filterKey
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
+                                key={button.value}
+                                onClick={() => setActiveFilter(button.value)}
+                                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === button.value
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                    }`}
                             >
-                                {status}
+                                {button.label}
                             </button>
-                            );
-                        })}
+                         ))}
                     </div>
                 </div>
 
