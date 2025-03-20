@@ -7,7 +7,7 @@ import ManageUsers from './Components/manageUsers.jsx';
 import MyAttendance from "./Components/myAttendance.jsx";
 import AccountSettings from './Components/accSettings.jsx';
 import AttendanceList from './Components/attendanceList.jsx';
-import ReqPage from './Components/reqPage.jsx';
+import AddReqPage from './Components/AddReqPage.jsx';
 import DeptPage from "./Components/departmentPage.jsx";
 import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
@@ -46,7 +46,7 @@ function App() {
                 <Route path="/manageUsers" element={<ManageUsers />} />
                 <Route path="/accSettings" element={<AccountSettings />} />
                 <Route path="/attendanceList" element={<AttendanceList />} />
-                <Route path="/reqPage" element={<ReqPage />} />
+                <Route path="/addReqPage" element={<AddReqPage />} />
                 <Route path="/deptPage" element={<DeptPage />} />
                 <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
                 <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
