@@ -6,6 +6,7 @@ import axios from 'axios';
 const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
 
@@ -30,6 +31,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
     if (isOpen) {
       fetchSchedules();
       setErrorMessage("");
+      setSuccessMessage("");
     }
   }, [isOpen]);
 
@@ -63,13 +65,14 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Create main user
+      // 1. Create the main user with JobTitleId
       const { data: userResponse } = await axios.post('http://localhost:8080/users/addUser', {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
         isAdmin: formData.role === 'admin',
-        employment_status: formData.employment_status
+        employment_status: formData.employment_status,
+        jobTitleId: parseInt(formData.JobTitleId) || null
       });
 
       if (!userResponse || !userResponse.user || !userResponse.user.id) {
@@ -78,47 +81,52 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
 
       const userId = userResponse.user.id;
 
-      // Create user info
+      // 2. Create user info (with default values if not provided)
       await axios.post('http://localhost:8080/userInfo/addUserInfo', {
         UserId: userId,
-        age: parseInt(formData.age),
-        city_add: formData.city_add,
-        provincial_add: formData.provincial_add,
-        birthdate: formData.birthdate,
-        civil_status: formData.civil_status,
-        name_of_spouse: formData.name_of_spouse,
-        spouse_occupation: formData.spouse_occupation,
-        spouse_employed_by: formData.spouse_employed_by,
-        father_name: formData.father_name,
-        father_occupation: formData.father_occupation,
-        father_employed_by: formData.father_employed_by,
-        mother_name: formData.mother_name,
-        mother_occupation: formData.mother_occupation,
-        mother_employed_by: formData.mother_employed_by,
-        height: formData.height,
-        weight: formData.weight,
-        religion: formData.religion,
-        citizenship: formData.citizenship,
-        no_of_children: formData.no_of_children
+        age: formData.age ? parseInt(formData.age) : 0,
+        city_add: formData.city_add || "N/A",
+        provincial_add: formData.provincial_add || "N/A",
+        birthdate: formData.birthdate || "1900-01-01",
+        civil_status: formData.civil_status || "Single",
+        name_of_spouse: formData.name_of_spouse || "N/A",
+        spouse_occupation: formData.spouse_occupation || "N/A",
+        spouse_employed_by: formData.spouse_employed_by || "N/A",
+        height: formData.height || "0",
+        weight: formData.weight || "0",
+        religion: formData.religion || "N/A",
+        citizenship: formData.citizenship || "N/A",
+        no_of_children: formData.no_of_children ? parseInt(formData.no_of_children) : 0,
+        father_name: formData.father_name || "N/A",
+        father_occupation: formData.father_occupation || "N/A",
+        father_employed_by: formData.father_employed_by || "N/A",
+        mother_name: formData.mother_name || "N/A",
+        mother_occupation: formData.mother_occupation || "N/A",
+        mother_employed_by: formData.mother_employed_by || "N/A"
       });
 
-      // Create emergency contact
+      // 3. Create emergency contact (with default values if not provided)
       await axios.post('http://localhost:8080/emgncyContact/addEmgncyContact', {
         UserId: userId,
-        name: formData.emergency_name,
-        relationship: formData.emergency_relationship,
-        contact_number: formData.emergency_contact
+        name: formData.emergency_name || "N/A",
+        relationship: formData.emergency_relationship || "N/A",
+        contact_number: formData.emergency_contact || "N/A"
       });
 
-      // Create schedule-user association
+      // 4. Create schedule-user association
       await axios.post('http://localhost:8080/schedUser/addSchedUser', {
         schedule_id: formData.schedule,
         user_id: userId,
         effectivity_date: formData.effectivity_date
       });
 
-      onUserAdded(userResponse.user);
-      onClose();
+      // 5. Show success message and close
+      setSuccessMessage("User added successfully.");
+      setTimeout(() => {
+        onUserAdded(userResponse.user);
+        onClose();
+      }, 1500);
+
     } catch (error) {
       console.error('Error adding user:', error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -129,6 +137,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
     }
   };
 
+  // Define the form sections
   const formSections = [
     {
       title: 'User Account',
@@ -136,9 +145,27 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         { name: 'employeeId', label: 'Employee ID', placeholder: 'Employee ID', type: 'number' },
         { name: 'name', label: 'Full Name', placeholder: 'Full Name', type: 'text' },
         { name: 'email', label: 'Email Address', placeholder: 'Email Address', type: 'email' },
-        { name: 'employment_status', label: 'Employment Status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        { name: 'JobTitleId', label: 'Job Title', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
-        { name: 'role', label: 'Role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
+        {
+          name: 'employment_status',
+          label: 'Employment Status',
+          type: 'select',
+          placeholder: 'Employment Status',
+          options: ['Employee', 'Intern', 'Inactive']
+        },
+        {
+          name: 'JobTitleId',
+          label: 'Job Title',
+          type: 'select',
+          placeholder: 'Job Title',
+          options: jobTitleOptions
+        },
+        {
+          name: 'role',
+          label: 'Role',
+          type: 'select',
+          placeholder: 'Role',
+          options: ['admin', 'user']
+        }
       ]
     },
     {
@@ -159,54 +186,142 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       fields: [
         { name: 'age', label: 'Age', placeholder: 'Age', type: 'number' },
         { name: 'birthdate', label: 'Birth Date', placeholder: 'Birth Date', type: 'date' },
-        { name: 'height', label: 'Height', placeholder: 'Height', type: 'text' },
-        { name: 'weight', label: 'Weight', placeholder: 'Weight', type: 'text' },
+        { name: 'height', label: 'Height', placeholder: 'Height (cm)', type: 'text' },
+        { name: 'weight', label: 'Weight', placeholder: 'Weight (kg)', type: 'text' },
         { name: 'religion', label: 'Religion', placeholder: 'Religion', type: 'text' },
         { name: 'citizenship', label: 'Citizenship', placeholder: 'Citizenship', type: 'text' },
-        { name: 'civil_status', label: 'Civil Status', placeholder: 'Civil Status', type: 'text' },
-        { name: 'no_of_children', label: 'Number of Children', placeholder: 'Number of Children', type: 'text' }
+        {
+          name: 'civil_status',
+          label: 'Civil Status',
+          type: 'select',
+          placeholder: 'Civil Status',
+          options: ['Single', 'Married', 'Divorced', 'Widowed', 'Other']
+        },
+        { name: 'no_of_children', label: 'Number of Children', placeholder: 'Number of Children', type: 'number' }
       ]
     },
     {
       title: 'Address Information',
       fields: [
-        { name: 'city_add', label: 'City Address', placeholder: 'City Address', type: 'text' },
-        { name: 'provincial_add', label: 'Provincial Address', placeholder: 'Provincial Address', type: 'text' }
+        {
+          name: 'city_add',
+          label: 'City Address',
+          placeholder: 'Street No., City, State',
+          type: 'text'
+        },
+        {
+          name: 'provincial_add',
+          label: 'Provincial Address',
+          placeholder: 'Provincial Address',
+          type: 'text'
+        }
       ]
     },
     {
       title: 'Spouse Information',
       fields: [
-        { name: 'name_of_spouse', label: "Spouse's Name", placeholder: "Spouse's Name", type: 'text' },
-        { name: 'spouse_occupation', label: "Spouse's Occupation", placeholder: "Spouse's Occupation", type: 'text' },
-        { name: 'spouse_employed_by', label: "Spouse's Employer", placeholder: "Spouse's Employer", type: 'text' }
+        {
+          name: 'name_of_spouse',
+          label: "Spouse's Name",
+          placeholder: "Spouse's Name",
+          type: 'text'
+        },
+        {
+          name: 'spouse_occupation',
+          label: "Spouse's Occupation",
+          placeholder: "Spouse's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'spouse_employed_by',
+          label: "Spouse's Employer",
+          placeholder: "Spouse's Employer",
+          type: 'text'
+        }
       ]
     },
     {
-      title: 'Parent Information',
+      title: "Father's Information",
       fields: [
-        { name: 'father_name', label: "Father's Name", placeholder: "Father's Name", type: 'text' },
-        { name: 'father_occupation', label: "Father's Occupation", placeholder: "Father's Occupation", type: 'text' },
-        { name: 'father_employed_by', label: "Father's Employer", placeholder: "Father's Employer", type: 'text' },
-        { name: 'mother_name', label: "Mother's Name", placeholder: "Mother's Name", type: 'text' },
-        { name: 'mother_occupation', label: "Mother's Occupation", placeholder: "Mother's Occupation", type: 'text' },
-        { name: 'mother_employed_by', label: "Mother's Employer", placeholder: "Mother's Employer", type: 'text' }
+        {
+          name: 'father_name',
+          label: "Father's Name",
+          placeholder: "Father's Name",
+          type: 'text'
+        },
+        {
+          name: 'father_occupation',
+          label: "Father's Occupation",
+          placeholder: "Father's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'father_employed_by',
+          label: "Father's Employer",
+          placeholder: "Father's Employer",
+          type: 'text'
+        }
+      ]
+    },
+    {
+      title: "Mother's Information",
+      fields: [
+        {
+          name: 'mother_name',
+          label: "Mother's Name",
+          placeholder: "Mother's Name",
+          type: 'text'
+        },
+        {
+          name: 'mother_occupation',
+          label: "Mother's Occupation",
+          placeholder: "Mother's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'mother_employed_by',
+          label: "Mother's Employer",
+          placeholder: "Mother's Employer",
+          type: 'text'
+        }
       ]
     },
     {
       title: 'Emergency Contact',
       fields: [
-        { name: 'emergency_name', label: 'Emergency Contact Name', placeholder: 'Emergency Contact Name', type: 'text' },
-        { name: 'emergency_relationship', label: 'Relationship', placeholder: 'Relationship', type: 'text' },
-        { name: 'emergency_contact', label: 'Contact Number', placeholder: 'Contact Number', type: 'tel' }
+        {
+          name: 'emergency_name',
+          label: 'Emergency Contact Name',
+          placeholder: 'Emergency Contact Name',
+          type: 'text'
+        },
+        {
+          name: 'emergency_relationship',
+          label: 'Relationship',
+          placeholder: 'Relationship',
+          type: 'text'
+        },
+        {
+          name: 'emergency_contact',
+          label: 'Contact Number',
+          placeholder: 'Contact Number',
+          type: 'tel'
+        }
       ]
     }
   ];
 
-  // Render each field with a label element
+  // Render each field with a label and optional name-pattern restrictions
   const renderField = (field) => {
     const baseClass =
       "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
+
+    // Restrict name fields to letters, spaces, periods, apostrophes, and hyphens
+    let extraProps = {};
+    if (field.type !== 'select' && field.name.toLowerCase().includes('name')) {
+      extraProps.pattern = "^[A-Za-z\\s.'-]+$";
+      extraProps.title = "Only letters, spaces, periods, apostrophes, and hyphens allowed";
+    }
 
     return (
       <div key={field.name} className="flex-1">
@@ -246,6 +361,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             onChange={handleChange}
             className={baseClass}
             required
+            {...extraProps}
           />
         )}
       </div>
@@ -268,10 +384,15 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {/* Sticky error message */}
+          {/* Error or success message */}
           {errorMessage && (
             <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
               {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-green-500 text-white rounded-md text-center">
+              {successMessage}
             </div>
           )}
 
