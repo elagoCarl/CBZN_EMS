@@ -28,8 +28,8 @@ const TimeAdjustmentPage = () => {
       try {
         setLoading(true);
         const userId = user.id
-        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
-        setCurrentUser(user.data.data);
+        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(userData.data.data);
 
         const { data } = await axios.get('http://localhost:8080/timeAdjustment/getAllTimeAdjustment');
         setRequestData(Array.isArray(data.data) ? data.data : []);
@@ -251,7 +251,7 @@ const TimeAdjustmentPage = () => {
                           <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
                             <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                               <div className="flex items-center">
-                                <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                {/* <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> */}
                                 <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
                                   {request.user?.name || 'Unknown'}
                                 </span>
