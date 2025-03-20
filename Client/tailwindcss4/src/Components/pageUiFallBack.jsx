@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";  // Import PropTypes
 import axios from "axios";
 
-const PageUiFallback = ({ children }) => {  // Accept children instead of forcing MyAttendance
+const PageUiFallback = ({ children }) => {
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
 
@@ -18,9 +19,17 @@ const PageUiFallback = ({ children }) => {  // Accept children instead of forcin
     fetchData();
   }, []);
 
-  return error ? <p>{error}</p> : children; // Render whatever is inside the PageUiFallback
+  if (error) return <p>{error}</p>;
+  if (!data) return <p>Loading...</p>
+  return error ? <p>{error}</p> : children;
+};
+
+// ✅ Define prop types
+PageUiFallback.propTypes = {
+  children: PropTypes.node.isRequired, // Ensures children are valid React elements
 };
 
 export default PageUiFallback;
+
 
 {/**WARNING: DONT REMOVE, This component serves as an error-handling wrapper for UI components that depend on fetching external data. It ensures that if an error occurs during data retrieval (e.g., due to network issues or a backend failure), the application does not break entirely but instead provides a graceful fallback message to the user. */}
