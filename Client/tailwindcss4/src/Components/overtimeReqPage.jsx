@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, X, ChevronDown, ChevronUp, Check, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Clock, X, ChevronDown, ChevronUp, Check, XCircle, Search } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -17,6 +17,7 @@ const OvertimeReqPage = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [currentPage, setCurrentPage] = useState(1);
     const [requestData, setRequestData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
 
     const [error, setError] = useState(null);
@@ -83,6 +84,10 @@ const OvertimeReqPage = () => {
         setShowRejectConfirm(true);
     };
 
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
+    };
     // Actual approve action after confirmation
     // const handleApprove = () => {
     //     setRequestData(requestData.map(req =>
@@ -195,9 +200,20 @@ const OvertimeReqPage = () => {
         );
     }
 
-    const filteredRequests = activeFilter === 'all'
-        ? requestData
-        : requestData.filter(req => req.status === activeFilter);
+     const filteredRequests = useMemo(() => {
+            // First filter by status
+            const statusFiltered = activeFilter === 'all'
+                ? requestData
+                : requestData.filter(req => req.status === activeFilter);
+    
+            // Then filter by search query if present
+            if (!searchQuery.trim()) return statusFiltered;
+    
+            return statusFiltered.filter(req => {
+                const userName = req.user?.name || '';
+                return userName.toLowerCase().includes(searchQuery.toLowerCase());
+            });
+        }, [activeFilter, requestData, searchQuery]);
 
     // Responsive pagination
     const getRequestsPerPage = () => {
@@ -303,7 +319,24 @@ const OvertimeReqPage = () => {
                             </button>
                          ))}
                     </div>
+
+                      {/* Search input - Right aligned */}
+                                        <div className="relative mt-1 md:mt-0">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <Search className="h-4 w-4 text-gray-400" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Search..."
+                                                value={searchQuery}
+                                                onChange={handleSearchChange}
+                                                className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
+                                            />
+                                        </div>
+                                    
                 </div>
+
+                
 
                 {/* Table Container */}
                 <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col justify-center">
