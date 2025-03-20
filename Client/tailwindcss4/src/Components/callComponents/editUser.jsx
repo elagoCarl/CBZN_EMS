@@ -5,8 +5,16 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
+
+  // Clear error when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage("");
+    }
+  }, [isOpen]);
 
   // Fetch schedule options when modal opens
   useEffect(() => {
@@ -155,7 +163,11 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       onClose();
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Failed to update user.');
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Failed to update user.");
+      }
     }
   };
 
@@ -163,13 +175,12 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     {
       title: 'User Account',
       fields: [
-        { name: 'employeeId', placeholder: 'Employee ID', type: 'number', disabled: true },
-        { name: 'name', placeholder: 'Full Name', type: 'text' },
-        { name: 'email', placeholder: 'Email Address', type: 'email' },
-        { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        // Updated JobTitleId field options using jobTitleOptions state
-        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
-        { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
+        { name: 'employeeId', label: 'Employee ID', placeholder: 'Employee ID', type: 'number', disabled: true },
+        { name: 'name', label: 'Full Name', placeholder: 'Full Name', type: 'text' },
+        { name: 'email', label: 'Email Address', placeholder: 'Email Address', type: 'email' },
+        { name: 'employment_status', label: 'Employment Status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
+        { name: 'JobTitleId', label: 'Job Title', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
+        { name: 'role', label: 'Role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
       ]
     },
     {
@@ -177,71 +188,76 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       fields: [
         {
           name: 'schedule',
+          label: 'Schedule',
           type: 'select',
           placeholder: 'Select Schedule',
           options: scheduleOptions
         },
-        { name: 'effectivity_date', placeholder: 'Effectivity Date', type: 'date' }
+        { name: 'effectivity_date', label: 'Effectivity Date', placeholder: 'Effectivity Date', type: 'date' }
       ]
     },
     {
       title: 'Personal Information',
       fields: [
-        { name: 'age', placeholder: 'Age', type: 'number' },
-        { name: 'birthdate', placeholder: 'Birth Date', type: 'date' },
-        { name: 'height', placeholder: 'Height', type: 'text' },
-        { name: 'weight', placeholder: 'Weight', type: 'text' },
-        { name: 'religion', placeholder: 'Religion', type: 'text' },
-        { name: 'citizenship', placeholder: 'Citizenship', type: 'text' },
-        { name: 'civil_status', placeholder: 'Civil Status', type: 'text' },
-        { name: 'no_of_children', placeholder: 'Number of Children', type: 'text' }
+        { name: 'age', label: 'Age', placeholder: 'Age', type: 'number' },
+        { name: 'birthdate', label: 'Birth Date', placeholder: 'Birth Date', type: 'date' },
+        { name: 'height', label: 'Height', placeholder: 'Height', type: 'text' },
+        { name: 'weight', label: 'Weight', placeholder: 'Weight', type: 'text' },
+        { name: 'religion', label: 'Religion', placeholder: 'Religion', type: 'text' },
+        { name: 'citizenship', label: 'Citizenship', placeholder: 'Citizenship', type: 'text' },
+        { name: 'civil_status', label: 'Civil Status', placeholder: 'Civil Status', type: 'text' },
+        { name: 'no_of_children', label: 'Number of Children', placeholder: 'Number of Children', type: 'text' }
       ]
     },
     {
       title: 'Address Information',
       fields: [
-        { name: 'city_add', placeholder: 'City Address', type: 'text' },
-        { name: 'provincial_add', placeholder: 'Provincial Address', type: 'text' }
+        { name: 'city_add', label: 'City Address', placeholder: 'City Address', type: 'text' },
+        { name: 'provincial_add', label: 'Provincial Address', placeholder: 'Provincial Address', type: 'text' }
       ]
     },
     {
       title: 'Spouse Information',
       fields: [
-        { name: 'name_of_spouse', placeholder: "Spouse's Name", type: 'text' },
-        { name: 'spouse_occupation', placeholder: "Spouse's Occupation", type: 'text' },
-        { name: 'spouse_employed_by', placeholder: "Spouse's Employer", type: 'text' }
+        { name: 'name_of_spouse', label: "Spouse's Name", placeholder: "Spouse's Name", type: 'text' },
+        { name: 'spouse_occupation', label: "Spouse's Occupation", placeholder: "Spouse's Occupation", type: 'text' },
+        { name: 'spouse_employed_by', label: "Spouse's Employer", placeholder: "Spouse's Employer", type: 'text' }
       ]
     },
     {
       title: 'Parent Information',
       fields: [
-        { name: 'father_name', placeholder: "Father's Name", type: 'text' },
-        { name: 'father_occupation', placeholder: "Father's Occupation", type: 'text' },
-        { name: 'father_employed_by', placeholder: "Father's Employer", type: 'text' },
-        { name: 'mother_name', placeholder: "Mother's Name", type: 'text' },
-        { name: 'mother_occupation', placeholder: "Mother's Occupation", type: 'text' },
-        { name: 'mother_employed_by', placeholder: "Mother's Employer", type: 'text' }
+        { name: 'father_name', label: "Father's Name", placeholder: "Father's Name", type: 'text' },
+        { name: 'father_occupation', label: "Father's Occupation", placeholder: "Father's Occupation", type: 'text' },
+        { name: 'father_employed_by', label: "Father's Employer", placeholder: "Father's Employer", type: 'text' },
+        { name: 'mother_name', label: "Mother's Name", placeholder: "Mother's Name", type: 'text' },
+        { name: 'mother_occupation', label: "Mother's Occupation", placeholder: "Mother's Occupation", type: 'text' },
+        { name: 'mother_employed_by', label: "Mother's Employer", placeholder: "Mother's Employer", type: 'text' }
       ]
     },
     {
       title: 'Emergency Contact',
       fields: [
-        { name: 'emergency_name', placeholder: 'Emergency Contact Name', type: 'text' },
-        { name: 'emergency_relationship', placeholder: 'Relationship', type: 'text' },
-        { name: 'emergency_contact', placeholder: 'Contact Number', type: 'tel' }
+        { name: 'emergency_name', label: 'Emergency Contact Name', placeholder: 'Emergency Contact Name', type: 'text' },
+        { name: 'emergency_relationship', label: 'Relationship', placeholder: 'Relationship', type: 'text' },
+        { name: 'emergency_contact', label: 'Contact Number', placeholder: 'Contact Number', type: 'tel' }
       ]
     }
   ];
 
-  // Enhanced renderField to handle both string options and object options
+  // Enhanced renderField to handle both string options and object options with a label element
   const renderField = (field) => {
     const baseClass =
       "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
-    if (field.type === 'select') {
-      return (
-        <div key={field.name} className="flex-1">
+    return (
+      <div key={field.name} className="flex-1">
+        <label htmlFor={field.name} className="block text-sm font-medium text-white mb-1">
+          {field.label || field.placeholder}
+        </label>
+        {field.type === 'select' ? (
           <select
+            id={field.name}
             name={field.name}
             onChange={handleChange}
             value={formData[field.name] || ''}
@@ -264,22 +280,19 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
               );
             })}
           </select>
-        </div>
-      );
-    }
-
-    return (
-      <div key={field.name} className="flex-1">
-        <input
-          type={field.type}
-          name={field.name}
-          placeholder={field.placeholder}
-          onChange={handleChange}
-          value={formData[field.name] || ''}
-          className={baseClass}
-          disabled={field.disabled}
-          required
-        />
+        ) : (
+          <input
+            id={field.name}
+            type={field.type}
+            name={field.name}
+            placeholder={field.placeholder}
+            onChange={handleChange}
+            value={formData[field.name] || ''}
+            className={baseClass}
+            disabled={field.disabled}
+            required
+          />
+        )}
       </div>
     );
   };
@@ -297,6 +310,13 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          {/* Sticky error message */}
+          {errorMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
+              {errorMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {formSections.map((section, index) => (
               <div key={index} className="space-y-4">

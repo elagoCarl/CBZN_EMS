@@ -74,6 +74,13 @@ const updateCutoff = async (req, res) => {
       });
     }
 
+    if (!remarks) {
+      return res.status(400).json({
+        successful: false,
+        message: "Remarks are required."
+      });
+    }
+
     const cutoff = await Cutoff.findByPk(id);
     if (!cutoff) {
       return res.status(404).json({
@@ -82,10 +89,41 @@ const updateCutoff = async (req, res) => {
       });
     }
 
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth(); // 0-based (January = 0)
+
+    const nextMonthDate = new Date(currentYear, currentMonth + 1, 1);
+    const nextMonthYear = nextMonthDate.getFullYear();
+    const nextMonth = nextMonthDate.getMonth();
+
+    const startDate = new Date(cutoff.start_date);
+    const cutoffDate = new Date(cutoff.cutoff_date);
+
+    if (
+      startDate.getFullYear() !== currentYear ||
+      startDate.getMonth() !== currentMonth
+    ) {
+      return res.status(400).json({
+        successful: false,
+        message: "Only cutoffs with a start date in the current month can be updated."
+      });
+    }
+
+    if (
+      cutoffDate.getFullYear() !== nextMonthYear ||
+      cutoffDate.getMonth() !== nextMonth
+    ) {
+      return res.status(400).json({
+        successful: false,
+        message: "Only cutoffs with a cutoff date in the next month can be updated."
+      });
+    }
+
     // Update only fields provided
     if (start_date !== undefined) cutoff.start_date = start_date;
     if (cutoff_date !== undefined) cutoff.cutoff_date = cutoff_date;
-    if (remarks !== undefined) cutoff.remarks = remarks;
+    cutoff.remarks = remarks; // Required field
 
     await cutoff.save();
 
@@ -101,6 +139,9 @@ const updateCutoff = async (req, res) => {
     });
   }
 };
+
+
+
 
 // 2.4. Get Attendance within a given Cutoff
 const getAttendancesByCutoff = async (req, res) => {

@@ -106,7 +106,6 @@ const getAllOvertimeRequests = async (req, res) => {
             });
         }
 
-        return res.status(404).json({ error: 'No overtime request found' });
 
     } catch (error) {
         console.error("Error in getAllOvertimeRequests:", error);

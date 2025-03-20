@@ -5,9 +5,13 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
+import { useAuth } from '../Components/authContext.jsx';
 
 
 const OvertimeReqPage = () => {
+    const { user } = useAuth();
+    console.log("userid: ", user.id)
+    const userId = user.id
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -15,11 +19,8 @@ const OvertimeReqPage = () => {
     const [requestData, setRequestData] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
 
-
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-
-
 
     // Add states for confirmation modals
     const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -30,7 +31,6 @@ const OvertimeReqPage = () => {
         const fetchOTRequests = async () => {
             try {
                 setLoading(true);
-                const userId = 6
                 const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
                 setCurrentUser(user.data.data);
 
@@ -48,11 +48,6 @@ const OvertimeReqPage = () => {
         };
         fetchOTRequests();
     }, []);
-
-
-
-
-
 
     // Handle window resize with debounce for better performance
     useEffect(() => {
@@ -199,11 +194,6 @@ const OvertimeReqPage = () => {
         );
     }
 
-
-
-
-
-
     const filteredRequests = activeFilter === 'all'
         ? requestData
         : requestData.filter(req => req.status === activeFilter);
@@ -284,61 +274,29 @@ const OvertimeReqPage = () => {
 
             {/* Main Content - Responsive layout */}
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
-                {/* Filters - Scrollable on mobile */}
-                {/* Page header with responsive layout */}
-                <header className="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <h1 className="text-xl md:text-5xl font-bold mt-13 md:mb-0 text-green-500">
+                <header className="mb-6">
+                    <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
                         Overtime <span className="text-white"> Requests </span>
                     </h1>
                 </header>
-                <div className="flex flex-col md:flex-row justify-between gap-4 mt-13 mb-5 font-semibold">
-                    <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
-                        <button
-
-                            onClick={() => setActiveFilter('all')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'all'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
+                    <div className="flex overflow-x-auto gap-2 hide-scrollbar">
+                        {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => {
+                            const filterKey = status.toLowerCase();
+                            return (
+                            <button
+                                key={status}
+                                onClick={() => setActiveFilter(filterKey)}
+                                className={`px-3 md:px-4 py-2 md:py-2 rounded-full text-sm md:text-base ${
+                                activeFilter === filterKey
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
                                 }`}
-                        >
-                            All Requests
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('pending')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'pending'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Pending
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('approved')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'approved'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Approved
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('rejected')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'rejected'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Rejected
-                        </button>
-                        <button
-                            onClick={() => setActiveFilter('cancelled')}
-                            className={`px-3 md:px-4 py-2 md-py-2 rounded-full text-sm md:text-base ${activeFilter === 'canceled'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-[#363636] text-white hover:bg-[#404040]'
-                                }`}
-                        >
-                            Canceled
-                        </button>
+                            >
+                                {status}
+                            </button>
+                            );
+                        })}
                     </div>
                 </div>
 

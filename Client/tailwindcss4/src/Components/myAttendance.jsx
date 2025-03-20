@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "./callComponents/sidebar.jsx";
 import dayjs from "dayjs";
+import { useAuth } from '../Components/authContext.jsx';
 
-const userId = 1; // Ideally, this comes from your authentication logic
 
 const MyAttendance = () => {
+  const { user } = useAuth();
+  console.log("userid: ", user.id)
+  const userId = user.id; // Ideally, this comes from your authentication logic
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

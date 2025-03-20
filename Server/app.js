@@ -4,6 +4,7 @@ const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 // const cookieParser = require('cookie-parser');
 require('dotenv').config()
@@ -11,6 +12,12 @@ require('dotenv').config()
 //INITIALIZE EXPRESS APPLICATION AND STORE TO app
 const app = express();
 
+// Update CORS configuration to allow 'Cache-Control' header
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control']
+}));
 
 //IMPORT ALL ROUTERS NEEDED
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -41,7 +48,7 @@ app.use((req, res, next) => {
 //TO LOG CLIENT REQUEST-RESPONSE DATA IN A DEV ENVIRONMENT
 app.use(morgan('dev'));
 app.use(express.json())
-// app.use(cookieParser());
+app.use(cookieParser());
 
 //PARSE DATA THAT ARE URLENCODED
 //content-type: application/x-www-form-urlencoded
