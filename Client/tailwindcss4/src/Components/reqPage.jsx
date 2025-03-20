@@ -217,8 +217,8 @@ const ReqPage = () => {
             'overtime': (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                     <div>
-                        <p className="text-xs sm:text-sm font-medium text-gray-400">Time</p>
-                        <p className="text-white">{request.start_time} - {request.end_time}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Date and Time</p>
+                        <p className="text-white">{request.start_time} to {request.end_time}</p>
                     </div>
                     <div className="sm:col-span-2">
                         <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>

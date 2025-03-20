@@ -459,7 +459,7 @@ const LeaveReqPage = () => {
                                                         <div className="flex items-center">
                                                             {renderTypeIcon(request.type)}
                                                             <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
-                                                                {request.User?.name || 'Unknown User'}
+                                                                {request.user?.name || 'Unknown User'}
                                                             </span>
                                                         </div>
                                                     </td>

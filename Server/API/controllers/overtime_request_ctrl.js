@@ -88,15 +88,30 @@ const addOvertimeRequest = async (req, res) => {
 
 const getAllOvertimeRequests = async (req, res) => {
     try {
-        const overtimeRequests = await OvertimeRequest.findAll();
+        const overtimeRequests = await OvertimeRequest.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name']
+                },
+
+                {
+                    model: User,
+                    as: 'reviewer',
+                    attributes: ['id', 'name']
+                },
+            ],
+        });
 
         if (overtimeRequests.length > 0) {
             // Format the start_time and end_time for display
             const formattedRequests = overtimeRequests.map(request => {
                 return {
                     ...request.toJSON(),
-                    start_time: request.start_time ? dayjs(request.start_time).format("HH:mmA") : null,
-                    end_time: request.end_time ? dayjs(request.end_time).format("HH:mmA") : null,
+                    start_time: request.start_time ? dayjs(request.start_time).format("YYYY-MM-DD h:mmA") : null,
+                    end_time: request.end_time ? dayjs(request.end_time).format("YYYY-MM-DD h:mmA") : null,
+                    user_name: request.User ? request.User.name : "Unknown", // Extract user name
                 };
             });
 
@@ -105,7 +120,6 @@ const getAllOvertimeRequests = async (req, res) => {
                 data: formattedRequests
             });
         }
-
 
     } catch (error) {
         console.error("Error in getAllOvertimeRequests:", error);
@@ -125,8 +139,8 @@ const getOvertimeRequest = async (req, res) => {
         // Format start_time and end_time
         const formattedOvertimeRequest = {
             ...overtimeRequest.toJSON(),
-            start_time: overtimeRequest.start_time ? dayjs(overtimeRequest.start_time).format("HH:mmA") : null,
-            end_time: overtimeRequest.end_time ? dayjs(overtimeRequest.end_time).format("HH:mmA") : null,
+            start_time: overtimeRequest.start_time ? dayjs(overtimeRequest.start_time).format("YYYY-MM-DD h:mmA") : null,
+            end_time: overtimeRequest.end_time ? dayjs(overtimeRequest.end_time).format("YYYY-MM-DD h:mmA") : null,
         };
 
         return res.status(200).json({
@@ -170,7 +184,7 @@ const updateOvertimeRequest = async (req, res) => {
         }
 
         // Note: Based on your model the allowed status values are 'pending', 'approved', 'rejceted', 'cancelled'
-        if (status === 'approved' || status === 'rejceted') {
+        if (status === 'approved' || status === 'rejetced') {
             overtimeRequest.reviewer_id = reviewer_id;
             overtimeRequest.status = status;
             overtimeRequest.review_date = dayjs().format('YYYY-MM-DD');
@@ -229,29 +243,36 @@ const getAllOTReqsByUser = async (req, res) => {
                     as: 'reviewer',
                     attributes: ['id', 'name']
                 },
-
                 {
                     model: Schedule,
                     as: 'schedule',
                     attributes: ['id', 'title', 'schedule']
                 }
-
             ],
             order: [['createdAt', 'DESC']]
         });
+
         if (!reqs || reqs.length === 0) {
             return res.status(200).json({
                 successful: true,
-                message: "No reqs found.",
+                message: "No requests found.",
                 count: 0,
                 data: [],
             });
         }
 
+        // Format start_time and end_time in 12-hour format (e.g., "YYYY-MM-DD h:mm A")
+        const formattedReqs = reqs.map(request => ({
+            ...request.toJSON(),
+            start_time: request.start_time ? dayjs(request.start_time).format("YYYY-MM-DD h:mm A") : null,
+            end_time: request.end_time ? dayjs(request.end_time).format("YYYY-MM-DD h:mm A") : null,
+        }));
+
         return res.status(200).json({
             successful: true,
-            data: reqs
+            data: formattedReqs
         });
+
     } catch (err) {
         console.error(err);
         return res.status(500).json({
@@ -260,6 +281,7 @@ const getAllOTReqsByUser = async (req, res) => {
         });
     }
 };
+
 
 const getAllOvertimeCutoffByUser = async (req, res) => {
     try {

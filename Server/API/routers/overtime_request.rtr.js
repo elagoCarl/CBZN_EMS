@@ -7,7 +7,7 @@ const { requireAuth } = require('../controllers/authMiddleware')
 
 
 router.post('/addOvertimeReq', OvertimeRequest.addOvertimeRequest)
-router.get('/getAllOvertimeReq', OvertimeRequest.getAllOvertimeRequests)
+router.get('/getAllOvertimeReq', OvertimeRequest.getAllOvertimeRequests) //ito ito ito
 router.get('/getAllOTReqsByUser/:id', OvertimeRequest.getAllOTReqsByUser)
 router.get('/getOvertimeReq/:id', OvertimeRequest.getOvertimeRequest)
 router.put('/updateOvertimeReq/:id', OvertimeRequest.updateOvertimeRequest)
