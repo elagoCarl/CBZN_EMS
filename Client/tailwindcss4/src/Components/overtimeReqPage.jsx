@@ -5,9 +5,13 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
+import { useAuth } from '../Components/authContext.jsx';
 
 
 const OvertimeReqPage = () => {
+    const { user } = useAuth();
+    console.log("userid: ", user.id)
+    const userId = user.id
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -30,7 +34,6 @@ const OvertimeReqPage = () => {
         const fetchOTRequests = async () => {
             try {
                 setLoading(true);
-                const userId = 6
                 const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
                 setCurrentUser(user.data.data);
 

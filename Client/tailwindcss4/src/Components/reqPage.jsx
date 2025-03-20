@@ -5,10 +5,12 @@ import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import AddReq from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
 import Sidebar from './callComponents/sidebar';
+import { useAuth } from '../Components/authContext';
 
 const ReqPage = () => {
-    // Temporary logged-in user id
-    const loggedInUserId = 1;
+    const { user } = useAuth();
+    console.log("userid: ", user.id)
+    const loggedInUserId = user.id
 
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
