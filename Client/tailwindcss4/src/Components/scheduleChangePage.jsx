@@ -27,9 +27,9 @@ const ScheduleChangePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const userId = user.id
-        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
-        setCurrentUser(user.data.data);
+        const userId = user.id;
+        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(userData.data.data);
         const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setError(null);
@@ -40,10 +40,9 @@ const ScheduleChangePage = () => {
       } finally {
         setLoading(false);
       }
-
     };
     fetchData();
-  }, []);
+  }, [user.id]);
 
   useEffect(() => {
     const handleResize = () => {
