@@ -3,7 +3,8 @@ const cron = require('node-cron');
 const { Cutoff } = require('../models'); // Adjust path as needed
 const { Op } = require('sequelize');
 
-cron.schedule('5 0 * * *', async () => {
+// cron.schedule('*/10 * * * * *', async () => {//every 10 seconds
+cron.schedule('5 0 * * *', async () => {//every 12:05 AM
     try {
         const now = new Date();
         // e.g., "2025-03-17"

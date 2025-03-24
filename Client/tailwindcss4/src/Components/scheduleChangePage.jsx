@@ -71,7 +71,6 @@ const ScheduleChangePage = () => {
 
   const updateRequest = status => async () => {
     try {
-
       // Send the update request to the backend endpoint.
       await axios.put(
         `http://localhost:8080/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
@@ -133,12 +132,17 @@ const ScheduleChangePage = () => {
   const filteredRequests = useMemo(() => {
     if (!Array.isArray(requestData)) return [];
     return requestData.filter(req => {
-      if (activeFilter !== 'all' && !(activeFilter === 'canceled' && req.status === 'cancelled') && req.status !== activeFilter) return false;
-      if (searchQuery.trim()) {
-        const userName = req.user?.name?.toLowerCase() || '';
-        return userName.includes(searchQuery.toLowerCase());
-      }
-      return true;
+      // Check if filter matches
+      const statusMatches =
+        activeFilter === 'all' ||
+        req.status === activeFilter ||
+        (activeFilter === 'cancelled' && (req.status === 'cancelled' || req.status === 'canceled'));
+
+      // Check if search matches
+      const searchMatches = !searchQuery.trim() ||
+        (req.user?.name?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+
+      return statusMatches && searchMatches;
     });
   }, [requestData, activeFilter, searchQuery]);
 
@@ -189,15 +193,22 @@ const ScheduleChangePage = () => {
         </header>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
           <div className="flex overflow-x-auto gap-2 hide-scrollbar">
-            {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => (
+            {[
+              { display: 'All Requests', value: 'all' },
+              { display: 'Pending', value: 'pending' },
+              { display: 'Approved', value: 'approved' },
+              { display: 'Rejected', value: 'rejected' },
+              { display: 'Cancelled', value: 'cancelled' }
+            ].map(status => (
               <button
-                key={status}
-                onClick={() => setActiveFilter(status)}
-                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status
-                  ? 'bg-green-600 text-white'
-                  : 'bg-[#363636] text-white hover:bg-[#404040]'}`}
+                key={status.display}
+                onClick={() => setActiveFilter(status.value)}
+                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status.value
+                    ? 'bg-green-600 text-white'
+                    : 'bg-[#363636] text-white hover:bg-[#404040]'
+                  }`}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status.display}
               </button>
             ))}
           </div>

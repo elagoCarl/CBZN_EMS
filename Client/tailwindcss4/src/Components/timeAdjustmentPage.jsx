@@ -73,7 +73,6 @@ const TimeAdjustmentPage = () => {
 
   const updateRequest = status => async () => {
     try {
-
       await axios.put(
         `http://localhost:8080/timeAdjustment/updateTimeAdjustment/${selectedRequestId}`,
         {
@@ -81,7 +80,6 @@ const TimeAdjustmentPage = () => {
           reviewer_id: currentUser.id,
         }
       );
-
 
       const today = dayjs().format('YYYY-MM-DD');
       setRequestData(requestData.map(req =>
@@ -134,8 +132,22 @@ const TimeAdjustmentPage = () => {
 
   const filteredRequests = useMemo(() => {
     if (!Array.isArray(requestData)) return [];
+
     return requestData.filter(req => {
-      if (activeFilter !== 'all' && !(activeFilter === 'canceled') && req.status !== activeFilter) return false;
+      // Handle all requests filter
+      if (activeFilter === 'all') {
+        // Apply search filter if present
+        if (searchQuery.trim()) {
+          const userName = req.user?.name?.toLowerCase() || '';
+          return userName.includes(searchQuery.toLowerCase());
+        }
+        return true;
+      }
+
+      // Filter by status
+      if (req.status !== activeFilter) return false;
+
+      // Apply search filter if present
       if (searchQuery.trim()) {
         const userName = req.user?.name?.toLowerCase() || '';
         return userName.includes(searchQuery.toLowerCase());
@@ -168,6 +180,15 @@ const TimeAdjustmentPage = () => {
   const getRequestName = id => requestData.find(r => r.id === id)?.user?.name || 'Unknown';
   const getDepartmentName = req => req?.user?.JobTitle?.Department?.name || 'N/A';
 
+  // Filter options with proper labels and values
+  const filterOptions = [
+    { label: 'All Requests', value: 'all' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Approved', value: 'approved' },
+    { label: 'Rejected', value: 'rejected' },
+    { label: 'Cancelled', value: 'canceled' }
+  ];
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
@@ -193,15 +214,15 @@ const TimeAdjustmentPage = () => {
         </header>
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
           <div className="flex overflow-x-auto gap-2 hide-scrollbar">
-            {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => (
+            {filterOptions.map(filter => (
               <button
-                key={status}
-                onClick={() => setActiveFilter(status)}
-                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status
+                key={filter.value}
+                onClick={() => setActiveFilter(filter.value)}
+                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === filter.value
                   ? 'bg-green-600 text-white'
                   : 'bg-[#363636] text-white hover:bg-[#404040]'}`}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {filter.label}
               </button>
             ))}
           </div>
