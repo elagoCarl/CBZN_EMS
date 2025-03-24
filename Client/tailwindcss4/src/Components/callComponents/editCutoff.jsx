@@ -1,28 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, X } from 'lucide-react';import axios from 'axios';
-
+import PropTypes from 'prop-types';
 
 
 // Edit Department Modal
-const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
-    const [startDate, setStartdate] = useState(cutoff?.start_date || '');
-    const [cutoffDate, setCutoffdate] = useState(cutoff?.start_date || '');
-    const [remarks, setRemarks] = useState(cutoff?.remarks || '');
+const EditCutoffModal = ({ isOpen, onClose, onCutoffUpdated, cutoff }) => {
+    
+    const [formData, setFormData] = useState({})
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const errorTimeoutRef = useRef(null);
 
-    useEffect(() => {
-        if (cutoff) {
-            setStartdate(cutoff.start_date);
-            setCutoffdate(cutoff.cutoff_date);
-            setRemarks(cutoff.remarks);
-        }
-        if (errorTimeoutRef.current) {
-            clearTimeout(errorTimeoutRef.current);
-        }
-    }, [cutoff]);
+    // useEffect(() => {
+    //     if (cutoff) {
+    //         setStartdate(cutoff.start_date);
+    //         setCutoffdate(cutoff.cutoff_date);
+    //         setRemarks(cutoff.remarks);
+    //     }
+    //     if (errorTimeoutRef.current) {
+    //         clearTimeout(errorTimeoutRef.current);
+    //     }
+    // }, [cutoff]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,17 +32,20 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
         
         try {
             await axios.put(`http://localhost:8080/cutoff/updateCutoff/${cutoff.id}`, {
-                startDate,
-                cutoffDate,
-                remarks
-
+                start_date: formData.startDate,
+                cutoff_date: formData.cutoffDate,
+                remarks: formData.remarks
                 
             });
             
-            if (onSuccess) onSuccess();
-            onClose();
+            setSuccessMessage("Cutoff updated successfully.");
+            setTimeout(() => {
+              onUserUpdated(formData);
+        onClose();
+      }, 1500);
+
         } catch (error) {
-            console.error('Error updating cutodd:', error);
+            console.error('Error updating cutoff:', error);
             setError(`${error.response.data.message}`);
             errorTimeoutRef.current = setTimeout(() => {
                 setError('');
@@ -54,6 +56,10 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
     };
 
     if (!isOpen) return null;
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
 
     return (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">
@@ -75,9 +81,9 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
                             Start Date
                         </label>
                         <input
-                            type="text"
-                            value={startDate}
-                            onChange={(e) => setName(e.target.value)}
+                            type="date"
+                            value={formData.startDate}
+                            onChange={handleChange}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
                         />
@@ -87,9 +93,9 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
                            Cutoff Date
                         </label>
                         <input
-                            type="text"
-                            value={cutoffDate}
-                            onChange={(e) => setName(e.target.value)}
+                            type="date"
+                            value={formData.cutoffDate}
+                            onChange={handleChange}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
                         />
@@ -102,7 +108,7 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
                         </label>
                         <input
                             type="text"
-                            value={remarks}
+                            value={formData.remarks}
                             onChange={(e) => setRemarks(e.target.value)}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
@@ -134,6 +140,11 @@ const EditCutoffModal = ({ isOpen, onClose, onSuccess, cutoff }) => {
     );
 };
 
+EditCutoffModal.propTypes = {
+      isOpen: PropTypes.bool.isRequired,
+      onClose: PropTypes.func.isRequired,
+      onCutoffUpdated: PropTypes.func.isRequired
+};
 
 
 export default  EditCutoffModal ;

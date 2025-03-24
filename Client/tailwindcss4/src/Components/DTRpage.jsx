@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Filter, User } from 'lucide-react';
 import Sidebar from './callComponents/sidebar';
 import dayjs from 'dayjs';
@@ -26,7 +26,7 @@ const DTR = () => {
   const [overtimeRequests, setOvertimeRequests] = useState([]);
   const [scheduleAdjustments, setScheduleAdjustments] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
-  const [isEditCutoffModalOpen, setIsEditCutoffModalOpen] = useState(false);
+  const [isEditCutoffOpen, setIsEditCutoffOpen] = useState(false);
   const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [scheduleUsers, setScheduleUsers] = useState([]);
@@ -357,21 +357,30 @@ const DTR = () => {
   const formatCutoffLabel = c => `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.end_date).format('MMM D, YYYY')}`;
   const filteredCutoffs = cutoffs.filter(c => formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleEditCutoff = id => {
-    if (cutoffs.find(c => c.id === id)) {
-      setSelectedCutoffId(id);
-      setIsEditCutoffModalOpen(true);
-    }
-  };
-  const handleCloseEditModal = () => {
-    setIsEditCutoffModalOpen(false);
-    setSelectedCutoffId(null);
+  // const refreshData = useCallback(() => {
+  //   fetchCutoffs();
+  //   fetchUsers();
+  // },[fetchCutoffs, fetchUsers]);
+  
+  // useEffect(() => {
+  //   refreshData();
+  // }, [refreshData]);
+
+
+  const handleEditCutoffClick = (cutoffs) => {
+    setSelectedCutoffId(cutoffs);
+    setIsEditCutoffOpen(true)
+  }
+
+  const handleEditCutoffClose = () => {
+    setIsEditCutoffOpen(false);
+
   };
   const handleCutoffUpdated = () => handleCloseEditModal();
 
   const combinedData = useMemo(() => {
     if (!selectedUser) return [];
-    return attendanceData.filter(r => r.user_id === selectedUser.id).sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+    return attendanceData.filter(r => handleEditCutoffClick.user_id === selectedUser.id).sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
   }, [selectedUser, attendanceData]);
 
   const filteredData = useMemo(() => {
@@ -453,7 +462,9 @@ const DTR = () => {
                 )}
               </div>
               <button className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors"
-                onClick={() => handleEditCutoff(cutoffs)}>Edit</button>
+                onClick={() => handleEditCutoffClick(cutoffs)}
+              >Edit
+              </button>
             </div>
           </div>
           <div className="p-4 md:p-6">
@@ -562,10 +573,10 @@ const DTR = () => {
       </div>
 
       <EditCutoffModal
-        isOpen={isEditCutoffModalOpen}
-        onClose={handleCloseEditModal}
+        isOpen={isEditCutoffOpen}
+        onClose={handleEditCutoffClose}
         cutoffId={selectedCutoffId}
-        onCutoffUpdated={handleCutoffUpdated}
+        // onSuccess={refreshData}
       />
     </div>
   );
