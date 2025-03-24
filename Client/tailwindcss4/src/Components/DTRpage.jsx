@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Filter, User } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Filter, User, ChevronDown } from 'lucide-react';
 import Sidebar from './callComponents/sidebar';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -32,41 +32,45 @@ const DTR = () => {
   const [scheduleUsers, setScheduleUsers] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
 
+  // Memoize the current cutoff based on selectedCutoffId
   const currentCutoff = useMemo(
     () => cutoffs.find(c => c.id === selectedCutoffId),
     [selectedCutoffId, cutoffs]
   );
 
-  // When auth user is available, set it as the default selected user (temporarily)
+  // When auth user is available, set it as the default selected user
   useEffect(() => {
     if (user) {
       setSelectedUser(user);
     }
   }, [user]);
 
-  // Fetch cutoff periods
-  useEffect(() => {
-    const fetchCutoffs = async () => {
-      try {
-        const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff');
-        if (res.data.successful) {
-          const periods = res.data.data.map(c => ({
-            id: c.id,
-            start_date: c.start_date,
-            end_date: c.cutoff_date
-          }));
-          setCutoffs(periods);
-          if (periods.length) {
-            const sorted = periods.sort((a, b) => dayjs(b.start_date).diff(dayjs(a.start_date)));
-            setSelectedCutoffId(sorted[0].id);
-          }
+  // Function to fetch cutoff periods
+  const fetchCutoffs = useCallback(async () => {
+    try {
+      const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff');
+      if (res.data.successful) {
+        const periods = res.data.data.map(c => ({
+          id: c.id,
+          start_date: c.start_date,
+          end_date: c.cutoff_date
+        }));
+        setCutoffs(periods);
+        if (periods.length && !selectedCutoffId) {
+          // Default to the most recent cutoff
+          const sorted = periods.sort((a, b) => dayjs(b.start_date).diff(dayjs(a.start_date)));
+          setSelectedCutoffId(sorted[0].id);
         }
-      } catch (error) {
-        console.error('Cutoffs error:', error);
       }
-    };
+    } catch (error) {
+      console.error('Cutoffs error:', error);
+    }
+  }, [selectedCutoffId]);
+
+  // Initial fetch of cutoff periods
+  useEffect(() => {
     fetchCutoffs();
-  }, []);
+  }, [fetchCutoffs]);
 
   // Fetch users along with job titles and departments
   useEffect(() => {
@@ -81,7 +85,7 @@ const DTR = () => {
             employee_id: u.id,
             job_title_id: u.JobTitle?.id || null,
             isAdmin: u.isAdmin,
-            JobTitle: u.JobTitle // Include full job details if available
+            JobTitle: u.JobTitle
           }));
           const jobs = [];
           const depts = [];
@@ -97,7 +101,7 @@ const DTR = () => {
           setJobTitles(jobs);
           setDepartments(depts);
 
-          // Update selected user with enriched data from the fetch
+          // Update selected user with enriched data
           if (user) {
             const enrichedUser = usr.find(u => u.id === user.id);
             if (enrichedUser) {
@@ -357,27 +361,39 @@ const DTR = () => {
   const formatCutoffLabel = c => `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.end_date).format('MMM D, YYYY')}`;
   const filteredCutoffs = cutoffs.filter(c => formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleEditCutoff = id => {
+  // Edit cutoff handler uses the selected cutoff id
+  const handleEditCutoff = (id) => {
     if (cutoffs.find(c => c.id === id)) {
       setSelectedCutoffId(id);
       setIsEditCutoffModalOpen(true);
     }
   };
+
+  // Do not reset selectedCutoffId on close so that the period remains selected.
   const handleCloseEditModal = () => {
     setIsEditCutoffModalOpen(false);
-    setSelectedCutoffId(null);
   };
-  const handleCutoffUpdated = () => handleCloseEditModal();
+
+  // After a successful update, re-fetch cutoff periods so the update reflects immediately.
+  const handleCutoffUpdated = async () => {
+    await fetchCutoffs();
+    handleCloseEditModal();
+  };
 
   const combinedData = useMemo(() => {
     if (!selectedUser) return [];
-    return attendanceData.filter(r => r.user_id === selectedUser.id).sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+    return attendanceData
+      .filter(r => r.user_id === selectedUser.id)
+      .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
   }, [selectedUser, attendanceData]);
 
   const filteredData = useMemo(() => {
     if (!currentCutoff) return combinedData;
     return combinedData.filter(r =>
-      dayjs(r.date).isBetween(dayjs(currentCutoff.start_date).subtract(1, 'day'), dayjs(currentCutoff.end_date).add(1, 'day'))
+      dayjs(r.date).isBetween(
+        dayjs(currentCutoff.start_date).subtract(1, 'day'),
+        dayjs(currentCutoff.end_date).add(1, 'day')
+      )
     );
   }, [combinedData, currentCutoff]);
 
@@ -392,12 +408,12 @@ const DTR = () => {
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
             <div className="flex flex-col sm:flex-row gap-3">
               {selectedUser?.isAdmin ? (
-                // Admin can change the employee selection
                 <div className="relative w-full sm:w-64">
                   <div className="flex items-center gap-2 bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer"
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
                     <User className="w-4 h-4 text-gray-400" />
                     <div className="flex-1 truncate">{selectedUser?.name || 'Select employee'}</div>
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
                   </div>
                   {isUserDropdownOpen && (
                     <div className="absolute z-20 mt-1 w-full bg-[#363636] rounded-md shadow-lg">
@@ -421,7 +437,6 @@ const DTR = () => {
                   )}
                 </div>
               ) : (
-                // Non-admin users see a disabled, static display
                 <div className="w-full sm:w-64 bg-[#363636] text-white text-sm rounded-md py-1.5 px-3">
                   {selectedUser?.name || 'Loading...'}
                 </div>
@@ -452,8 +467,14 @@ const DTR = () => {
                   </div>
                 )}
               </div>
-              <button className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors"
-                onClick={() => handleEditCutoff(cutoffs)}>Edit</button>
+              {/* Show edit button only if the selected user is an admin */}
+              {selectedUser?.isAdmin && (
+                <button
+                  className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors"
+                  onClick={() => handleEditCutoff(selectedCutoffId)}>
+                  Edit
+                </button>
+              )}
             </div>
           </div>
           <div className="p-4 md:p-6">
@@ -537,7 +558,9 @@ const DTR = () => {
                     })}
                     {!filteredData.length && (
                       <tr>
-                        <td colSpan="8" className="px-4 py-8 text-center text-gray-400">No records found for the selected period</td>
+                        <td colSpan="8" className="px-4 py-8 text-center text-gray-400">
+                          No records found for the selected period
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -564,7 +587,7 @@ const DTR = () => {
       <EditCutoffModal
         isOpen={isEditCutoffModalOpen}
         onClose={handleCloseEditModal}
-        cutoffId={selectedCutoffId}
+        cutoff={currentCutoff}
         onCutoffUpdated={handleCutoffUpdated}
       />
     </div>
