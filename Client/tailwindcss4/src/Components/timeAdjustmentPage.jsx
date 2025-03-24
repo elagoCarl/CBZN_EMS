@@ -28,8 +28,8 @@ const TimeAdjustmentPage = () => {
       try {
         setLoading(true);
         const userId = user.id
-        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
-        setCurrentUser(user.data.data);
+        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(userData.data.data);
 
         const { data } = await axios.get('http://localhost:8080/timeAdjustment/getAllTimeAdjustment');
         setRequestData(Array.isArray(data.data) ? data.data : []);
@@ -108,7 +108,7 @@ const TimeAdjustmentPage = () => {
 
   const formatStatus = status => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
   const getStatusColor = status => {
-    const colors = { approved: 'text-green-500', rejected: 'text-red-500', cancelled: 'text-gray-500', canceled: 'text-gray-500', pending: 'text-yellow-500' };
+    const colors = { approved: 'text-green-500', rejected: 'text-red-500', canceled: 'text-gray-500', pending: 'text-yellow-500' };
     return colors[status] || 'text-gray-400';
   };
 
@@ -135,7 +135,7 @@ const TimeAdjustmentPage = () => {
   const filteredRequests = useMemo(() => {
     if (!Array.isArray(requestData)) return [];
     return requestData.filter(req => {
-      if (activeFilter !== 'all' && !(activeFilter === 'canceled' && req.status === 'cancelled') && req.status !== activeFilter) return false;
+      if (activeFilter !== 'all' && !(activeFilter === 'canceled') && req.status !== activeFilter) return false;
       if (searchQuery.trim()) {
         const userName = req.user?.name?.toLowerCase() || '';
         return userName.includes(searchQuery.toLowerCase());
@@ -185,19 +185,19 @@ const TimeAdjustmentPage = () => {
           onCancel={closeModals}
         />
       )}
-      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6 mt-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500 mb-4 md:mb-0">
+      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
+        <header className="mb-6">
+          <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
             Time Adjustment <span className="text-white">Requests</span>
           </h1>
         </header>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 mb-5 font-semibold">
-          <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
-            {['all', 'pending', 'approved', 'rejected', 'cancelled'].map(status => (
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
+          <div className="flex overflow-x-auto gap-2 hide-scrollbar">
+            {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => (
               <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
-                className={`px-3 md:px-4 py-2 rounded-md text-sm md:text-base ${activeFilter === status
+                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status
                   ? 'bg-green-600 text-white'
                   : 'bg-[#363636] text-white hover:bg-[#404040]'}`}
               >
@@ -205,16 +205,17 @@ const TimeAdjustmentPage = () => {
               </button>
             ))}
           </div>
-          <div className="relative mt-2 md:mt-0">
+
+          <div className="relative mt-1 md:mt-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Search by name"
+              placeholder="Search..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-md text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
             />
           </div>
         </div>
@@ -250,7 +251,7 @@ const TimeAdjustmentPage = () => {
                           <tr className={expandedRow === request.id ? "bg-[#2b2b2b]" : "hover:bg-[#2b2b2b] transition-colors"}>
                             <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                               <div className="flex items-center">
-                                <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                                {/* <CalendarClock className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" /> */}
                                 <span className="ml-1 sm:ml-2 text-xs sm:text-sm font-medium text-white truncate max-w-[80px] sm:max-w-none">
                                   {request.user?.name || 'Unknown'}
                                 </span>

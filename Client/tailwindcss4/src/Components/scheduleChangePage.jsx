@@ -27,9 +27,9 @@ const ScheduleChangePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const userId = user.id
-        const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
-        setCurrentUser(user.data.data);
+        const userId = user.id;
+        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        setCurrentUser(userData.data.data);
         const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setError(null);
@@ -40,10 +40,9 @@ const ScheduleChangePage = () => {
       } finally {
         setLoading(false);
       }
-
     };
     fetchData();
-  }, []);
+  }, [user.id]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -182,19 +181,19 @@ const ScheduleChangePage = () => {
           onCancel={closeModals}
         />
       )}
-      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6 mt-8">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500 mb-4 md:mb-0">
+      <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
+        <header className="mb-6">
+          <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
             Schedule Change <span className="text-white">Requests</span>
           </h1>
         </header>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4 mb-5 font-semibold">
-          <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
-            {['all', 'pending', 'approved', 'rejected', 'cancelled'].map(status => (
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
+          <div className="flex overflow-x-auto gap-2 hide-scrollbar">
+            {['All Requests', 'Pending', 'Approved', 'Rejected', 'Cancelled'].map(status => (
               <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
-                className={`px-3 md:px-4 py-2 rounded-md text-sm md:text-base ${activeFilter === status
+                className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status
                   ? 'bg-green-600 text-white'
                   : 'bg-[#363636] text-white hover:bg-[#404040]'}`}
               >
@@ -202,16 +201,16 @@ const ScheduleChangePage = () => {
               </button>
             ))}
           </div>
-          <div className="relative mt-2 md:mt-0">
+          <div className="relative mt-1 md:mt-0">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-gray-400" />
             </div>
             <input
               type="text"
-              placeholder="Search by name"
+              placeholder="Search..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-md text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
             />
           </div>
         </div>

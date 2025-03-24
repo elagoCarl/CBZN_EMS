@@ -5,12 +5,14 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isBetween from 'dayjs/plugin/isBetween';
 import axios from 'axios';
+import EditCutoffModal from "./callComponents/editCutoff.jsx";
+
+
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 
 const DTR = () => {
   const today = dayjs('2025-03-10');
-  const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -29,6 +31,9 @@ const DTR = () => {
   const [scheduleAdjustments, setScheduleAdjustments] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
+  const [isEditCutoffModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [selectedCutoffId, setSelectedCutoffId] = useState(null);
+
 
   const currentCutoff = useMemo(() => cutoffs.find(c => c.id === selectedCutoffId), [selectedCutoffId, cutoffs]);
 
@@ -498,11 +503,32 @@ const DTR = () => {
       );
     }), [users, userSearchTerm, jobTitles, departments]);
 
+    const handleEditCutoff = (id) => {
+      const cutoffToEdit = cutoffs.find(cutoff => cutoff.id === id);
+      if (cutoffToEdit) {
+        setSelectedCutoffId(cutoffToEdit.id);
+        setIsEditUserModalOpen(true);
+      }
+    };
+  
+    const handleCloseEditModal = () => {
+      setIsEditUserModalOpen(false);
+      setSelectedCutoffId(null);
+    };
+
+    const handleCutoffUpdated = () => {
+      fetchCutoffs();
+      handleCloseEditModal();
+    };
+  
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
-      <div className="flex flex-col flex-1 p-4 md:p-8 mt-8 overflow-y-auto">
-        <h1 className="text-xl md:text-2xl font-bold text-green-500 mb-6">Daily Time Record</h1>
+      <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
+        <header className="mb-6">
+          <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">Daily Time Record</h1>
+        </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -511,7 +537,7 @@ const DTR = () => {
                   <div className="relative w-full sm:w-64">
                     <div className="flex items-center gap-2 w-full bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer" onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
                       <User className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1 truncate">{selectedUser?.name || 'Select employee'}</div>
+                      <div className="flex-1 px-3 py-2 font-semibold text-md truncate">{selectedUser?.name || 'Select employee'}</div>
                     </div>
                     {isUserDropdownOpen && (
                       <div className="absolute z-20 mt-1 w-full bg-[#363636] rounded-md shadow-lg">
@@ -548,7 +574,7 @@ const DTR = () => {
                 <div className="relative w-full sm:w-64">
                   <div className="flex items-center gap-2 w-full bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                     <Filter className="w-4 h-4 text-gray-400" />
-                    <div className="flex-1 truncate">{currentCutoff ? formatCutoffLabel(currentCutoff) : 'Select period'}</div>
+                    <div className="flex-1 px-3 py-2 font-semibold text-md truncate">{currentCutoff ? formatCutoffLabel(currentCutoff) : 'Select period'}</div>
                   </div>
                   {isDropdownOpen && (
                     <div className="absolute z-10 mt-1 w-full bg-[#363636] rounded-md shadow-lg">
@@ -576,6 +602,11 @@ const DTR = () => {
                     </div>
                   )}
                 </div>
+                <button className="bg-green-600 text-white px-3 py-2 rounded text-md hover:bg-green-700 flex items-center justify-center sm:justify-start transition-colors" 
+                onClick={() =>handleEditCutoff(cutoffs)}
+                    >
+                      Edit
+                  </button>
               </div>
             </div>
           </div>
@@ -694,6 +725,13 @@ const DTR = () => {
           </div>
         </div>
       </div>
+
+       <EditCutoffModal
+              isOpen={isEditCutoffModalOpen}
+              onClose={handleCloseEditModal}
+              cutoffId={selectedCutoffId}
+              onCutoffUpdated={handleCutoffUpdated}
+            />
     </div>
   );
 };
