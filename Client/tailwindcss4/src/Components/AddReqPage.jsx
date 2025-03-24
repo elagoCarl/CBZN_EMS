@@ -317,9 +317,9 @@ const AddReqPage = () => {
             <Sidebar />
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 <header className="mb-6">
-                    <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
-                        Add Requests
-                    </h1>
+                <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
+            Add <span className="text-white">Requests</span>
+          </h1>
                 </header>
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
                     <div className="flex flex-col sm:flex-row gap-2">

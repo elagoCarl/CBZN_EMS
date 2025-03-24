@@ -292,8 +292,8 @@ const MyAttendance = () => {
       <div className="flex-1 p-2 sm:p-4 md:p-6 flex flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
-          <h1 className="text-lg sm:text-xl md:text-3xl lg:text-5xl mt-4 sm:mt-8 mb-2 sm:mb-0 text-white">
-            Hello, <span className="font-bold text-green-500">{userData.name}</span>
+          <h1 className="text-lg sm:text-xl md:text-3xl lg:text-5xl mt-4 sm:mt-8 mb-2 sm:mb-0 font-bold text-white">
+            Hello, <span className="font-normal text-green-500">{userData.name}</span>
           </h1>
           <div className="flex flex-col items-center">
             <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white">
@@ -307,8 +307,8 @@ const MyAttendance = () => {
 
         {/* Employee ID */}
         <div className="flex flex-col sm:flex-row justify-between items-center mt-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-0 text-white">
-            Employee ID: <span className="font-bold text-green-500">{userData.employeeId}</span>
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-2 sm:mb-0 font-bold text-white">
+            Employee ID: <span className="font-normal text-green-500">{userData.employeeId}</span>
           </h1>
         </div>
 

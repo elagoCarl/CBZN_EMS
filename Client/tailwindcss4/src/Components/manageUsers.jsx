@@ -112,17 +112,11 @@ const ManageUsers = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 bg-black/40 p-4 md:p-6 rounded-2xl backdrop-blur-sm">
           <div className="space-y-1 md:space-y-2 text-center md:text-left">
-            <h1 className="text-xl md:text-3xl font-bold text-white">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white ">
               Welcome Back, <span className="text-green-500">Admin</span>
             </h1>
           </div>
           <div className="text-center backdrop-blur-md bg-black/20 p-3 md:p-4 rounded-xl w-full md:w-auto">
-            <div className="text-xl md:text-3xl font-bold text-white mb-1">
-              {currentTime.toLocaleDateString()}
-            </div>
-            <div className="text-lg md:text-2xl text-green-500">
-              {currentTime.toLocaleTimeString()}
-            </div>
           </div>
         </div>
 

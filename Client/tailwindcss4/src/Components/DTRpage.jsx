@@ -26,7 +26,7 @@ const DTR = () => {
   const [overtimeRequests, setOvertimeRequests] = useState([]);
   const [scheduleAdjustments, setScheduleAdjustments] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
-  const [isEditCutoffOpen, setIsEditCutoffOpen] = useState(false);
+  const [isEditCutoffModalOpen, setIsEditCutoffModalOpen] = useState(false);
   const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [schedules, setSchedules] = useState([]);
   const [scheduleUsers, setScheduleUsers] = useState([]);
@@ -400,9 +400,11 @@ const DTR = () => {
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
-      <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
+      <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-15">
         <header className="mb-6">
-          <h1 className="text-xl md:text-5xl font-bold text-green-500">Daily Time Record</h1>
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+         Daily Time <span className="text-green-500"> Record</span>
+      </h1>
         </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">

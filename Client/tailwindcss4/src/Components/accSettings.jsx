@@ -193,7 +193,7 @@ const AccountSettings = () => {
       <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <h1 className="text-3xl md:text-4xl text-white mb-4 md:mb-0 font-bold">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
             Account <span className="text-green-500">Settings</span>
           </h1>
           <div className="flex flex-col items-center">
