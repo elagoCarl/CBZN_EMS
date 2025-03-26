@@ -18,7 +18,8 @@ import {
     PlusCircle,
     FileClock,
     CalendarClock,
-    BriefcaseBusiness
+    BriefcaseBusiness,
+    History
 } from 'lucide-react';
 import { useAuth } from '../authContext'; // Adjust path if needed
 
@@ -85,6 +86,7 @@ const Sidebar = () => {
         { name: 'Departments & Jobs', icon: <BriefcaseBusiness size={20} color={iconColor} />, path: '/deptPage' },
 
         { name: 'Schedules', icon: <FileClock size={20} color={iconColor} />, path: '/schedulePage' },
+        { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
         { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
         {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
@@ -100,6 +102,8 @@ const Sidebar = () => {
     ] : [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
         { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
+        { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
+
         {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
