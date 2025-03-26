@@ -1,5 +1,7 @@
+
 // src/App.js
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+
 // import { useState } from 'react';
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';

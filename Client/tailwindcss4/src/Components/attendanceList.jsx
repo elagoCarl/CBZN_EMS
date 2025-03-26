@@ -114,6 +114,7 @@ const AdminAttendance = () => {
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
             Attendance
+
           </h1>
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500">
          List
