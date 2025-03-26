@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from "./callComponents/sidebar.jsx"; // Import the Sidebar component as used in MyAttendance
+import { useAuth } from '../Components/authContext.jsx';
 
 const AccountSettings = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -17,7 +18,9 @@ const AccountSettings = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const userId = 1; // Hardcoded user ID for demo purposes
+  const { user } = useAuth();
+  console.log("userid: ", user.id);
+  const userId = user.id;
 
   // Update time every second
   useEffect(() => {
@@ -97,9 +100,17 @@ const AccountSettings = () => {
     );
   };
 
+  // Handle profile picture upload
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Check if the file format is valid
+    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validImageTypes.includes(file.type)) {
+      toast.error('Invalid file format. Please select a .jpeg or .png file.');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -120,6 +131,9 @@ const AccountSettings = () => {
       if (response.data.profilePicture) {
         setProfilePic(`http://localhost:8080/${response.data.profilePicture}`);
         toast.success('Profile picture updated successfully!');
+      } else {
+        // If there's no profilePicture in the response, still show a success or fallback message
+        toast.success('Profile picture updated successfully!');
       }
     } catch (error) {
       console.error("Error uploading profile picture:", error);
@@ -127,6 +141,7 @@ const AccountSettings = () => {
     }
   };
 
+  // Handle email change
   const handleEmailChange = async () => {
     try {
       const response = await axios.put(`http://localhost:8080/users/updateUserEmail/${userId}`, { email });
@@ -141,6 +156,7 @@ const AccountSettings = () => {
     }
   };
 
+  // Handle password change
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match');
@@ -177,7 +193,7 @@ const AccountSettings = () => {
       <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <h1 className="text-3xl md:text-4xl text-white mb-4 md:mb-0 font-bold">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
             Account <span className="text-green-500">Settings</span>
           </h1>
           <div className="flex flex-col items-center">
@@ -330,7 +346,7 @@ const AccountSettings = () => {
       {/* Toast Notifications */}
       <ToastContainer
         position="top-right"
-        autoClose={1100}
+        autoClose={2500}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

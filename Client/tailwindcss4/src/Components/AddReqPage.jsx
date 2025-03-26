@@ -5,10 +5,12 @@ import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import AddReq from './callComponents/addReq';
 import CancelReq from './callComponents/cancelReq';
 import Sidebar from './callComponents/sidebar';
+import { useAuth } from './authContext';
 
-const ReqPage = () => {
-    // Temporary logged-in user id
-    const loggedInUserId = 1;
+const AddReqPage = () => {
+    const { user } = useAuth();
+    console.log("userid: ", user.id)
+    const loggedInUserId = user.id
 
     const [expandedRow, setExpandedRow] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
@@ -215,8 +217,8 @@ const ReqPage = () => {
             'overtime': (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
                     <div>
-                        <p className="text-xs sm:text-sm font-medium text-gray-400">Time</p>
-                        <p className="text-white">{request.start_time} - {request.end_time}</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-400">Date and Time</p>
+                        <p className="text-white">{request.start_time} to {request.end_time}</p>
                     </div>
                     <div className="sm:col-span-2">
                         <p className="text-xs sm:text-sm font-medium text-gray-400">Reason</p>
@@ -272,7 +274,7 @@ const ReqPage = () => {
     const FilterDropdown = ({ id, isOpen, setIsOpen, current, options, active, setActive, closeOther }) => (
         <div className="relative" id={id}>
             <button
-                className="w-full sm:w-auto px-3 py-2 rounded-md bg-[#363636] text-white flex items-center justify-between gap-2 text-sm"
+                className="w-full sm:w-auto px-3 py-2 rounded-md bg-[#363636] text-md text-white flex items-center justify-between gap-2"
                 onClick={() => {
                     setIsOpen(!isOpen);
                     closeOther();
@@ -315,12 +317,12 @@ const ReqPage = () => {
             <Sidebar />
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 <header className="mb-6">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl text-green-500 font-semibold">
-                        Requests
-                    </h1>
+                <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
+            Add <span className="text-white">Requests</span>
+          </h1>
                 </header>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mb-4">
-                    <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
+                    <div className="flex flex-col sm:flex-row gap-2">
                         <FilterDropdown
                             id="type-dropdown"
                             isOpen={typeDropdownOpen}
@@ -343,7 +345,7 @@ const ReqPage = () => {
                         />
                     </div>
                     <button
-                        className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 flex items-center justify-center sm:justify-start transition-colors"
+                        className="bg-green-600 text-white px-3 py-2 rounded text-md hover:bg-green-700 flex items-center justify-center sm:justify-start transition-colors"
                         onClick={handleAddReqClick}
                     >
                         Add Request
@@ -469,4 +471,4 @@ const ReqPage = () => {
     );
 };
 
-export default ReqPage;
+export default AddReqPage;

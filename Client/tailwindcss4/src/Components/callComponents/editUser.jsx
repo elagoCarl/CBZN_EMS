@@ -5,8 +5,38 @@ import axios from 'axios';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // For success notifications
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
+
+  // Define local select options as arrays of objects
+  const employmentStatusOptions = [
+    { value: 'Employee', label: 'Employee' },
+    { value: 'Intern', label: 'Intern' },
+    { value: 'Inactive', label: 'Inactive' }
+  ];
+
+  const roleOptions = [
+    { value: 'admin', label: 'Admin' },
+    { value: 'user', label: 'User' }
+  ];
+
+  const civilStatusOptions = [
+    { value: 'Single', label: 'Single' },
+    { value: 'Married', label: 'Married' },
+    { value: 'Divorced', label: 'Divorced' },
+    { value: 'Widowed', label: 'Widowed' },
+    { value: 'Other', label: 'Other' }
+  ];
+
+  // Clear error/success when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage("");
+      setSuccessMessage("");
+    }
+  }, [isOpen]);
 
   // Fetch schedule options when modal opens
   useEffect(() => {
@@ -14,8 +44,9 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       try {
         const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
         if (response.data.successful) {
+          // Convert numeric IDs to strings for consistency in the select
           const options = response.data.data.map(schedule => ({
-            value: schedule.id,
+            value: String(schedule.id),
             label: schedule.title
           }));
           setScheduleOptions(options);
@@ -37,8 +68,9 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       try {
         const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
         if (response.data.successful) {
+          // Convert numeric IDs to strings for consistency
           const options = response.data.data.map(jobTitle => ({
-            value: jobTitle.id,
+            value: String(jobTitle.id),
             label: jobTitle.name
           }));
           setJobTitleOptions(options);
@@ -54,7 +86,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     }
   }, [isOpen]);
 
-  // Fetch user data along with schedule association when modal opens
+  // Fetch user data (main user, user info, emergency contact, schedule) when modal opens
   useEffect(() => {
     if (isOpen && userId) {
       (async () => {
@@ -68,27 +100,46 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             axios.get(`http://localhost:8080/users/getUser/${userId}`),
             axios.get(`http://localhost:8080/userInfo/getUserInfoById/${userId}`),
             axios.get(`http://localhost:8080/emgncyContact/getEmgncyContactById/${userId}`),
-            // Assuming an endpoint to fetch schedule association by user ID
             axios.get(`http://localhost:8080/schedUser/getSchedUserByUser/${userId}`)
           ]);
 
+          // Log to confirm the data structure
+          console.log("User data from API:", userDataResponse.data.data);
+          console.log("User info data from API:", userInfoResponse.data.userInfo);
+          console.log("Emergency contact data from API:", emergencyContactResponse.data.emgncyContact);
+          console.log("Schedule data from API:", scheduleResponse.data.schedUser);
+
+          const userData = userDataResponse.data.data;
+          const userInfo = userInfoResponse.data.userInfo;
+          const emgncy = emergencyContactResponse.data.emgncyContact;
+          const schedUser = scheduleResponse.data.schedUser;
+
           const fetchedData = {
-            // Spread main user data (assumed nested under 'data')
-            ...userDataResponse.data.data,
-            // Derive role from isAdmin value:
-            role: userDataResponse.data.data.isAdmin ? 'admin' : 'user',
-            // Spread user info data (assumed nested under 'userInfo')
-            ...userInfoResponse.data.userInfo,
-            // Map emergency contact data
-            emergency_name: emergencyContactResponse.data.emgncyContact.name,
-            emergency_relationship: emergencyContactResponse.data.emgncyContact.relationship,
-            emergency_contact: emergencyContactResponse.data.emgncyContact.contact_number,
-            // Include schedule association if available
-            schedule: scheduleResponse.data.schedUser?.schedule_id || '',
-            effectivity_date: scheduleResponse.data.schedUser?.effectivity_date || ''
+            // Spread main user data
+            ...userData,
+
+            // Convert isAdmin boolean to 'admin'/'user'
+            role: userData.isAdmin ? 'admin' : 'user',
+
+            // Ensure employment_status is a string
+            employment_status: userData.employment_status || '',
+
+            // Convert numeric JobTitleId to string
+            JobTitleId: userData.JobTitleId ? String(userData.JobTitleId) : '',
+
+            // Spread user info
+            ...userInfo,
+
+            // Emergency contact fields
+            emergency_name: emgncy.name,
+            emergency_relationship: emgncy.relationship,
+            emergency_contact: emgncy.contact_number,
+
+            // Schedule info
+            schedule: schedUser?.schedule_id ? String(schedUser.schedule_id) : '',
+            effectivity_date: schedUser?.effectivity_date || ''
           };
 
-          console.log(fetchedData);
           setFormData(fetchedData);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -98,23 +149,26 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     }
   }, [isOpen, userId]);
 
+  // Handle form changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Update main user
+      // 1. Update main user (including jobTitleId)
       await axios.put(`http://localhost:8080/users/updateUser/${userId}`, {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
         isAdmin: formData.role === 'admin',
-        employment_status: formData.employment_status
+        employment_status: formData.employment_status,
+        jobTitleId: parseInt(formData.JobTitleId) || null
       });
 
-      // Update user info
+      // 2. Update user info
       await axios.put(`http://localhost:8080/userInfo/updateUserInfo`, {
         UserId: userId,
         age: parseInt(formData.age),
@@ -138,38 +192,65 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         no_of_children: formData.no_of_children
       });
 
-      // Update emergency contact
+      // 3. Update emergency contact
       await axios.put(`http://localhost:8080/emgncyContact/updateEmgncyContact/${userId}`, {
         name: formData.emergency_name,
         relationship: formData.emergency_relationship,
         contact_number: formData.emergency_contact
       });
 
-      // Update schedule-user association (assumes an update endpoint exists)
+      // 4. Update schedule-user association
       await axios.put(`http://localhost:8080/schedUser/updateSchedUserByUser/${userId}`, {
-        schedule_id: formData.schedule,
+        schedule_id: parseInt(formData.schedule) || null,
         effectivity_date: formData.effectivity_date
       });
 
-      onUserUpdated(formData);
-      onClose();
+      // 5. Show success message, then close after a short delay
+      setSuccessMessage("User updated successfully.");
+      setTimeout(() => {
+        onUserUpdated(formData);
+        onClose();
+      }, 1500);
+
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Failed to update user.');
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Failed to update user.");
+      }
     }
   };
 
+  // Build form sections using your arrays of objects for select fields
   const formSections = [
     {
       title: 'User Account',
       fields: [
-        { name: 'employeeId', placeholder: 'Employee ID', type: 'number', disabled: true },
-        { name: 'name', placeholder: 'Full Name', type: 'text' },
-        { name: 'email', placeholder: 'Email Address', type: 'email' },
-        { name: 'employment_status', type: 'select', placeholder: 'Employment Status', options: ['Employee', 'Intern', 'Inactive'] },
-        // Updated JobTitleId field options using jobTitleOptions state
-        { name: 'JobTitleId', type: 'select', placeholder: 'Job Title', options: jobTitleOptions },
-        { name: 'role', type: 'select', placeholder: 'Role', options: ['admin', 'user'] }
+        { name: 'employeeId', label: 'Employee ID', placeholder: 'Employee ID', type: 'number', disabled: true },
+        { name: 'name', label: 'Full Name', placeholder: 'Full Name', type: 'text' },
+        { name: 'email', label: 'Email Address', placeholder: 'Email Address', type: 'email' },
+        {
+          name: 'employment_status',
+          label: 'Employment Status',
+          type: 'select',
+          placeholder: 'Select Employment Status',
+          options: employmentStatusOptions
+        },
+        {
+          name: 'JobTitleId',
+          label: 'Job Title',
+          type: 'select',
+          placeholder: 'Job Title',
+          options: jobTitleOptions
+        },
+        {
+          name: 'role',
+          label: 'Role',
+          type: 'select',
+          placeholder: 'Select Role',
+          options: roleOptions
+        }
       ]
     },
     {
@@ -177,71 +258,167 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       fields: [
         {
           name: 'schedule',
+          label: 'Schedule',
           type: 'select',
           placeholder: 'Select Schedule',
           options: scheduleOptions
         },
-        { name: 'effectivity_date', placeholder: 'Effectivity Date', type: 'date' }
+        { name: 'effectivity_date', label: 'Effectivity Date', placeholder: 'Effectivity Date', type: 'date' }
       ]
     },
     {
       title: 'Personal Information',
       fields: [
-        { name: 'age', placeholder: 'Age', type: 'number' },
-        { name: 'birthdate', placeholder: 'Birth Date', type: 'date' },
-        { name: 'height', placeholder: 'Height', type: 'text' },
-        { name: 'weight', placeholder: 'Weight', type: 'text' },
-        { name: 'religion', placeholder: 'Religion', type: 'text' },
-        { name: 'citizenship', placeholder: 'Citizenship', type: 'text' },
-        { name: 'civil_status', placeholder: 'Civil Status', type: 'text' },
-        { name: 'no_of_children', placeholder: 'Number of Children', type: 'text' }
+        { name: 'age', label: 'Age', placeholder: 'Age', type: 'number' },
+        { name: 'birthdate', label: 'Birth Date', placeholder: 'Birth Date', type: 'date' },
+        { name: 'height', label: 'Height', placeholder: 'Height (cm)', type: 'text' },
+        { name: 'weight', label: 'Weight', placeholder: 'Weight (kg)', type: 'text' },
+        { name: 'religion', label: 'Religion', placeholder: 'Religion', type: 'text' },
+        { name: 'citizenship', label: 'Citizenship', placeholder: 'Citizenship', type: 'text' },
+        {
+          name: 'civil_status',
+          label: 'Civil Status',
+          type: 'select',
+          placeholder: 'Civil Status',
+          options: civilStatusOptions
+        },
+        { name: 'no_of_children', label: 'Number of Children', placeholder: 'Number of Children', type: 'number' }
       ]
     },
     {
       title: 'Address Information',
       fields: [
-        { name: 'city_add', placeholder: 'City Address', type: 'text' },
-        { name: 'provincial_add', placeholder: 'Provincial Address', type: 'text' }
+        {
+          name: 'city_add',
+          label: 'City Address',
+          placeholder: 'Street No., City, State',
+          type: 'text'
+        },
+        {
+          name: 'provincial_add',
+          label: 'Provincial Address',
+          placeholder: 'Provincial Address',
+          type: 'text'
+        }
       ]
     },
     {
       title: 'Spouse Information',
       fields: [
-        { name: 'name_of_spouse', placeholder: "Spouse's Name", type: 'text' },
-        { name: 'spouse_occupation', placeholder: "Spouse's Occupation", type: 'text' },
-        { name: 'spouse_employed_by', placeholder: "Spouse's Employer", type: 'text' }
+        {
+          name: 'name_of_spouse',
+          label: "Spouse's Name",
+          placeholder: "Spouse's Name",
+          type: 'text'
+        },
+        {
+          name: 'spouse_occupation',
+          label: "Spouse's Occupation",
+          placeholder: "Spouse's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'spouse_employed_by',
+          label: "Spouse's Employer",
+          placeholder: "Spouse's Employer",
+          type: 'text'
+        }
       ]
     },
     {
-      title: 'Parent Information',
+      title: "Father's Information",
       fields: [
-        { name: 'father_name', placeholder: "Father's Name", type: 'text' },
-        { name: 'father_occupation', placeholder: "Father's Occupation", type: 'text' },
-        { name: 'father_employed_by', placeholder: "Father's Employer", type: 'text' },
-        { name: 'mother_name', placeholder: "Mother's Name", type: 'text' },
-        { name: 'mother_occupation', placeholder: "Mother's Occupation", type: 'text' },
-        { name: 'mother_employed_by', placeholder: "Mother's Employer", type: 'text' }
+        {
+          name: 'father_name',
+          label: "Father's Name",
+          placeholder: "Father's Name",
+          type: 'text'
+        },
+        {
+          name: 'father_occupation',
+          label: "Father's Occupation",
+          placeholder: "Father's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'father_employed_by',
+          label: "Father's Employer",
+          placeholder: "Father's Employer",
+          type: 'text'
+        }
+      ]
+    },
+    {
+      title: "Mother's Information",
+      fields: [
+        {
+          name: 'mother_name',
+          label: "Mother's Name",
+          placeholder: "Mother's Name",
+          type: 'text'
+        },
+        {
+          name: 'mother_occupation',
+          label: "Mother's Occupation",
+          placeholder: "Mother's Occupation",
+          type: 'text'
+        },
+        {
+          name: 'mother_employed_by',
+          label: "Mother's Employer",
+          placeholder: "Mother's Employer",
+          type: 'text'
+        }
       ]
     },
     {
       title: 'Emergency Contact',
       fields: [
-        { name: 'emergency_name', placeholder: 'Emergency Contact Name', type: 'text' },
-        { name: 'emergency_relationship', placeholder: 'Relationship', type: 'text' },
-        { name: 'emergency_contact', placeholder: 'Contact Number', type: 'tel' }
+        {
+          name: 'emergency_name',
+          label: 'Emergency Contact Name',
+          placeholder: 'Emergency Contact Name',
+          type: 'text'
+        },
+        {
+          name: 'emergency_relationship',
+          label: 'Relationship',
+          placeholder: 'Relationship',
+          type: 'text'
+        },
+        {
+          name: 'emergency_contact',
+          label: 'Contact Number',
+          placeholder: 'Contact Number',
+          type: 'tel'
+        }
       ]
     }
   ];
 
-  // Enhanced renderField to handle both string options and object options
+  // Render each field, adding pattern restrictions for name fields
   const renderField = (field) => {
     const baseClass =
       "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
-    if (field.type === 'select') {
-      return (
-        <div key={field.name} className="flex-1">
+    let extraProps = {};
+    // If the field name includes 'name' and is a text input, restrict to letters, spaces, etc.
+    if (
+      field.type === 'text' &&
+      field.name.toLowerCase().includes('name')
+    ) {
+      extraProps.pattern = "^[A-Za-z\\s.'-]+$";
+      extraProps.title = "Only letters, spaces, periods, apostrophes, and hyphens allowed";
+    }
+
+    return (
+      <div key={field.name} className="flex-1">
+        <label htmlFor={field.name} className="block text-sm font-medium text-white mb-1">
+          {field.label || field.placeholder}
+        </label>
+        {field.type === 'select' ? (
           <select
+            id={field.name}
             name={field.name}
             onChange={handleChange}
             value={formData[field.name] || ''}
@@ -249,37 +426,26 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             required
           >
             <option value="">{field.placeholder}</option>
-            {field.options.map(opt => {
-              if (typeof opt === 'object') {
-                return (
-                  <option key={opt.value} value={opt.value} className="bg-gray-800">
-                    {opt.label}
-                  </option>
-                );
-              }
-              return (
-                <option key={opt} value={opt} className="bg-gray-800">
-                  {opt}
-                </option>
-              );
-            })}
+            {field.options.map(opt => (
+              <option key={opt.value} value={opt.value} className="bg-gray-800">
+                {opt.label}
+              </option>
+            ))}
           </select>
-        </div>
-      );
-    }
-
-    return (
-      <div key={field.name} className="flex-1">
-        <input
-          type={field.type}
-          name={field.name}
-          placeholder={field.placeholder}
-          onChange={handleChange}
-          value={formData[field.name] || ''}
-          className={baseClass}
-          disabled={field.disabled}
-          required
-        />
+        ) : (
+          <input
+            id={field.name}
+            type={field.type}
+            name={field.name}
+            placeholder={field.placeholder}
+            onChange={handleChange}
+            value={formData[field.name] || ''}
+            className={baseClass}
+            disabled={field.disabled}
+            required
+            {...extraProps}
+          />
+        )}
       </div>
     );
   };
@@ -297,6 +463,18 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          {/* Error or success message */}
+          {errorMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
+              {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className="sticky top-0 z-10 mb-4 p-3 bg-green-500 text-white rounded-md text-center">
+              {successMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {formSections.map((section, index) => (
               <div key={index} className="space-y-4">

@@ -40,19 +40,23 @@ const requireAuth = async (req, res, next) => {
             if (!session) {
               throw new Error("Invalid refresh token");
             }
+            console.log("Refresh Token:", refreshToken);
 
             const user = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
             const accessToken = createAccessToken(user.id);
             const newRefreshToken = createRefreshToken(user.id);
+            console.log("New Refresh Token:", newRefreshToken);
+            console.log("New Access Token:", accessToken);
+
 
             res.cookie('refreshToken', '', { maxAge: 1 });
             res.cookie('jwt', accessToken, { httpOnly: true, maxAge: maxAge * 1000 });
             res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: (60 * 60 * 24 * 30) * 1000 });
 
-            await Session.destroy({ where: { userId: user.id } });
+            await Session.destroy({ where: { UserId: user.id } });
             await Session.create({
-              userId: user.id,
-              token: newRefreshToken
+              UserId: user.id,
+              Token: newRefreshToken
             });
 
             req.decodedToken = user;

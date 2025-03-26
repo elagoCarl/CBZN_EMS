@@ -47,12 +47,12 @@ const addSchedUser = async (req, res) => {
     const existingPairing = await SchedUser.findOne({
       where: { user_id, schedule_id, effectivity_date }
     });
-    if (existingPairing) {
-      return res.status(400).json({
-        successful: false,
-        message: "This schedule is already associated with the user at the same effectivity date."
-      });
-    }
+    // if (existingPairing) {
+    //   return res.status(400).json({
+    //     successful: false,
+    //     message: "This schedule is already associated with the user at the same effectivity date."
+    //   });
+    // }
     const newSchedUser = await SchedUser.create({ schedule_id, user_id, effectivity_date });
     return res.status(201).json({
       successful: true,
@@ -184,12 +184,12 @@ const updateSchedUserByUser = async (req, res) => {
         effectivity_date
       }
     });
-    if (duplicate) {
-      return res.status(400).json({
-        successful: false,
-        message: "This schedule is already associated with the user at the same effectivity date."
-      });
-    }
+    // if (duplicate) {
+    //   return res.status(400).json({
+    //     successful: false,
+    //     message: "This schedule is already associated with the user at the same effectivity date."
+    //   });
+    // }
 
     // Remove the current association
     await existingAssociation.destroy();

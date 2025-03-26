@@ -2,10 +2,12 @@ const express = require('express')
 const OvertimeRequest = require('../controllers/overtime_request_ctrl');
 const { Route53RecoveryCluster } = require('aws-sdk');
 const router = express.Router();
+const { requireAuth } = require('../controllers/authMiddleware')
+// router.use(requireAuth)
 
 
 router.post('/addOvertimeReq', OvertimeRequest.addOvertimeRequest)
-router.get('/getAllOvertimeReq', OvertimeRequest.getAllOvertimeRequests)
+router.get('/getAllOvertimeReq', OvertimeRequest.getAllOvertimeRequests) //ito ito ito
 router.get('/getAllOTReqsByUser/:id', OvertimeRequest.getAllOTReqsByUser)
 router.get('/getOvertimeReq/:id', OvertimeRequest.getOvertimeRequest)
 router.put('/updateOvertimeReq/:id', OvertimeRequest.updateOvertimeRequest)

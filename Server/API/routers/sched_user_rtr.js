@@ -1,6 +1,8 @@
 const express = require('express');
 const SchedUser = require('../controllers/sched_user_ctrl');
 const router = express.Router();
+const { requireAuth } = require('../controllers/authMiddleware')
+// router.use(requireAuth)
 
 router.post('/addSchedUser', SchedUser.addSchedUser);
 router.get('/getAllSchedUsers', SchedUser.getAllSchedUser);

@@ -107,26 +107,19 @@ const AdminAttendance = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black/90">
-      {/* Mobile sidebar toggle button */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 bg-green-600 text-white p-2 rounded-md"
-        onClick={toggleSidebar}
-      >
-        {isSidebarOpen ? '✕' : '☰'}
-      </button>
+    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
+      <Sidebar />
+      <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+            Attendance
 
-      {/* Sidebar with conditional classes for responsive behavior */}
-      <div className={`${isSidebarOpen ? 'block' : 'hidden'} lg:block fixed lg:relative z-40 h-full transition-all duration-300 ease-in-out`}>
-        <Sidebar />
-      </div>
-
-      {/* Main content */}
-      <div className={`flex-1 p-3 sm:p-4 md:p-6 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-0' : 'ml-0'}`}>
-        <div className="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 mt-8 lg:mt-0">
-          <h1 className="text-xl sm:text-3xl md:text-5xl font-bold mb-4 md:mb-0 text-green-500">
-            Attendance List
           </h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500">
+         List
+          </h1>
+        </div>
         </div>
 
         {/* Filters */}
