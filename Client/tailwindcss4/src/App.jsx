@@ -13,6 +13,9 @@ import ScheduleChangePage from "./Components/scheduleChangePage.jsx";
 import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
+import ScheduleUser from "./Components/schedUser.jsx";
+
+
 import Page404 from "./Components/page404.jsx";
 import Page403 from "./Components/page403.jsx"
 // import ProtectedRoutes from "./Components/protectedRoutes.jsx";
@@ -53,6 +56,9 @@ function App() {
                 <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
                 <Route path="/leaveReqPage" element={<LeaveReqPage />} />
                 <Route path="/schedulePage" element={<SchedulePage />} />
+                <Route path="/schedUser" element={<ScheduleUser />} />
+
+
                 {/* Catch-all 404 Route */}
                 <Route path="*" element={<Page404 />} />
                 <Route path="/403" element={<Page403 />} />
