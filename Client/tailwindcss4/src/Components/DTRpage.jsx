@@ -369,6 +369,46 @@ const DTR = () => {
     }
   };
 
+  const calculateLateMinutes = (scheduleIn, actualTimeIn) => {
+    if (!scheduleIn || !actualTimeIn) return 0;
+
+    const normalizeTime = (time) => {
+      return time.includes('AM') || time.includes('PM')
+        ? time
+        : dayjs(time, 'HH:mm').format('h:mm A');
+    };
+
+    const normalizedScheduleIn = normalizeTime(scheduleIn);
+    const normalizedActualTimeIn = normalizeTime(actualTimeIn);
+
+    const schedTime = dayjs(`2025-01-01 ${normalizedScheduleIn}`, 'YYYY-MM-DD h:mm A');
+    const actualTime = dayjs(`2025-01-01 ${normalizedActualTimeIn}`, 'YYYY-MM-DD h:mm A');
+
+    const lateDiff = actualTime.diff(schedTime, 'minute');
+
+    return lateDiff > 0 ? lateDiff : 0;
+  };
+
+  const calculateUndertimeMinutes = (scheduleOut, actualTimeOut) => {
+    if (!scheduleOut || !actualTimeOut) return 0;
+
+    const normalizeTime = (time) => {
+      return time.includes('AM') || time.includes('PM')
+        ? time
+        : dayjs(time, 'HH:mm').format('h:mm A');
+    };
+
+    const normalizedScheduleOut = normalizeTime(scheduleOut);
+    const normalizedActualTimeOut = normalizeTime(actualTimeOut);
+
+    const schedTime = dayjs(`2025-01-01 ${normalizedScheduleOut}`, 'YYYY-MM-DD h:mm A');
+    const actualTime = dayjs(`2025-01-01 ${normalizedActualTimeOut}`, 'YYYY-MM-DD h:mm A');
+
+    const undertimeDiff = schedTime.diff(actualTime, 'minute');
+
+    return undertimeDiff > 0 ? undertimeDiff : 0;
+  };
+
   // Do not reset selectedCutoffId on close so that the period remains selected.
   const handleCloseEditModal = () => {
     setIsEditCutoffModalOpen(false);
@@ -402,9 +442,9 @@ const DTR = () => {
       <Sidebar />
       <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-15">
         <header className="mb-6">
-        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
-         Daily Time <span className="text-green-500"> Record</span>
-      </h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+            Daily Time <span className="text-green-500"> Record</span>
+          </h1>
         </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
@@ -427,7 +467,11 @@ const DTR = () => {
                         onChange={e => setUserSearchTerm(e.target.value)}
                       />
                       <div className="max-h-60 overflow-y-auto">
-                        {users.filter(u => u.name.toLowerCase().includes(userSearchTerm.toLowerCase())).map(u => (
+                        {users.filter(u =>
+                          u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                          getJobTitle(u).toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                          getDepartment(u).toLowerCase().includes(userSearchTerm.toLowerCase())
+                        ).map(u => (
                           <div key={u.id} className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'}`}
                             onClick={() => { setSelectedUser(u); setIsUserDropdownOpen(false); }}>
                             <div className="font-medium">{u.name}</div>
@@ -469,10 +513,9 @@ const DTR = () => {
                   </div>
                 )}
               </div>
-              {/* Show edit button only if the selected user is an admin */}
               {selectedUser?.isAdmin && (
                 <button
-                  className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors"
+                  className="bg-green-600 text-white px-4 rounded hover:bg-green-700 transition-colors"
                   onClick={() => handleEditCutoff(selectedCutoffId)}>
                   Edit
                 </button>
@@ -514,7 +557,7 @@ const DTR = () => {
                 <table className="w-full text-sm text-left">
                   <thead className="bg-[#363636] text-white">
                     <tr>
-                      {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Remarks'].map((h, i) => (
+                      {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
                         <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
                       ))}
                     </tr>
@@ -522,6 +565,27 @@ const DTR = () => {
                   <tbody>
                     {filteredData.map((r, i) => {
                       const dateOT = getOvertimeForDate(r.date);
+                      const workShift = r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
+                        const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                        return adj ? `${adj.time_in} - ${adj.time_out}` : r.workShift;
+                      })();
+
+                      // Extract schedule in and out times
+                      const schedIn = workShift && workShift !== 'LEAVE' && workShift !== 'REST DAY'
+                        ? workShift.split(' - ')[0]
+                        : null;
+                      const schedOut = workShift && workShift !== 'LEAVE' && workShift !== 'REST DAY'
+                        ? workShift.split(' - ')[1]
+                        : null;
+
+                      // Calculate late and undertime
+                      const lateMinutes = r.time_in && schedIn
+                        ? calculateLateMinutes(schedIn, r.time_in)
+                        : 0;
+                      const undertimeMinutes = r.time_out && schedOut
+                        ? calculateUndertimeMinutes(schedOut, r.time_out)
+                        : 0;
+
                       return (
                         <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
                           <td className="px-4 py-3 border-b border-white/5 text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
@@ -542,6 +606,24 @@ const DTR = () => {
                                 <span className="text-gray-500 ml-1">({ot.start_time}-{ot.end_time})</span>
                               </div>
                             )) : '0.00'}
+                          </td>
+                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                            {lateMinutes > 0 ? (
+                              <div className="text-xs">
+                                <span className="font-medium text-orange-400">{(lateMinutes / 60).toFixed(2)} hrs</span>
+                              </div>
+                            ) : (
+                              '0.00'
+                            )}
+                          </td>
+                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                            {undertimeMinutes > 0 ? (
+                              <div className="text-xs">
+                                <span className="font-medium text-orange-400">{(undertimeMinutes / 60).toFixed(2)} hrs</span>
+                              </div>
+                            ) : (
+                              '0.00'
+                            )}
                           </td>
                           <td className="px-4 py-3 border-b border-white/5 text-gray-300">
                             {r.remarks && r.remarks !== 'Rest Day' && (
@@ -569,13 +651,32 @@ const DTR = () => {
                   <tfoot>
                     <tr className="font-bold bg-[#363636] text-white">
                       <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
-                      <td className="px-4 py-3 border-t border-white/10 text-green-400">{filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 border-t border-white/10 text-green-400">
+                        {filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}
+                      </td>
                       <td className="px-4 py-3 border-t border-white/10 text-green-400">
                         {filteredData.reduce((sum, r) => {
                           const ot = getOvertimeForDate(r.date);
                           return sum + ot.reduce((s, o) => s + (o.additionalHours || 0), 0);
                         }, 0).toFixed(2)}
                       </td>
+                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                        {filteredData.reduce((sum, r) => {
+                          const schedIn = r.workShift && r.workShift !== 'LEAVE' && r.workShift !== 'REST DAY'
+                            ? r.workShift.split(' - ')[0]
+                            : null;
+                          return sum + (r.time_in && schedIn ? calculateLateMinutes(schedIn, r.time_in) / 60 : 0);
+                        }, 0).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                        {filteredData.reduce((sum, r) => {
+                          const schedOut = r.workShift && r.workShift !== 'LEAVE' && r.workShift !== 'REST DAY'
+                            ? r.workShift.split(' - ')[1]
+                            : null;
+                          return sum + (r.time_out && schedOut ? calculateUndertimeMinutes(schedOut, r.time_out) / 60 : 0);
+                        }, 0).toFixed(2)}
+                      </td>
+
                       <td className="px-4 py-3 border-t border-white/10"></td>
                     </tr>
                   </tfoot>

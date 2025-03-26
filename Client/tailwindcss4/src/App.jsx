@@ -20,8 +20,8 @@ import SchedulePage from "./Components/schedPage.jsx";
 import ProtectedRoute from './Components/protectedRoute.jsx';
 import { AuthProvider } from "./Components/authContext"; // adjust path as needed
 import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
-import PageUiFallback from "./Components/pageUiFallBack";
 import DTR from "./Components/DTRpage.jsx";
+import SavedDTR from "./Components/SavedDTRpage.jsx"
 
 
 function App() {
@@ -39,7 +39,7 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<LoginPage />} />
               <Route path="/forgotPass" element={<ForgotPass />} />
-
+              <Route path="/savedDTR" element={<SavedDTR />} />
               {/* Protected Routes Group */}
               <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/myAttendance" element={<MyAttendance />} />
