@@ -14,7 +14,7 @@ const Page404 = () => {
           The page you are looking for doesn&apos;t exist.
         </p>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/myAttendance")}
           className="mt-6 px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-md hover:bg-green-800 transition duration-300 border-none"
         >
           Go Back?

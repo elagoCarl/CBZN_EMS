@@ -31,6 +31,7 @@ const DTR = () => {
   const [schedules, setSchedules] = useState([]);
   const [scheduleUsers, setScheduleUsers] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Memoize the current cutoff based on selectedCutoffId
   const currentCutoff = useMemo(
@@ -369,6 +370,27 @@ const DTR = () => {
     }
   };
 
+  const handleSaveDTR = async () => {
+    if (!selectedUser || !currentCutoff) return;
+
+    setIsSaving(true);
+    try {
+      const response = await axios.post('http://localhost:8080/dtr/generateDTR', {
+        user_id: selectedUser.id,
+        cutoff_id: currentCutoff.id
+      });
+
+      if (response.data.successful) {
+        // Optional: Add a toast or alert for successful save
+        console.log('DTR saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving DTR:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const calculateLateMinutes = (scheduleIn, actualTimeIn) => {
     if (!scheduleIn || !actualTimeIn) return 0;
 
@@ -441,15 +463,15 @@ const DTR = () => {
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
       <div className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-15">
-        <header className="mb-6">
+        <header className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
-            Daily Time <span className="text-green-500"> Record</span>
+            Daily Time <span className="text-green-500">Record</span>
           </h1>
         </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
             <div className="flex flex-col sm:flex-row gap-3">
-              {selectedUser?.isAdmin ? (
+              {user?.isAdmin ? (
                 <div className="relative w-full sm:w-64">
                   <div className="flex items-center gap-2 bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer"
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
@@ -513,11 +535,20 @@ const DTR = () => {
                   </div>
                 )}
               </div>
-              {selectedUser?.isAdmin && (
+              {user?.isAdmin && (
                 <button
                   className="bg-green-600 text-white px-4 rounded hover:bg-green-700 transition-colors"
                   onClick={() => handleEditCutoff(selectedCutoffId)}>
-                  Edit
+                  Edit Cutoff
+                </button>
+              )}
+              {user?.isAdmin && (
+                <button
+                  onClick={handleSaveDTR}
+                  disabled={isSaving}
+                  className="bg-green-600 text-white px-4 rounded hover:bg-green-700 transition-colors "
+                >
+                  {isSaving ? 'Saving...' : 'Save DTR'}
                 </button>
               )}
             </div>
@@ -588,18 +619,18 @@ const DTR = () => {
 
                       return (
                         <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          <td className="px-4 py-3  text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
+                          <td className="px-4 py-3  text-gray-300">
                             {r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
                               const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
                               return adj ? `${adj.time_in} - ${adj.time_out}` : getUserSchedule(selectedUser);
                             })()}
                           </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">{r.site || 'Office'}</td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">{r.time_in}</td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">{r.time_out}</td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">{(r.totalHours || 0).toFixed(2)}</td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          <td className="px-4 py-3  text-gray-300">{r.site || 'Office'}</td>
+                          <td className="px-4 py-3  text-gray-300">{r.time_in}</td>
+                          <td className="px-4 py-3  text-gray-300">{r.time_out}</td>
+                          <td className="px-4 py-3  text-gray-300">{(r.totalHours || 0).toFixed(2)}</td>
+                          <td className="px-4 py-3  text-gray-300">
                             {dateOT.length ? dateOT.map((ot, j) => (
                               <div key={j} className="text-xs">
                                 <span className="font-medium text-green-400">{ot.additionalHours.toFixed(2)} hrs</span>
@@ -607,7 +638,7 @@ const DTR = () => {
                               </div>
                             )) : '0.00'}
                           </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          <td className="px-4 py-3  text-gray-300">
                             {lateMinutes > 0 ? (
                               <div className="text-xs">
                                 <span className="font-medium text-orange-400">{(lateMinutes / 60).toFixed(2)} hrs</span>
@@ -616,7 +647,7 @@ const DTR = () => {
                               '0.00'
                             )}
                           </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          <td className="px-4 py-3  text-gray-300">
                             {undertimeMinutes > 0 ? (
                               <div className="text-xs">
                                 <span className="font-medium text-orange-400">{(undertimeMinutes / 60).toFixed(2)} hrs</span>
@@ -625,7 +656,7 @@ const DTR = () => {
                               '0.00'
                             )}
                           </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                          <td className="px-4 py-3  text-gray-300">
                             {r.remarks && r.remarks !== 'Rest Day' && (
                               <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isLeave ? 'bg-purple-500/20 text-purple-400' :
                                 r.isTimeAdjustment ? 'bg-blue-500/20 text-blue-400' :

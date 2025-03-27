@@ -49,13 +49,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="bg-cover bg-no-repeat bg-center min-h-screen w-screen bg-black/95">
-      <div className="fixed top-0 left-0 w-full bg-black text-white p-8 flex justify-between items-center z-50">
+    <div className="flex flex-col gap-8 min-h-screen w-screen bg-black/95">
+      <div className="w-full bg-black text-white p-8 flex justify-between items-center z-50">
         <img src={logo} alt="Logo" className="h-11 w-auto ml-8" />
       </div>
 
-      <div className="flex items-center justify-center h-[calc(100vh-88px)]">
-        <div className="bg-black/80 p-10 rounded-lg shadow-lg w-full max-w-md mx-4">
+      <div className="flex flex-1 items-center justify-center">
+        <div className="bg-black/60 p-10 rounded-lg shadow-lg w-full max-w-md mx-4">
           <h2 className="text-2xl font-bold text-white text-center mb-6">LOGIN TO YOUR ACCOUNT</h2>
           {error && <p className="text-red-500 text-center">{error}</p>}
           <form className="space-y-4" onSubmit={handleLogin}>
@@ -89,7 +89,7 @@ const LoginPage = () => {
             <div className="flex flex-col space-y-4">
               <button
                 type="submit"
-                className="font-bold text-gray-900 hover:bg-green-700 text-center text-lg rounded-md bg-[#4E9F48] p-2 duration-300 w-full"
+                className="font-bold text-white hover:bg-green-700 text-center text-lg rounded-md bg-green-600 p-2 duration-300 w-full"
               >
                 Login
               </button>
