@@ -41,6 +41,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
             defaultValue: 0
         },
+        remarks: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "Absent"
+        },
         user_id: {
             type: DataTypes.INTEGER,
             allowNull: false

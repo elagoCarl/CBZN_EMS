@@ -86,12 +86,8 @@ const generateDTRForCutoffByUser = async (req, res) => {
                     user_id: user_id,
                     status: 'approved', // only approved leaves
                     [Op.or]: [
-                        {
-                            start_date: { [Op.between]: [startDate, endDate] }
-                        },
-                        {
-                            end_date: { [Op.between]: [startDate, endDate] }
-                        },
+                        { start_date: { [Op.between]: [startDate, endDate] } },
+                        { end_date: { [Op.between]: [startDate, endDate] } },
                         {
                             start_date: { [Op.lte]: startDate },
                             end_date: { [Op.gte]: endDate }
@@ -173,11 +169,6 @@ const generateDTRForCutoffByUser = async (req, res) => {
                     isRestDay = false;
                     schedIn = scheduleForDay.In;
                     schedOut = scheduleForDay.Out;
-
-                    // If you want to show times in the shift label:
-                    // const timeLabel = `${dayjs(`2025-01-01T${schedIn}`).format('h:mm A')} - ${dayjs(`2025-01-01T${schedOut}`).format('h:mm A')}`;
-                    // shiftLabel = `${activeSched.title} | ${timeLabel}`;
-
                     shiftLabel = `${activeSched.title}`;
                 }
             }
@@ -189,9 +180,9 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 isRestDay,
                 schedule_in: schedIn,
                 schedule_out: schedOut,
-
                 time_in: null,
                 time_out: null,
+                // Default remarks: "Rest Day" for rest days, otherwise "Absent"
                 remarks: isRestDay ? 'Rest Day' : 'Absent',
                 regular_hours: 0,
                 late_hours: 0,
@@ -211,26 +202,24 @@ const generateDTRForCutoffByUser = async (req, res) => {
             }
         });
 
-        // 8b. Time Adjustments (only if attendance is missing or partial)
+        // 8b. Merge Time Adjustments (only if attendance is missing or partial)
         timeAdjustmentsRes.forEach(adj => {
             const idx = allRecords.findIndex(r => r.date === adj.date);
             if (idx >= 0) {
-                // If there's NO attendance time_in, apply the time_in from adjustment
                 if (!allRecords[idx].time_in) {
                     allRecords[idx].time_in = adj.time_in;
                 }
-                // If there's NO attendance time_out, apply the time_out from adjustment
                 if (!allRecords[idx].time_out) {
                     allRecords[idx].time_out = adj.time_out;
                 }
-                // If we ended up using at least one of them, mark remarks
+                // Mark remarks if attendance is absent or empty
                 if (!allRecords[idx].remarks || allRecords[idx].remarks === 'Absent') {
                     allRecords[idx].remarks = 'Time Adjusted';
                 }
             }
         });
 
-        // 8c. Leaves
+        // 8c. Merge Leaves
         leavesRes.forEach(leave => {
             let start = dayjs(leave.start_date);
             const end = dayjs(leave.end_date);
@@ -247,23 +236,31 @@ const generateDTRForCutoffByUser = async (req, res) => {
             }
         });
 
-        // 8d. Schedule Adjustments (override the default shift label)
+        // 8d. Merge Schedule Adjustments and update remarks accordingly
         scheduleAdjustmentsRes.forEach(sa => {
             const idx = allRecords.findIndex(r => r.date === sa.date);
             if (idx >= 0) {
+                // Update work_shift to show the adjusted times
                 allRecords[idx].work_shift = `${sa.time_in} - ${sa.time_out} (Sched Adjusted)`;
+                // Update remarks: if originally "Absent", mark as "Absent (Sched Adjusted)";
+                // Otherwise, append " (Sched Adjusted)".
+                if (allRecords[idx].remarks === 'Absent') {
+                    allRecords[idx].remarks = 'Absent (Sched Adjusted)';
+                } else {
+                    allRecords[idx].remarks = `${allRecords[idx].remarks} (Sched Adjusted)`;
+                }
             }
         });
 
         // 9. Compute regular hours, late hours, undertime, etc.
         allRecords = allRecords.map(record => {
-            // 9a. If there's a time_in/time_out, compute total hours
+            // 9a. Compute total hours if time_in and time_out exist
             if (record.time_in && record.time_out) {
                 const diffHours = dayjs(record.time_out).diff(dayjs(record.time_in), 'hour', true);
                 record.regular_hours = parseFloat(diffHours.toFixed(2));
             }
 
-            // 9b. Late & Undertime
+            // 9b. Compute late and undertime if not a rest day and schedule exists
             if (!record.isRestDay && record.schedule_in && record.time_in) {
                 const scheduledIn = dayjs(`${record.date}T${record.schedule_in}`);
                 const actualIn = dayjs(record.time_in);
@@ -295,7 +292,7 @@ const generateDTRForCutoffByUser = async (req, res) => {
             }
         });
 
-        // 11. Remove existing DTR for this user+cutoff
+        // 11. Remove existing DTR records for this user and cutoff
         await DTR.destroy({
             where: {
                 user_id: user_id,
@@ -303,7 +300,7 @@ const generateDTRForCutoffByUser = async (req, res) => {
             }
         });
 
-        // 12. Prepare final records
+        // 12. Prepare final records including remarks
         const finalRecords = allRecords.map(r => ({
             date: r.date,
             work_shift: r.work_shift,
@@ -314,10 +311,11 @@ const generateDTRForCutoffByUser = async (req, res) => {
             undertime: r.undertime,
             overtime: r.overtime,
             user_id: user_id,
-            cutoff_id: cutoff_id
+            cutoff_id: cutoff_id,
+            remarks: r.remarks
         }));
 
-        // 13. Bulk create DTR
+        // 13. Bulk create DTR records
         await DTR.bulkCreate(finalRecords);
 
         return res.status(200).json({
@@ -334,6 +332,41 @@ const generateDTRForCutoffByUser = async (req, res) => {
     }
 };
 
+
+const getAllDTR = async (req, res) => {
+    try {
+        // Retrieve all DTR records including associated user and cutoff data
+        const records = await DTR.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name', 'employeeId', 'employment_status'] // Adjust as needed
+                },
+                {
+                    model: Cutoff,
+                    as: 'cutoff',
+                    attributes: ['id', 'start_date', 'cutoff_date'] // Adjust as needed
+                }
+            ],
+            order: [['date', 'ASC']]
+        });
+
+        return res.status(200).json({
+            successful: true,
+            data: records
+        });
+    } catch (error) {
+        console.error('getAllDTR error:', error);
+        return res.status(500).json({
+            successful: false,
+            message: error.message || "An unexpected error occurred."
+        });
+    }
+};
+
+
 module.exports = {
-    generateDTRForCutoffByUser
+    generateDTRForCutoffByUser,
+    getAllDTR
 };
