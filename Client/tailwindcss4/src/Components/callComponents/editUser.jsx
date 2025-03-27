@@ -399,10 +399,9 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   // Render each field, adding pattern restrictions for name fields
   const renderField = (field) => {
     const baseClass =
-      "w-full p-3 rounded-xl bg-black/40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
+      "w-full p-3 rounded-md bg-black/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
     let extraProps = {};
-    // If the field name includes 'name' and is a text input, restrict to letters, spaces, etc.
     if (
       field.type === 'text' &&
       field.name.toLowerCase().includes('name')
@@ -425,9 +424,9 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             className={baseClass}
             required
           >
-            <option value="">{field.placeholder}</option>
+            <option value="" className="bg-black/70 text-white">{field.placeholder}</option>
             {field.options.map(opt => (
-              <option key={opt.value} value={opt.value} className="bg-gray-800">
+              <option key={opt.value} value={opt.value} className="bg-black/70">
                 {opt.label}
               </option>
             ))}
@@ -454,8 +453,8 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900/95 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="p-6 flex justify-between items-center border-b border-gray-800">
+      <div className="bg-[#2b2b2b] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+        <div className="p-6 flex justify-between items-center border-b border-white/10">
           <h2 className="text-2xl font-bold text-white">Edit User</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X size={24} />
@@ -478,7 +477,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
           <form onSubmit={handleSubmit} className="space-y-8">
             {formSections.map((section, index) => (
               <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-green-500 border-b border-gray-800 pb-2">
+                <h3 className="text-lg font-semibold text-green-500 border-b border-white/10 pb-2">
                   {section.title}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -487,17 +486,17 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
               </div>
             ))}
 
-            <div className="flex gap-4 pt-4 border-t border-gray-800">
+            <div className="flex gap-4 pt-4 border-t border-white/10">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-xl bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 rounded-xl bg-green-600 text-white hover:bg-green-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors"
               >
                 Update User
               </button>

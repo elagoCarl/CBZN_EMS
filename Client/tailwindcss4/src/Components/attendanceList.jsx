@@ -186,7 +186,7 @@ const AdminAttendance = () => {
                   </thead>
                   <tbody>
                     {currentEntries.map((attendance) => (
-                      <tr key={attendance.id} className="border-b border-[#2b2b2b] hover:bg-[#404040]">
+                      <tr key={attendance.id} className="hover:bg-[#404040]">
                         <td className="text-[#4E9F48] py-2 px-1 sm:px-2 md:px-4 text-xs sm:text-sm md:text-base text-center">
                           {attendance.UserId}
                         </td>

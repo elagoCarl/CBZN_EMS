@@ -102,31 +102,26 @@ const ManageUsers = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-black/95">
-      {/* Sidebar - hidden on small screens, visible on md+ */}
+    <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
+      {/* Sidebar */}
       <div className="md:block">
         <Sidebar />
       </div>
 
       <div className="flex-1 p-3 md:p-6 space-y-4 md:space-y-6 overflow-y-auto">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 bg-black/40 p-4 md:p-6 rounded-2xl backdrop-blur-sm">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4  p-4 md:p-6">
           <div className="space-y-1 md:space-y-2 text-center md:text-left">
-
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white ">
-
-              Welcome Back, <span className="text-green-500">Admin</span>
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+              Welcome Back, <span className="text-green-600">Admin</span>
             </h1>
-          </div>
-          <div className="text-center backdrop-blur-md bg-black/20 p-3 md:p-4 rounded-xl w-full md:w-auto">
-
           </div>
         </div>
 
         {/* Controls Section */}
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-center">
           <button
-            className="w-full sm:w-auto bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-medium transition-all hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-md font-medium transition-all hover:bg-green-700 focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2"
             onClick={handleAddUser}
           >
             <Plus size={15} />
@@ -134,7 +129,7 @@ const ManageUsers = () => {
           </button>
 
           <select
-            className="w-full sm:w-auto bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-medium transition-all hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
+            className="w-full sm:w-auto bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-md font-medium transition-all hover:bg-green-800 focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-black"
             value={employmentFilter}
             onChange={(e) => setEmploymentFilter(e.target.value)}
           >
@@ -148,35 +143,34 @@ const ManageUsers = () => {
             <input
               type="text"
               placeholder="Search by ID, name, or email..."
-              className="w-full bg-black/40 text-white pl-12 pr-4 py-2 md:py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none transition-all"
+              className="w-full bg-[#363636] text-white pl-12 pr-4 py-2 md:py-3 rounded-md focus:ring-2 focus:ring-green-600 focus:outline-none transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Table Section - Responsive Card View on Mobile */}
-        {/* Table Section - Enhanced for better usability */}
-        <div className="bg-black/40 rounded-2xl overflow-hidden backdrop-blur-sm">
+        {/* Table Section */}
+        <div className="bg-[#363636] rounded-xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-48 md:h-64">
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                <div className="text-green-500 text-lg md:text-xl">Loading users...</div>
+                <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="text-green-600 text-lg md:text-xl">Loading users...</div>
               </div>
             </div>
           ) : (
             <>
-              {/* Mobile Card View (Hidden on md+) */}
+              {/* Mobile Card View */}
               <div className="md:hidden space-y-3 p-4">
                 {currentUsers.length === 0 ? (
                   <div className="text-center text-gray-400 py-6">No users found</div>
                 ) : (
                   currentUsers.map((user) => (
-                    <div key={user.employeeId} className="bg-black/60 rounded-xl p-4 space-y-2 border border-gray-800 hover:border-green-500/30 transition-colors">
+                    <div key={user.employeeId} className="bg-[#404040] rounded-md p-4 space-y-2 border border-gray-800 hover:border-green-600/30 transition-colors">
                       <div className="flex justify-between items-center">
                         <span className="text-green-500 font-medium">ID: {user.employeeId}</span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(user.employment_status)}`}>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${getStatusClass(user.employment_status)}`}>
                           {user.employment_status}
                         </span>
                       </div>
@@ -185,7 +179,7 @@ const ManageUsers = () => {
                       <div className="text-gray-400 text-sm">Role: {user.isAdmin ? 'Admin' : 'User'}</div>
                       <div className="pt-2">
                         <button
-                          className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                           onClick={() => handleEditUser(user.employeeId)}
                         >
                           Edit
@@ -196,7 +190,7 @@ const ManageUsers = () => {
                 )}
               </div>
 
-              {/* Desktop Table View (Hidden on small screens) */}
+              {/* Desktop Table View */}
               <div className="hidden md:block">
                 <div className="overflow-x-auto">
                   <table className="w-full table-fixed">
@@ -209,7 +203,7 @@ const ManageUsers = () => {
                       <col className="w-2/12" />
                     </colgroup>
                     <thead>
-                      <tr className="bg-black/60 text-gray-300">
+                      <tr className="bg-[#2b2b2b] text-gray-300">
                         <th className="py-4 px-6 text-left">ID</th>
                         <th className="py-4 px-6 text-left">Name</th>
                         <th className="py-4 px-6 text-left">Email</th>
@@ -218,7 +212,7 @@ const ManageUsers = () => {
                         <th className="py-4 px-6 text-left">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800">
+                    <tbody className="divide-y divide-[#404040]">
                       {currentUsers.length === 0 ? (
                         <tr>
                           <td colSpan="6" className="py-8 text-center text-gray-400">No users found</td>
@@ -227,10 +221,10 @@ const ManageUsers = () => {
                         currentUsers.map((user) => (
                           <tr
                             key={user.employeeId}
-                            className="transition-all hover:bg-black/40 border-l-4 border-transparent hover:border-l-green-500"
+                            className="hover:bg-[#404040] border-l-4 border-transparent hover:border-l-green-600"
                           >
                             <td className="py-4 px-6 truncate">
-                              <span className="text-green-500 font-medium">{user.employeeId}</span>
+                              <span className="text-green-600 font-medium">{user.employeeId}</span>
                             </td>
                             <td className="py-4 px-6 truncate">
                               <div className="text-white font-medium">{user.name}</div>
@@ -239,18 +233,18 @@ const ManageUsers = () => {
                               {user.email}
                             </td>
                             <td className="py-4 px-6 text-gray-300">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium ${user.isAdmin ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${user.isAdmin ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'}`}>
                                 {user.isAdmin ? 'Admin' : 'User'}
                               </span>
                             </td>
                             <td className="py-4 px-6">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(user.employment_status)}`}>
+                              <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium ${getStatusClass(user.employment_status)}`}>
                                 {user.employment_status}
                               </span>
                             </td>
                             <td className="py-4 px-6">
                               <button
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-black"
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-black"
                                 onClick={() => handleEditUser(user.employeeId)}
                               >
                                 Edit
@@ -266,9 +260,9 @@ const ManageUsers = () => {
             </>
           )}
 
-          {/* Pagination - Enhanced for better usability */}
+          {/* Pagination */}
           {totalPages > 0 && (
-            <div className="bg-black/60 py-3 md:py-4 px-4 md:px-6 flex justify-between items-center">
+            <div className="bg-[#2b2b2b] py-3 md:py-4 px-4 md:px-6 flex justify-between items-center">
               <div className="text-gray-400 text-sm">
                 {filteredUsers.length > 0 ?
                   `Showing ${(currentPage - 1) * usersPerPage + 1}-${Math.min(currentPage * usersPerPage, filteredUsers.length)} of ${filteredUsers.length} users` :
@@ -279,8 +273,10 @@ const ManageUsers = () => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors
-            ${currentPage === 1 ? 'bg-black/20 text-gray-600 cursor-not-allowed' : 'bg-black/40 text-gray-400 hover:bg-black/60'}`}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors
+            ${currentPage === 1 
+              ? 'bg-[#363636] text-gray-600 cursor-not-allowed' 
+              : 'bg-[#404040] text-white hover:bg-green-600'}`}
                 >
                   Previous
                 </button>
@@ -292,10 +288,10 @@ const ManageUsers = () => {
                       key={index}
                       onClick={() => setCurrentPage(index + 1)}
                       className={`
-                px-3 py-1 rounded-lg text-sm font-medium transition-colors
+                px-3 py-1 rounded-md text-sm font-medium transition-colors
                 ${currentPage === index + 1
                           ? 'bg-green-600 text-white'
-                          : 'bg-black/40 text-gray-400 hover:bg-black/60'
+                          : 'bg-[#404040] text-white hover:bg-green-600/80'
                         }
               `}
                     >
@@ -308,7 +304,7 @@ const ManageUsers = () => {
                     {/* First page */}
                     <button
                       onClick={() => setCurrentPage(1)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${currentPage === 1 ? 'bg-green-600 text-white' : 'bg-black/40 text-gray-400 hover:bg-black/60'}`}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === 1 ? 'bg-green-600 text-white' : 'bg-[#404040] text-white hover:bg-green-600/80'}`}
                     >
                       1
                     </button>
@@ -329,10 +325,10 @@ const ManageUsers = () => {
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
                           className={`
-                    px-3 py-1 rounded-lg text-sm font-medium transition-colors
+                    px-3 py-1 rounded-md text-sm font-medium transition-colors
                     ${currentPage === pageNum
                               ? 'bg-green-600 text-white'
-                              : 'bg-black/40 text-gray-400 hover:bg-black/60'
+                              : 'bg-[#404040] text-white hover:bg-green-600/80'
                             }
                   `}
                         >
@@ -350,7 +346,7 @@ const ManageUsers = () => {
                     {totalPages > 1 && (
                       <button
                         onClick={() => setCurrentPage(totalPages)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${currentPage === totalPages ? 'bg-green-600 text-white' : 'bg-black/40 text-gray-400 hover:bg-black/60'}`}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === totalPages ? 'bg-green-600 text-white' : 'bg-[#404040] text-white hover:bg-green-600/80'}`}
                       >
                         {totalPages}
                       </button>
@@ -361,8 +357,10 @@ const ManageUsers = () => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors
-            ${currentPage === totalPages ? 'bg-black/20 text-gray-600 cursor-not-allowed' : 'bg-black/40 text-gray-400 hover:bg-black/60'}`}
+                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors
+            ${currentPage === totalPages 
+              ? 'bg-[#363636] text-gray-600 cursor-not-allowed' 
+              : 'bg-[#404040] text-white hover:bg-green-600'}`}
                 >
                   Next
                 </button>

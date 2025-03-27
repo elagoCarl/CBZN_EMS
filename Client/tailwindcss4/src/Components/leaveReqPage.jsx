@@ -441,7 +441,7 @@ const LeaveReqPage = () => {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-black-700">
+                                <tbody>
                                     {currentRequests.length === 0 ? (
                                         <tr>
                                             <td colSpan="6" className="text-green-500 py-2 md:py-3 px-2 md:px-4 text-sm md:text-base text-center">
