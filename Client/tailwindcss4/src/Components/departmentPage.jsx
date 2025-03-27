@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Plus, Edit, Filter } from 'lucide-react';
 import axios from 'axios';
 import Sidebar from './callComponents/sidebar';
@@ -106,7 +106,9 @@ const DeptPage = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-xl md:text-2xl font-bold text-green-500">Department & Job Management</h1>
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+         Department & Job <span className="text-green-500"> Management</span>
+      </h1>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <button className="inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-200 w-full sm:w-auto" onClick={handleAddDeptClick}>
               <Plus className="w-4 h-4 mr-2" />

@@ -3,8 +3,11 @@ import { Calendar, Clock, UserCheck, X } from 'lucide-react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../authContext';
 
 export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
+  const { user } = useAuth();
+  console.log("userid: ", user.id)
   const [activeRequest, setActiveRequest] = useState(null);
   const profileRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -25,7 +28,8 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
     timeAdjustReason: '',
     // Schedule Change fields
     scheduleDate: '',
-    schedule: '',
+    scheduleTimeIn: '',    // Add this instead of schedule
+    scheduleTimeOut: '',   // Add this  
     scheduleReason: ''
   });
 
@@ -62,7 +66,8 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       timeAdjustTo: '',
       timeAdjustReason: '',
       scheduleDate: '',
-      schedule: '',
+      scheduleTimeIn: '',    // Add this instead of schedule
+      scheduleTimeOut: '',   // Add this
       scheduleReason: ''
     });
   };
@@ -72,22 +77,20 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
 
     if (activeRequest === 'schedule') {
       // Schedule Change Request
-      const { scheduleDate, schedule, scheduleReason } = formData;
-      const scheduleMapping = {
-        "9AM-6PM": { time_in: "09:00", time_out: "18:00" },
-        "10AM-7PM": { time_in: "10:00", time_out: "19:00" }
-      };
-      const times = scheduleMapping[schedule];
-      if (!times) {
-        toast.error("Invalid schedule selected");
+      const { scheduleDate, scheduleTimeIn, scheduleTimeOut, scheduleReason } = formData;
+
+      // Validate inputs
+      if (!scheduleDate || !scheduleTimeIn || !scheduleTimeOut || !scheduleReason) {
+        toast.error("All fields are required");
         return;
       }
+
       try {
         const response = await axios.post('http://localhost:8080/schedAdjustment/addSchedAdjustment', {
-          user_id: 1, // Replace with actual user id
+          user_id: user.id, // Replace with actual user id
           date: scheduleDate,
-          time_in: times.time_in,
-          time_out: times.time_out,
+          time_in: scheduleTimeIn,
+          time_out: scheduleTimeOut,
           reason: scheduleReason,
         });
         toast.success(response.data.message || "Schedule change request submitted successfully.");
@@ -120,29 +123,29 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       }
 
       // Replace the existing time adjustment submission code with this:
-try {
-  const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
-    user_id: 1,               // Replace with actual user id
-    date: timeAdjustDate,     // e.g., "2025-03-03"
-    from_datetime: timeAdjustFrom, // Send the full datetime string e.g., "2025-03-03T08:00"
-    to_datetime: timeAdjustTo,     // Send the full datetime string e.g., "2025-03-03T17:00"
-    reason: timeAdjustReason, // Reason must be non-empty
-  });
-  setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
-  if (onRequestAdded) onRequestAdded(response.data);
-  resetForm();
-  setActiveRequest(null);
-  onClose();
-} catch (error) {
-  console.error("Error submitting time adjustment request:", error);
-  setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
-}
+      try {
+        const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
+          user_id: user.id,               // Replace with actual user id
+          date: timeAdjustDate,     // e.g., "2025-03-03"
+          from_datetime: timeAdjustFrom, // Send the full datetime string e.g., "2025-03-03T08:00"
+          to_datetime: timeAdjustTo,     // Send the full datetime string e.g., "2025-03-03T17:00"
+          reason: timeAdjustReason, // Reason must be non-empty
+        });
+        // setBackendMessage(response.data.message || "Time adjustment request submitted successfully.");
+        if (onRequestAdded) onRequestAdded(response.data);
+        resetForm();
+        setActiveRequest(null);
+        onClose();
+      } catch (error) {
+        console.error("Error submitting time adjustment request:", error);
+        // setBackendMessage(error.response?.data?.message || "An unexpected error occurred");
+      }
     } else if (activeRequest === 'leave') {
       // Leave Request
       const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
       try {
         const response = await axios.post('http://localhost:8080/leaveRequest/addLeaveRequest', {
-          user_id: 1, // Replace with actual user id
+          user_id: user.id, // Replace with actual user id
           type: leaveType,
           start_date: leaveStartDate,
           end_date: leaveEndDate,
@@ -172,7 +175,7 @@ try {
       }
       try {
         const response = await axios.post('http://localhost:8080/OTrequests/addOvertimeReq', {
-          user_id: 1, // Replace with actual user id
+          user_id: user.id, // Replace with actual user id
           date: overtimeDate,    // 'YYYY-MM-DD'
           start_time: startTime,   // 'HH:mm'
           end_time: endTime,       // 'HH:mm'
@@ -349,22 +352,33 @@ try {
           <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-xl text-green-500 font-semibold mb-4">Schedule Change Request</h2>
             <div className="space-y-4">
-              <InputField
-                type="date"
-                name="scheduleDate"
-                value={formData.scheduleDate}
-                onChange={handleInputChange}
-              />
-              <select
-                name="schedule"
-                value={formData.schedule}
-                onChange={handleInputChange}
-                className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
-              >
-                <option value="">Select Schedule</option>
-                <option value="9AM-6PM">9AM-6PM</option>
-                <option value="10AM-7PM">10AM-7PM</option>
-              </select>
+              <div className="space-y-2">
+                <label className="block text-sm text-gray-300">Date</label>
+                <InputField
+                  type="date"
+                  name="scheduleDate"
+                  value={formData.scheduleDate}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm text-gray-300">Time In</label>
+                <InputField
+                  type="time"
+                  name="scheduleTimeIn"
+                  value={formData.scheduleTimeIn}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm text-gray-300">Time Out</label>
+                <InputField
+                  type="time"
+                  name="scheduleTimeOut"
+                  value={formData.scheduleTimeOut}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
             <textarea
               name="scheduleReason"

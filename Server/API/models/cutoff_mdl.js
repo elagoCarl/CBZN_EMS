@@ -1,11 +1,11 @@
 module.exports = (sequelize, DataTypes) => {
     const Cutoff = sequelize.define('Cutoff', {
-        cutoff_date: {
-            type: DataTypes.DATEONLY,  // e.g., "2025-04-16"
+        start_date: {
+            type: DataTypes.DATEONLY,   // e.g., "2025-02-17"
             allowNull: false
         },
-        effective_for: {
-            type: DataTypes.DATEONLY,  // e.g., "2025-04-01" (label for April 2025) label lang para sa month na yun
+        cutoff_date: {
+            type: DataTypes.DATEONLY,   // e.g., "2025-03-16"
             allowNull: false
         },
         remarks: {
@@ -13,10 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         }
     }, {
-        // If you want createdAt/updatedAt columns:
-        timestamps: true,
-        // If you want a custom table name:
-        // tableName: 'SystemCutoff'
+        timestamps: true // If you want createdAt/updatedAt
     });
 
     // // Example association (optional):

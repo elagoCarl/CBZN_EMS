@@ -1,67 +1,18 @@
-const { User, Session } = require('../models'); // Ensure model name matches exported model
+const { User, Session, JobTitle, Department } = require('../models'); // Ensure model name matches exported model
 const util = require('../../utils');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-
-const uploadProfilePic = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
-
-        // New profile picture path (relative)
-        await user.update({ profilePicture: req.file.buffer });
-
-        return res.status(200).json({
-            message: "Profile picture updated successfully"
-        });
-
-    } catch (error) {
-        console.error("Error uploading profile picture:", error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
-};
-
-
-
-const getProfilePic = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
-
-        if (!user || !user.profilePicture) {
-            return res.status(404).json({ error: "Profile picture not found" });
-        }
-
-        // Set response headers for the correct image type
-        res.setHeader("Content-Type", "image/jpeg");
-        res.send(user.profilePicture);
-    } catch (error) {
-        console.error("Error fetching profile picture:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-};
-
-
-
-
+const { get } = require('http');
 // const nodemailer = require('nodemailer');
-    const { USER,
+const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_SECRET } = process.env
+    REFRESH_TOKEN_SECRET } = process.env;
 
 
 //nodemailer
@@ -77,7 +28,8 @@ const transporter = nodemailer.createTransport({
 });
 
 // Create access token
-const maxAge = 60; // 1 minute in seconds
+// const maxAge = 60; // 1 minute in seconds
+const maxAge = 1200; // 20 minutes in seconds
 const createAccessToken = (id) => {
     return jwt.sign({ id }, ACCESS_TOKEN_SECRET, {
         expiresIn: maxAge,
@@ -140,11 +92,63 @@ const generateAccessToken = async (req, res, next) => {
     }
 };
 
+const uploadProfilePic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // New profile picture path (relative)
+        await user.update({ profilePicture: req.file.buffer });
+
+        return res.status(200).json({
+            message: "Profile picture updated successfully"
+        });
+
+    } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const getProfilePic = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+
+        if (!user || !user.profilePicture) {
+            return res.status(404).json({ error: "Profile picture not found" });
+        }
+
+        // Set response headers for the correct image type
+        res.setHeader("Content-Type", "image/jpeg");
+        res.send(user.profilePicture);
+    } catch (error) {
+        console.error("Error fetching profile picture:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 const addUser = async (req, res, next) => {
     const t = await User.sequelize.transaction(); // Start transaction
 
     try {
-        const { employeeId, name, email, isAdmin, employment_status } = req.body;
+        const {
+            employeeId,
+            name,
+            email,
+            isAdmin,
+            employment_status,
+            jobTitleId
+        } = req.body;
+
         const DefaultPassword = "UserPass123"; // Default password
 
         // Validate mandatory fields
@@ -163,10 +167,10 @@ const addUser = async (req, res, next) => {
             });
         }
 
-        // Check if the email already exists
+        // Check if the email or employeeId already exists
         const existingEmail = await User.findOne({ where: { email } });
         const existingEmployeeId = await User.findOne({ where: { employeeId } });
-        
+
         if (existingEmployeeId) {
             return res.status(406).json({
                 successful: false,
@@ -181,24 +185,27 @@ const addUser = async (req, res, next) => {
         }
 
         // Create new user with a hashed password
-        const newUser = await User.create(
-            {
-                employeeId,
-                name,
-                email,
-                password: DefaultPassword,
-                isAdmin: isAdmin || false, // Default to false if not provided
-                employment_status: employment_status || 'Employee' // Default to 'Employee'
-            },
-            { transaction: t }
-        );
+        const newUser = await User.create({
+            employeeId,
+            name,
+            email,
+            password: DefaultPassword,
+            isAdmin: isAdmin || false,          // Default to false if not provided
+            employment_status: employment_status || 'Employee', // Default to 'Employee'
+            JobTitleId: jobTitleId || null      // Associate job title if provided
+        }, { transaction: t });
 
         await t.commit(); // Commit transaction
 
         return res.status(201).json({
             successful: true,
             message: "Successfully added new user. Verification email sent.",
-            user: { id: newUser.id, name: newUser.name, email: newUser.email } // Returning basic details
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                jobTitleId: newUser.JobTitleId
+            }
         });
 
     } catch (err) {
@@ -211,6 +218,7 @@ const addUser = async (req, res, next) => {
         });
     }
 };
+
 
 const updateUserEmail = async (req, res, next) => {
     try {
@@ -238,6 +246,15 @@ const updateUserEmail = async (req, res, next) => {
             return res.status(406).json({
                 successful: false,
                 message: "Email format is invalid."
+            });
+        }
+
+        // If the new email is the same as the current one, accept the update
+        if (user.email === email) {
+            await user.update({ email });
+            return res.status(200).json({
+                successful: true,
+                message: "User email updated successfully."
             });
         }
 
@@ -272,12 +289,13 @@ const updateUserEmail = async (req, res, next) => {
     }
 };
 
+
 const updateUserPassword = async (req, res) => {
     try {
         const { id } = req.params;
         const { password: old_password, new_password, confirm_password } = req.body;
 
-        if (!util.checkMandatoryFields([old_password, new_password, confirm_password])){
+        if (!util.checkMandatoryFields([old_password, new_password, confirm_password])) {
             return res.status(400).json({
                 successful: false,
                 message: "A mandatory field is missing."
@@ -287,41 +305,47 @@ const updateUserPassword = async (req, res) => {
         // Find user by ID
         const user = await User.findByPk(id);
         if (!user) {
-            return res.status(404).json({ 
-                successful: false, 
-                message: "User not found." 
+            return res.status(404).json({
+                successful: false,
+                message: "User not found."
             });
         }
 
         // Verify old password
         const isMatch = await bcrypt.compare(old_password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ 
-                successful: false, 
-                message: "Old password is incorrect." 
+            return res.status(401).json({
+                successful: false,
+                message: "Old password is incorrect."
             });
         }
-        
+
         // Update user's password
         await user.update({ password: new_password });
 
-        return res.status(200).json({ 
-            successful: true, 
-            message: "Password updated successfully." 
+        return res.status(200).json({
+            successful: true,
+            message: "Password updated successfully."
         });
 
     } catch (error) {
         console.error("Error updating password:", error);
-        return res.status(500).json({ 
-            successful: false, 
-            message: "An unexpected error occurred. Please try again later." 
+        return res.status(500).json({
+            successful: false,
+            message: "An unexpected error occurred. Please try again later."
         });
     }
 };
 
 const updateUserById = async (req, res, next) => {
     try {
-        const { name, email, isAdmin, employment_status } = req.body;
+        const {
+            name,
+            email,
+            isAdmin,
+            employment_status,
+            jobTitleId
+        } = req.body;
 
         // Check if the user exists
         const user = await User.findByPk(req.params.id);
@@ -366,8 +390,9 @@ const updateUserById = async (req, res, next) => {
         await user.update({
             name,
             email,
-            isAdmin: isAdmin || user.isAdmin, // Only update if provided
-            employment_status: employment_status || user.employment_status // Default to existing status if not provided
+            isAdmin: (typeof isAdmin !== 'undefined') ? isAdmin : user.isAdmin,
+            employment_status: employment_status || user.employment_status,
+            JobTitleId: jobTitleId || user.JobTitleId
         });
 
         return res.status(200).json({
@@ -379,7 +404,7 @@ const updateUserById = async (req, res, next) => {
         console.error(err);
         return res.status(500).json({
             successful: false,
-            message: err
+            message: err.message || "An unexpected error occurred."
         });
     }
 };
@@ -434,6 +459,13 @@ const loginUser = async (req, res, next) => {
             return;
         }
 
+        if (user.employment_status === 'Inactive') {
+            return res.status(403).json({
+                successful: false,
+                message: "Your account is inactive. Please contact your administrator."
+            });
+        }
+
         // If user exists and password is correct, proceed with login
         const accessToken = createAccessToken(user.id);
         const refreshToken = createRefreshToken(user.id);
@@ -445,10 +477,17 @@ const loginUser = async (req, res, next) => {
         });
 
         console.log("LOGGED IN, Tokens saved successfully");
+        console.log("UserRRRRRRRRRRRRRRRRRRR: ", user);
 
         // Set cookies with the JWT tokens
         res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 60 * 60 * 1000 });
         res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: (60 * 60 * 24 * 30) * 1000 });
+
+        if (user.profilePicture) {
+            const base64Image = Buffer.from(user.profilePicture).toString('base64');
+            // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
+            user.profilePicture = `data:image/png;base64,${base64Image}`;
+        }
 
         return res.status(201).json({
             successful: true,
@@ -456,8 +495,11 @@ const loginUser = async (req, res, next) => {
             userEmail: user.email,
             userPassword: user.password,
             user: user.id,
+            profilePicture: user.profilePicture,
+            isAdmin: user.isAdmin,
+            employment_status: user.employment_status,
             accessToken: accessToken,
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
         });
 
     } catch (err) {
@@ -511,7 +553,7 @@ const logoutUser = async (req, res, next) => {
         console.error("Error logging out:", error);
         res.status(500).json({
             successful: false,
-            message: "Internal server error"
+            message: error.message
         });
     }
 };
@@ -537,7 +579,6 @@ const forgotPass = async (req, res) => {
                 message: "The email address you provided does not exist in our system. Please check and try again."
             });
         }
-
 
         // Generate a random temporary password
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
@@ -610,12 +651,100 @@ const getAllUsers = async (req, res, next) => {
             message: err.message
         });
     }
-}
+};
+
+const getCurrentUser = async (req, res, next) => {
+    // Set header to prevent caching
+    res.set('Cache-Control', 'no-store');
+
+    // Retrieve the access token from cookies
+    const token = req.cookies.jwt;
+    if (!token) {
+        return res.status(401).json({
+            successful: false,
+            message: 'Not authenticated'
+        });
+    }
+
+    try {
+        // Verify token
+        const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
+        // Query the user by primary key and return non-sensitive fields
+        const user = await User.findByPk(decoded.id, {
+            attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
+        });
+        if (!user) {
+            return res.status(404).json({
+                successful: false,
+                message: 'User not found'
+            });
+        }
+        if (user.profilePicture) {
+            const base64Image = Buffer.from(user.profilePicture).toString('base64');
+            // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
+            user.profilePicture = `data:image/png;base64,${base64Image}`;
+        }
+
+        return res.status(200).json({
+            successful: true,
+            user
+        });
+        console.log("User: ", user);
+        console.log("decoded: ", decoded);
+    } catch (error) {
+        console.error("Error in getCurrentUser:", error);
+        return res.status(401).json({
+            successful: false,
+            message: 'Invalid or expired token'
+        });
+    }
+};
+
+const getAllUsersWithJob = async (req, res, next) => {
+    try {
+        const users = await User.findAll({
+            where: { employment_status: { [Op.ne]: 'Inactive' } }, // only get not inactive users
+            attributes: ['id', 'name', 'isAdmin'], // select only these attributes
+            include: [
+                {
+                    model: JobTitle,
+                    attributes: ['id', 'name'], // include job title name
+                    include: [
+                        {
+                            model: Department,
+                            attributes: ['id', 'name'] // include department name
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!users || users.length === 0) {
+            return res.status(200).json({
+                successful: true,
+                message: "No user found.",
+                count: 0,
+                data: [],
+            });
+        }
+
+        res.status(200).json({
+            successful: true,
+            message: "Retrieved all users.",
+            data: users
+        });
+    } catch (err) {
+        res.status(500).json({
+            successful: false,
+            message: err.message
+        });
+    }
+};
 
 module.exports = {
     addUser,
     getUserById,
-    updateUserEmail,    
+    updateUserEmail,
     updateUserPassword,
     updateUserById,
     loginUser,
@@ -623,5 +752,7 @@ module.exports = {
     forgotPass,
     getAllUsers,
     uploadProfilePic,
-    getProfilePic
-}
+    getProfilePic,
+    getCurrentUser,
+    getAllUsersWithJob
+};

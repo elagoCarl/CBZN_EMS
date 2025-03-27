@@ -1,9 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import logo from '../Img/CBZN-Logo.png';
 import {
-    Calendar, ClipboardList, Users, Settings, FileText, Clock, CalendarDays, CalendarClock, CalendarRange, ChevronDown, LogOut, Menu, X
+    Calendar,
+    ClipboardList,
+    Users,
+    Settings,
+    FileText,
+    Clock,
+    CalendarDays,
+    CalendarRange,
+    ChevronDown,
+    LogOut,
+    Menu,
+    X,
+    PlusCircle,
+    FileClock,
+    CalendarClock,
+    BriefcaseBusiness,
+    History
 } from 'lucide-react';
+import { useAuth } from '../authContext'; // Adjust path if needed
 
 const Sidebar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,71 +31,102 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Handle screen resize and close mobile menu on larger screens
+    // Get user, setUser, and loading from AuthContext
+    const { user, setUser, loading } = useAuth();
+    // console.log("User: ", user)
+
+    const iconColor = "#9ca3af";
+
+    // Define useEffect hooks before any conditional returns
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
                 setIsMobileMenuOpen(false);
             }
         };
-
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Close profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setIsProfileOpen(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Close mobile menu when clicking on overlay
+    // If we're still loading user data, render a loading indicator
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
     };
 
-    // Toggle dropdown menu
     const toggleDropdown = (itemName) => {
         setExpandedItem(expandedItem === itemName ? null : itemName);
     };
 
-    // Handle navigation
     const handleNavigation = (path) => {
         navigate(path);
-        closeMobileMenu();
+        setIsMobileMenuOpen(false);
     };
 
-    // Check if a path is active
-    const isActive = (path) => {
-        return location.pathname === path;
-    };
+    const isActive = (path) => location.pathname === path;
 
-    // Neutral icon color
-    const iconColor = "#9ca3af"; // Gray-400
-
-    // Navigation items with Lucide icons and paths
-    const navigationItems = [
+    // Define navigation items here after confirming user data is loaded
+    const navigationItems = user && user.isAdmin ? [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
         { name: 'Attendance List', icon: <ClipboardList size={20} color={iconColor} />, path: '/attendanceList' },
         { name: 'Manage Users', icon: <Users size={20} color={iconColor} />, path: '/manageUsers' },
-        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
+        { name: 'Departments & Jobs', icon: <BriefcaseBusiness size={20} color={iconColor} />, path: '/deptPage' },
+
+        { name: 'Schedules', icon: <FileClock size={20} color={iconColor} />, path: '/schedulePage' },
+        { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
+        { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
         {
-            name: 'Requests',
-            icon: <FileText size={20} color={iconColor} />,
+            name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
-                { name: 'OT Request', path: '/requests/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> }, //overtime
-                { name: 'Leave Request', path: '/requests/leaveReqPage', icon: <CalendarDays size={18} color={iconColor} /> }, //leave
-                { name: 'Time Adjustments', path: '/requests/timeAdjustmentPage', icon: <CalendarClock size={18} color={iconColor} /> }, //time-adjustments
-                { name: 'Schedule Change', path: '/requests/scheduleChangePage', icon: <CalendarRange size={18} color={iconColor} /> } //schedule-change
+                { name: 'Add Request', path: '/addReqPage', icon: <PlusCircle size={18} color={iconColor} /> },
+                { name: 'OT Request', path: '/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                { name: 'Leave Request', path: '/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
         },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' }
+    ] : [
+        { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
+        { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
+        { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
+
+        {
+            name: 'Requests', icon: <FileText size={20} color={iconColor} />,
+            subItems: [
+                { name: 'Add Request', path: '/addReqPage', icon: <PlusCircle size={18} color={iconColor} /> },
+                // { name: 'OT Request', path: '/overtimeReqPage', icon: <Clock size={18} color={iconColor} /> },
+                // { name: 'Leave Request', path: '/leaveReqPage', icon: <CalendarDays size={20} color={iconColor} /> },
+                // { name: 'Time Adjustments', path: '/timeAdjustmentPage', icon: <CalendarRange size={20} color={iconColor} /> },
+                // { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
+            ]
+        },
+        { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' },
+
     ];
+
+    const handleLogout = async () => {
+        try {
+            await axios.post("http://localhost:8080/users/logoutUser", {}, { withCredentials: true });
+            setUser(null);
+            navigate('/');
+        } catch (error) {
+            console.error("Error logging out:", error);
+        }
+    };
 
     return (
         <>
@@ -104,12 +153,12 @@ const Sidebar = () => {
             <div className="md:block">
                 <aside
                     className={`
-                        fixed md:relative w-64 bg-black flex flex-col min-h-screen 
-                        transition-all duration-300 ease-in-out z-45
-                        md:translate-x-0 
-                        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-                        shadow-lg
-                    `}
+                    fixed md:relative w-64 bg-black flex flex-col min-h-screen 
+                    transition-all duration-300 ease-in-out z-45
+                    md:translate-x-0 
+                    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                    shadow-lg
+                  `}
                     aria-label="Sidebar navigation"
                 >
                     {/* Logo Section */}
@@ -127,7 +176,7 @@ const Sidebar = () => {
                                     {!item.subItems ? (
                                         <button
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
-                                                ${isActive(item.path)
+                                            ${isActive(item.path)
                                                     ? 'text-green-500 bg-gray-900'
                                                     : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                             onClick={() => handleNavigation(item.path)}
@@ -139,7 +188,7 @@ const Sidebar = () => {
                                         <div>
                                             <button
                                                 className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
-                                                    ${item.subItems.some(subItem => isActive(subItem.path))
+                                                ${item.subItems.some(subItem => isActive(subItem.path))
                                                         ? 'text-green-500 bg-gray-900'
                                                         : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
                                                 onClick={() => toggleDropdown(item.name)}
@@ -161,15 +210,15 @@ const Sidebar = () => {
                                             <div
                                                 id={`dropdown-${item.name}`}
                                                 className={`
-                                                    mt-1 ml-8 space-y-1 overflow-hidden transition-all duration-300
-                                                    ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
+                                                mt-2 ml-8 space-y-1 overflow-hidden transition-all duration-300
+                                                ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
                                                 `}
                                             >
                                                 {item.subItems.map((subItem) => (
                                                     <button
                                                         key={subItem.name}
                                                         className={`w-full text-left flex items-center gap-2 text-sm px-3 py-2 rounded-md transition-all duration-200
-                                                            ${isActive(subItem.path)
+                                                        ${isActive(subItem.path)
                                                                 ? 'text-green-500 bg-gray-900'
                                                                 : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
                                                         onClick={() => handleNavigation(subItem.path)}
@@ -194,16 +243,41 @@ const Sidebar = () => {
                             aria-expanded={isProfileOpen}
                             aria-haspopup="true"
                         >
-                            <div className="w-10 h-10 bg-[#363636] rounded-full flex items-center justify-center text-white">
-                                A
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#363636]">
+                                {(!user || !user.profilePicture) ? (
+                                    <span className="text-white">?</span>
+                                ) : (
+                                    <img
+                                        src={user.profilePicture}
+                                        alt="Profile"
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                )}
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-white font-medium">ADMIN</span>
-                                <span className="text-gray-400 text-xs">ADMIN@CBZN.COM</span>
+                                {!user
+                                    ? (
+                                        <>
+                                            <span className="text-white font-medium">LOADING...</span>
+                                            <span className="text-gray-400 text-xs">LOADING...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="text-white font-medium">
+                                                {user.isAdmin
+                                                    ? "ADMIN"
+                                                    : "EMPLOYEE"
+                                                }
+                                            </span>
+                                            <span className="text-gray-400 text-xs">
+                                                {user.email ? user.email.toUpperCase() : "NO EMAIL"}
+                                            </span>
+                                        </>
+                                    )
+                                }
                             </div>
                         </button>
 
-                        {/* Profile Dropdown */}
                         {isProfileOpen && (
                             <div className="absolute left-4 right-4 bottom-full mb-2 bg-[#2b2b2b] text-white rounded-lg shadow-lg overflow-hidden">
                                 <button
@@ -211,8 +285,7 @@ const Sidebar = () => {
                                     onClick={() => {
                                         setIsProfileOpen(false);
                                         closeMobileMenu();
-                                        // Add logout logic here
-                                        handleNavigation('/');
+                                        handleLogout();
                                     }}
                                 >
                                     <LogOut size={16} color={iconColor} />

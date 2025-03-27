@@ -120,7 +120,7 @@ const updateDepartment = async (req, res) => {
             });
         }
 
-        if(!isActive && await JobTitle.findOne({ where: { DepartmentId: req.params.id } })) {
+        if(!isActive && await JobTitle.findOne({ where: { DepartmentId: req.params.id, isActive: true } })) {
             return res.status(400).json({
                 successful: false,
                 message: `Department is currently assigned to a job and cannot be deactivated.`,
