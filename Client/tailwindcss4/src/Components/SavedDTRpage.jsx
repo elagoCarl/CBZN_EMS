@@ -10,25 +10,18 @@ dayjs.extend(isSameOrAfter);
 
 const SavedDTR = () => {
   const { user } = useAuth();
-
   // Master data
   const [records, setRecords] = useState([]);
   const [users, setUsers] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
+  //
 
-  // Dropdown selections
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedCutoffId, setSelectedCutoffId] = useState(null);
-
-  // Search terms
   const [searchTerm, setSearchTerm] = useState('');
   const [userSearchTerm, setUserSearchTerm] = useState('');
-
-  // Dropdown toggles
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-
-  // Loading & modals
   const [loading, setLoading] = useState(true);
   const [isEditCutoffModalOpen, setIsEditCutoffModalOpen] = useState(false);
 
@@ -47,7 +40,6 @@ const SavedDTR = () => {
       return 'bg-green-500/20 text-green-400';
     }
   }
-
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -345,7 +337,6 @@ const SavedDTR = () => {
                               {Number(r.undertime || 0).toFixed(2)}
                             </td>
 
-                            {/* REMARKS with dynamic color */}
                             <td className="px-4 py-3 border-b border-white/5 text-gray-300">
                               {r.remarks === 'Rest Day' ? (
                                 ''
@@ -423,6 +414,7 @@ const SavedDTR = () => {
           onCutoffUpdated={handleCutoffUpdated}
         />
       )}
+
     </div>
   );
 };
