@@ -1,8 +1,6 @@
 
 // src/App.js
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
-
-// import { useState } from 'react';
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from './Components/manageUsers.jsx';
@@ -16,11 +14,8 @@ import TimeAdjustmentPage from "./Components/timeAdjustmentPage.jsx";
 import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 import ScheduleHistory from "./Components/schedHistory.jsx";
-
-
 import Page404 from "./Components/page404.jsx";
 import Page403 from "./Components/page403.jsx"
-// import ProtectedRoutes from "./Components/protectedRoutes.jsx";
 import SchedulePage from "./Components/schedPage.jsx";
 import ProtectedRoute from './Components/protectedRoute.jsx';
 import { AuthProvider } from "./Components/authContext"; // adjust path as needed
