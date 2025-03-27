@@ -87,7 +87,9 @@ const Sidebar = () => {
 
         { name: 'Schedules', icon: <FileClock size={20} color={iconColor} />, path: '/schedulePage' },
         { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
-        { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
+        { 
+            name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' 
+        },
         {
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
