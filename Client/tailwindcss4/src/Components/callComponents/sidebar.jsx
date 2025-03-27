@@ -18,6 +18,7 @@ import {
     PlusCircle,
     FileClock,
     CalendarClock,
+    CalendarCheck2Icon,
     BriefcaseBusiness,
     History
 } from 'lucide-react';
@@ -87,8 +88,18 @@ const Sidebar = () => {
 
         { name: 'Schedules', icon: <FileClock size={20} color={iconColor} />, path: '/schedulePage' },
         { name: 'Schedule History', icon: <History size={20} color={iconColor} />, path: '/schedHistory' },
-        { name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />, path: '/dtr' },
+
         {
+            //Daily Time Record Dropdown
+            name: 'Daily Time Record', icon: <CalendarClock size={20} color={iconColor} />,
+            subItems: [
+                { name: 'Current DTR', path: '/dtr', icon: <CalendarClock size={20} color={iconColor} /> },
+                { name: 'Saved DTR', path: '/savedDTR', icon: <CalendarCheck2Icon size={20} color={iconColor} /> }
+            ]
+        },
+
+        {
+            //Request Dropdown
             name: 'Requests', icon: <FileText size={20} color={iconColor} />,
             subItems: [
                 { name: 'Add Request', path: '/addReqPage', icon: <PlusCircle size={18} color={iconColor} /> },
@@ -98,6 +109,7 @@ const Sidebar = () => {
                 { name: 'Schedule Change', path: '/scheduleChangePage', icon: <CalendarRange size={20} color={iconColor} /> }
             ]
         },
+
         { name: 'Account Settings', icon: <Settings size={20} color={iconColor} />, path: '/accSettings' }
     ] : [
         { name: 'My Attendance', icon: <Calendar size={20} color={iconColor} />, path: '/myAttendance' },
@@ -132,7 +144,7 @@ const Sidebar = () => {
         <>
             {/* Mobile Menu Button */}
             <button
-                className={`md:hidden fixed top-5 ${isMobileMenuOpen ? 'left-44' : 'left-4'} z-50 p-2 rounded-lg w-10 h-10 flex justify-center items-center transition-all duration-300 cursor-pointer bg-gray-800`}
+                className={`md:hidden fixed top-5 ${ isMobileMenuOpen ? 'left-44' : 'left-4' } z-50 p-2 rounded-lg w-10 h-10 flex justify-center items-center transition-all duration-300 cursor-pointer bg-gray-800`}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen}
@@ -156,7 +168,7 @@ const Sidebar = () => {
                     fixed md:relative w-64 bg-black flex flex-col min-h-screen 
                     transition-all duration-300 ease-in-out z-45
                     md:translate-x-0 
-                    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                    ${ isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full' }
                     shadow-lg
                   `}
                     aria-label="Sidebar navigation"
@@ -176,9 +188,9 @@ const Sidebar = () => {
                                     {!item.subItems ? (
                                         <button
                                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 
-                                            ${isActive(item.path)
+                                            ${ isActive(item.path)
                                                     ? 'text-green-500 bg-gray-900'
-                                                    : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                                    : 'text-white hover:text-green-500 hover:bg-gray-900' }`}
                                             onClick={() => handleNavigation(item.path)}
                                         >
                                             {item.icon}
@@ -188,12 +200,12 @@ const Sidebar = () => {
                                         <div>
                                             <button
                                                 className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md transition-all duration-200
-                                                ${item.subItems.some(subItem => isActive(subItem.path))
+                                                ${ item.subItems.some(subItem => isActive(subItem.path))
                                                         ? 'text-green-500 bg-gray-900'
-                                                        : 'text-white hover:text-green-500 hover:bg-gray-900'}`}
+                                                        : 'text-white hover:text-green-500 hover:bg-gray-900' }`}
                                                 onClick={() => toggleDropdown(item.name)}
                                                 aria-expanded={expandedItem === item.name}
-                                                aria-controls={`dropdown-${item.name}`}
+                                                aria-controls={`dropdown-${ item.name }`}
                                             >
                                                 <div className="flex items-center gap-3">
                                                     {item.icon}
@@ -202,25 +214,25 @@ const Sidebar = () => {
                                                 <ChevronDown
                                                     size={16}
                                                     color={iconColor}
-                                                    className={`transition-transform duration-200 ${expandedItem === item.name ? 'rotate-180' : ''}`}
+                                                    className={`transition-transform duration-200 ${ expandedItem === item.name ? 'rotate-180' : '' }`}
                                                 />
                                             </button>
 
                                             {/* Dropdown Menu */}
                                             <div
-                                                id={`dropdown-${item.name}`}
+                                                id={`dropdown-${ item.name }`}
                                                 className={`
                                                 mt-2 ml-8 space-y-1 overflow-hidden transition-all duration-300
-                                                ${expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
+                                                ${ expandedItem === item.name ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0' }
                                                 `}
                                             >
                                                 {item.subItems.map((subItem) => (
                                                     <button
                                                         key={subItem.name}
                                                         className={`w-full text-left flex items-center gap-2 text-sm px-3 py-2 rounded-md transition-all duration-200
-                                                        ${isActive(subItem.path)
+                                                        ${ isActive(subItem.path)
                                                                 ? 'text-green-500 bg-gray-900'
-                                                                : 'text-gray-300 hover:text-green-500 hover:bg-gray-900'}`}
+                                                                : 'text-gray-300 hover:text-green-500 hover:bg-gray-900' }`}
                                                         onClick={() => handleNavigation(subItem.path)}
                                                     >
                                                         {subItem.icon}
