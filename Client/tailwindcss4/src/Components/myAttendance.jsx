@@ -374,7 +374,7 @@ const MyAttendance = () => {
                     <tbody>
                       {currentRecords.length > 0 ? (
                         currentRecords.map((record, index) => (
-                          <tr key={index} className="border-b border-black/90 hover:bg-[#404040]">
+                          <tr key={index} className=" hover:bg-[#404040]">
                             <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.date}</td>
                             <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.day}</td>
                             <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.site}</td>
