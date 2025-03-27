@@ -15,7 +15,6 @@ const SavedDTR = () => {
   const [users, setUsers] = useState([]);
   const [cutoffs, setCutoffs] = useState([]);
   //
-
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedCutoffId, setSelectedCutoffId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
