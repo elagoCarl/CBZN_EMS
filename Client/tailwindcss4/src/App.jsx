@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route, } from "react-router-dom";
-// import { useState } from 'react';
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
 import ManageUsers from './Components/manageUsers.jsx';
@@ -14,7 +13,6 @@ import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 import Page404 from "./Components/page404.jsx";
 import Page403 from "./Components/page403.jsx"
-// import ProtectedRoutes from "./Components/protectedRoutes.jsx";
 import SchedulePage from "./Components/schedPage.jsx";
 import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
 import PageUiFallback from "./Components/pageUiFallBack";
