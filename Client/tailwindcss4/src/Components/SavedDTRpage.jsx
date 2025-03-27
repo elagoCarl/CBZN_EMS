@@ -32,17 +32,51 @@ const SavedDTR = () => {
   const [loading, setLoading] = useState(true);
   const [isEditCutoffModalOpen, setIsEditCutoffModalOpen] = useState(false);
 
-  // 1) Fetch DTR Records (and optionally Users, Cutoffs if needed)
+  function getRemarksBadgeClass(r) {
+    if (!r.remarks) return '';
+
+    if (r.isLeave) {
+      return 'bg-purple-500/20 text-purple-400';
+    } else if (r.isTimeAdjustment) {
+      return 'bg-blue-500/20 text-blue-400';
+    } else if (r.remarks.toLowerCase().includes('absent')) {
+      return 'bg-red-500/20 text-red-400';
+    } else if (r.remarks.toLowerCase().includes('late')) {
+      return 'bg-orange-500/20 text-orange-400';
+    } else {
+      return 'bg-green-500/20 text-green-400';
+    }
+  }
+
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setIsUserDropdownOpen(false);
+      }
+      if (
+        cutoffDropdownRef.current &&
+        !cutoffDropdownRef.current.contains(event.target)
+      ) {
+        setIsCutoffDropdownOpen(false);
+      }
+    }
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     const fetchDTRRecords = async () => {
       setLoading(true);
       try {
-        // Call your getAllDTR endpoint
-        // Adjust to your actual route
         const res = await axios.get('http://localhost:8080/dtr/getAllDTR');
-        const data = res.data.data; // array of DTR objects
+        const data = res.data.data;
 
-        // Store them in state
         setRecords(data);
       } catch (error) {
         console.error('Failed to fetch DTR records:', error);
@@ -52,10 +86,9 @@ const SavedDTR = () => {
       }
     };
 
-    // If you also need users and cutoffs from separate endpoints, do it similarly:
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/dtr/users'); // example
+        const res = await axios.get('http://localhost:8080/users/getAllUsersWithJob'); // example
         setUsers(res.data.data || []);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -64,7 +97,7 @@ const SavedDTR = () => {
 
     const fetchCutoffs = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/dtr/cutoffs'); // example
+        const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff'); // example
         setCutoffs(res.data.data || []);
       } catch (error) {
         console.error('Failed to fetch cutoffs:', error);
@@ -73,36 +106,30 @@ const SavedDTR = () => {
 
     // Kick off your fetch calls
     fetchDTRRecords();
-    // fetchUsers();
-    // fetchCutoffs();
+    fetchUsers();
+    fetchCutoffs();
 
     // If you want to auto-select the logged-in user:
     if (user) {
-      // This might need to come AFTER we fetch the "users" if we want a matching object
       setSelectedUser({ id: user.id, name: user.name, isAdmin: user.isAdmin });
     }
   }, [user]);
 
-  // 2) Current cutoff object
   const currentCutoff = useMemo(() => {
     return cutoffs.find((c) => c.id === selectedCutoffId) || null;
   }, [cutoffs, selectedCutoffId]);
 
-  // 3) Format cutoff label
   const formatCutoffLabel = (c) => {
     return `${ dayjs(c.start_date).format('MMM D, YYYY') } - ${ dayjs(c.cutoff_date).format('MMM D, YYYY') }`;
   };
 
-  // 4) Filter cutoffs by searchTerm
   const filteredCutoffs = useMemo(() => {
     return cutoffs.filter((c) =>
       formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [cutoffs, searchTerm]);
 
-  // 5) Filter the records in a memo (by user + cutoff)
   const filteredRecords = useMemo(() => {
-    // If we haven't selected a user yet, or we have no data
     if (!selectedUser) return [];
 
     // If no cutoff selected, just filter by user
@@ -110,7 +137,6 @@ const SavedDTR = () => {
       return records.filter((r) => r.user_id === selectedUser.id);
     }
 
-    // Otherwise, filter by user + date range
     return records.filter((r) => {
       if (r.user_id !== selectedUser.id) return false;
 
@@ -122,7 +148,6 @@ const SavedDTR = () => {
     });
   }, [records, selectedUser, currentCutoff]);
 
-  // 6) Handle editing cutoff
   const handleEditCutoff = (id) => {
     if (cutoffs.find((c) => c.id === id)) {
       setSelectedCutoffId(id);
@@ -135,11 +160,9 @@ const SavedDTR = () => {
   };
 
   const handleCutoffUpdated = async () => {
-    // Optionally re-fetch cutoffs
     handleCloseEditModal();
   };
 
-  // 7) Render
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
@@ -284,51 +307,70 @@ const SavedDTR = () => {
                   </thead>
                   <tbody>
                     {filteredRecords.length > 0 ? (
-                      filteredRecords.map((r, i) => (
-                        <tr
-                          key={r.id}
-                          className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}
-                        >
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {dayjs(r.date).format('ddd, MMM D, YYYY')}
-                            <div className="text-xs text-gray-400">
-                              {r.user?.name} | Cutoff: {dayjs(r.cutoff?.start_date).format('MMM D')} ➜{' '}
-                              {dayjs(r.cutoff?.cutoff_date).format('MMM D')}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {r.work_shift || '-'}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {r.site || '-'}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {r.time_in
-                              ? dayjs(r.time_in).format('hh:mm A')
-                              : '-'}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {r.time_out
-                              ? dayjs(r.time_out).format('hh:mm A')
-                              : '-'}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {Number(r.regular_hours || 0).toFixed(2)}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {Number(r.overtime || 0).toFixed(2)}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {Number(r.late_hours || 0).toFixed(2)}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {Number(r.undertime || 0).toFixed(2)}
-                          </td>
-                          <td className="px-4 py-3 border-b border-white/5 text-gray-300">
-                            {r.remarks || '-'}
-                          </td>
-                        </tr>
-                      ))
+                      filteredRecords.map((r, i) => {
+                        return (
+                          <tr
+                            key={r.id}
+                            className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}
+                          >
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {dayjs(r.date).format('ddd, MMM D, YYYY')}
+                              <div className="text-xs text-gray-400">
+                                {r.user?.name} | Cutoff: {dayjs(r.cutoff?.start_date).format('MMM D')} ➜{' '}
+                                {dayjs(r.cutoff?.cutoff_date).format('MMM D')}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {r.work_shift || '-'}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {r.site || '-'}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {r.time_in ? dayjs(r.time_in).format('hh:mm A') : '-'}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {r.time_out ? dayjs(r.time_out).format('hh:mm A') : '-'}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {Number(r.regular_hours || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {Number(r.overtime || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {Number(r.late_hours || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {Number(r.undertime || 0).toFixed(2)}
+                            </td>
+
+                            {/* REMARKS with dynamic color */}
+                            <td className="px-4 py-3 border-b border-white/5 text-gray-300">
+                              {r.remarks === 'Rest Day' ? (
+                                ''
+                              ) : r.remarks ? (
+                                <span
+                                  className={`inline-block px-2 py-0.5 text-xs rounded-md ${ r.isLeave
+                                    ? 'bg-purple-500/20 text-purple-400'
+                                    : r.isTimeAdjustment
+                                      ? 'bg-blue-500/20 text-blue-400'
+                                      : r.remarks.toLowerCase().includes('absent')
+                                        ? 'bg-red-500/20 text-red-400'
+                                        : r.remarks.toLowerCase().includes('late')
+                                          ? 'bg-orange-500/20 text-orange-400'
+                                          : 'bg-green-500/20 text-green-400'
+                                    }`}
+                                >
+                                  {r.remarks}
+                                </span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
                         <td colSpan={10} className="text-center py-8 text-gray-400">
@@ -337,6 +379,7 @@ const SavedDTR = () => {
                       </tr>
                     )}
                   </tbody>
+
                   <tfoot>
                     <tr className="font-bold bg-[#363636] text-white">
                       <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">
