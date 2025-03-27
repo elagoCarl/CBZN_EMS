@@ -366,7 +366,55 @@ const getAllDTR = async (req, res) => {
 };
 
 
+const getAllDTRCutoffByUser = async (req, res) => {
+    try {
+        const { user_id, cutoff_id } = req.body;
+
+        // Validate required fields
+        if (!user_id || !cutoff_id) {
+            return res.status(400).json({
+                successful: false,
+                message: "Missing user_id or cutoff_id."
+            });
+        }
+
+        // Fetch DTR records for the given user and cutoff
+        const records = await DTR.findAll({
+            where: {
+                user_id,
+                cutoff_id
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'name', 'employeeId', 'employment_status'] // Customize as needed
+                },
+                {
+                    model: Cutoff,
+                    as: 'cutoff',
+                    attributes: ['id', 'start_date', 'cutoff_date'] // Customize as needed
+                }
+            ],
+            order: [['date', 'ASC']]
+        });
+
+        return res.status(200).json({
+            successful: true,
+            data: records
+        });
+    } catch (error) {
+        console.error('getAllDTRCutoffByUser error:', error);
+        return res.status(500).json({
+            successful: false,
+            message: error.message || "An unexpected error occurred."
+        });
+    }
+};
+
+
 module.exports = {
     generateDTRForCutoffByUser,
-    getAllDTR
+    getAllDTR,
+    getAllDTRCutoffByUser
 };

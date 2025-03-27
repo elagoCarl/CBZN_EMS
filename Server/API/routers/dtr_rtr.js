@@ -5,5 +5,6 @@ const router = express.Router();
 router.get('/test', (req, res) => res.status(200).json({ message: "Test endpoint works" }));
 router.post('/generateDTR', DTR.generateDTRForCutoffByUser);
 router.get('/getAllDTR', DTR.getAllDTR);
+router.get('/getAllDTRCutoffByUser', DTR.getAllDTRCutoffByUser);
 
 module.exports = router;
