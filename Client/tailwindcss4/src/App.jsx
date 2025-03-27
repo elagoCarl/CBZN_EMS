@@ -21,7 +21,7 @@ import ProtectedRoute from './Components/protectedRoute.jsx';
 import { AuthProvider } from "./Components/authContext"; // adjust path as needed
 import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
 import DTR from "./Components/DTRpage.jsx";
-import SavedDTR from "./Components/SavedDTRpage.jsx"
+import SavedDTR from "./Components/savedDTRpage.jsx"
 
 
 function App() {
@@ -39,7 +39,6 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<LoginPage />} />
               <Route path="/forgotPass" element={<ForgotPass />} />
-              <Route path="/savedDTR" element={<SavedDTR />} />
               {/* Protected Routes Group */}
               <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/myAttendance" element={<MyAttendance />} />
@@ -47,6 +46,7 @@ function App() {
                 <Route path="/accSettings" element={<AccountSettings />} />
                 <Route path="/attendanceList" element={<AttendanceList />} />
                 <Route path="/addReqPage" element={<AddReqPage />} />
+                <Route path="/savedDTR" element={<SavedDTR />} />
                 <Route path="/deptPage" element={<DeptPage />} />
                 <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
                 <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
@@ -59,7 +59,7 @@ function App() {
                 <Route path="*" element={<Page404 />} />
                 <Route path="/403" element={<Page403 />} />
                 <Route path="/dtr" element={<DTR />} />
-  
+
               </Route>
             </Routes >
           </ErrorBoundary >
