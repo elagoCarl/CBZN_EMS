@@ -56,8 +56,7 @@ const generateDTRForCutoffByUser = async (req, res) => {
             timeAdjustmentsRes,
             leavesRes,
             scheduleAdjustmentsRes,
-            otRes,
-            schedUserRes
+            otRes
         ] = await Promise.all([
             Attendance.findAll({
                 where: {
@@ -118,30 +117,93 @@ const generateDTRForCutoffByUser = async (req, res) => {
                     },
                     status: 'approved'
                 }
-            }),
-            SchedUser.findAll({
-                where: {
-                    user_id: user_id,
-                    effectivity_date: {
-                        [Op.lte]: endDate.format('YYYY-MM-DD')
-                    }
-                },
-                include: [{ model: Schedule }]
             })
         ]);
 
-        // Debug logs (optional):
-        console.log('ATTENDANCE RES:', attendanceRes);
-        console.log('TIME ADJUSTMENTS RES:', timeAdjustmentsRes);
+        // 6. Fetch schedule users with a more comprehensive approach
+        // 6a. Get schedules within the cutoff period
+        let schedulesInCutoff = await SchedUser.findAll({
+            where: {
+                user_id: user_id,
+                effectivity_date: {
+                    [Op.between]: [
+                        startDate.format('YYYY-MM-DD'),
+                        endDate.format('YYYY-MM-DD')
+                    ]
+                }
+            },
+            include: [{ model: Schedule }],
+            order: [['effectivity_date', 'ASC']]
+        });
 
-        // 6. Determine the active schedule
-        let activeSched = null;
-        if (schedUserRes && schedUserRes.length > 0) {
-            const sorted = schedUserRes.sort((a, b) =>
-                dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date))
-            );
-            activeSched = sorted[0].Schedule; // The newest schedule
+        // 6b. Get the latest schedule before the cutoff start date
+        const latestBeforeCutoff = await SchedUser.findOne({
+            where: {
+                user_id: user_id,
+                effectivity_date: {
+                    [Op.lt]: startDate.format('YYYY-MM-DD')
+                }
+            },
+            include: [{ model: Schedule }],
+            order: [['effectivity_date', 'DESC']]
+        });
+
+        // 6c. Create a map to store all schedules
+        const scheduleMap = new Map();
+
+        // Add the latest schedule before cutoff if it exists
+        if (latestBeforeCutoff) {
+            const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
+            scheduleMap.set(uniqueKey, latestBeforeCutoff);
         }
+
+        // Add all schedules within cutoff
+        schedulesInCutoff.forEach(sched => {
+            const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+            scheduleMap.set(uniqueKey, sched);
+        });
+
+        // 6d. Look for intermediate schedules if there are schedules within cutoff
+        if (schedulesInCutoff.length > 0) {
+            const scheduleDates = schedulesInCutoff.map(sched => sched.effectivity_date);
+            scheduleDates.sort((a, b) => new Date(a) - new Date(b));
+
+            // Include cutoff_start at the beginning of dates to check
+            const datesToCheck = [startDate.format('YYYY-MM-DD'), ...scheduleDates];
+            
+            // For each pair of consecutive dates, find schedules that fall in between
+            for (let i = 0; i < datesToCheck.length - 1; i++) {
+                const currentDate = datesToCheck[i];
+                const nextDate = datesToCheck[i + 1];
+                
+                // Skip if the dates are the same
+                if (currentDate === nextDate) continue;
+                
+                // Find schedules effective between these dates
+                const intermediateSchedules = await SchedUser.findAll({
+                    where: {
+                        user_id: user_id,
+                        effectivity_date: {
+                            [Op.gt]: currentDate,
+                            [Op.lt]: nextDate
+                        }
+                    },
+                    include: [{ model: Schedule }],
+                    order: [['effectivity_date', 'ASC']]
+                });
+                
+                // Add any intermediate schedules found
+                intermediateSchedules.forEach(sched => {
+                    const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+                    scheduleMap.set(uniqueKey, sched);
+                });
+            }
+        }
+
+        // 6e. Convert the Map to an array and sort by effectivity_date ascending
+        const allSchedules = Array.from(scheduleMap.values()).sort(
+            (a, b) => new Date(a.effectivity_date) - new Date(b.effectivity_date)
+        );
 
         // 7. Build a day-by-day array for the entire cutoff range
         let allRecords = [];
@@ -151,25 +213,30 @@ const generateDTRForCutoffByUser = async (req, res) => {
             const dateStr = d.format('YYYY-MM-DD');
             const weekdayName = d.format('dddd');
 
+            // 7a. Find the applicable schedule for this date
+            const applicableSchedule = allSchedules
+                .filter(sched => dayjs(sched.effectivity_date).isSameOrBefore(d))
+                .pop();
+
             let scheduleForDay = null;
             let shiftLabel = 'REST DAY';
             let isRestDay = true;
-            let schedIn = null;  // store the schedule's "In" time
-            let schedOut = null; // store the schedule's "Out" time
+            let schedIn = null;
+            let schedOut = null;
 
-            // If there's an active schedule, parse it
-            if (activeSched && activeSched.schedule) {
+            // 7b. If there's an applicable schedule, parse it
+            if (applicableSchedule && applicableSchedule.Schedule && applicableSchedule.Schedule.schedule) {
                 const schedData =
-                    typeof activeSched.schedule === 'string'
-                        ? JSON.parse(activeSched.schedule)
-                        : activeSched.schedule;
+                    typeof applicableSchedule.Schedule.schedule === 'string'
+                        ? JSON.parse(applicableSchedule.Schedule.schedule)
+                        : applicableSchedule.Schedule.schedule;
 
                 scheduleForDay = schedData[weekdayName];
                 if (scheduleForDay && scheduleForDay.In && scheduleForDay.Out) {
                     isRestDay = false;
                     schedIn = scheduleForDay.In;
                     schedOut = scheduleForDay.Out;
-                    shiftLabel = `${activeSched.title}`;
+                    shiftLabel = `${applicableSchedule.Schedule.title} (${schedIn} - ${schedOut})`;
                 }
             }
 
@@ -182,7 +249,7 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 schedule_out: schedOut,
                 time_in: null,
                 time_out: null,
-                // Default remarks: "Rest Day" for rest days, otherwise "Absent"
+                site: null,
                 remarks: isRestDay ? 'Rest Day' : 'Absent',
                 regular_hours: 0,
                 late_hours: 0,
@@ -199,6 +266,8 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 allRecords[idx].time_in = att.time_in;
                 allRecords[idx].time_out = att.time_out;
                 allRecords[idx].remarks = att.remarks || allRecords[idx].remarks;
+                // Add site from attendance
+                allRecords[idx].site = att.site || 'Onsite'; // Default to 'Onsite' if site is null
             }
         });
 
@@ -228,9 +297,13 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 const dateStr = start.format('YYYY-MM-DD');
                 const idx = allRecords.findIndex(r => r.date === dateStr);
                 if (idx >= 0) {
-                    allRecords[idx].remarks = `${leave.type} Leave`;
+                    allRecords[idx].remarks = `${leave.type.charAt(0).toUpperCase() + leave.type.slice(1)} Leave`;
                     allRecords[idx].time_in = null;
                     allRecords[idx].time_out = null;
+                    // Set site to 'Remote' for leaves as a default
+                    if (!allRecords[idx].site) {
+                        allRecords[idx].site = 'Remote';
+                    }
                 }
                 start = start.add(1, 'day');
             }
@@ -242,10 +315,15 @@ const generateDTRForCutoffByUser = async (req, res) => {
             if (idx >= 0) {
                 // Update work_shift to show the adjusted times
                 allRecords[idx].work_shift = `${sa.time_in} - ${sa.time_out} (Sched Adjusted)`;
-                // Update remarks: if originally "Absent", mark as "Absent (Sched Adjusted)";
-                // Otherwise, append " (Sched Adjusted)".
+                // Update schedule_in and schedule_out with the adjusted values
+                allRecords[idx].schedule_in = sa.time_in;
+                allRecords[idx].schedule_out = sa.time_out;
+                allRecords[idx].isRestDay = false; // If there's a schedule adjustment, it's not a rest day
+                // Update remarks
                 if (allRecords[idx].remarks === 'Absent') {
                     allRecords[idx].remarks = 'Absent (Sched Adjusted)';
+                } else if (allRecords[idx].remarks === 'Rest Day') {
+                    allRecords[idx].remarks = 'Rest Day (Sched Adjusted)';
                 } else {
                     allRecords[idx].remarks = `${allRecords[idx].remarks} (Sched Adjusted)`;
                 }
@@ -258,6 +336,11 @@ const generateDTRForCutoffByUser = async (req, res) => {
             if (record.time_in && record.time_out) {
                 const diffHours = dayjs(record.time_out).diff(dayjs(record.time_in), 'hour', true);
                 record.regular_hours = parseFloat(diffHours.toFixed(2));
+                
+                // If the remarks is still 'Absent', update it to 'Present'
+                if (record.remarks === 'Absent') {
+                    record.remarks = 'Present';
+                }
             }
 
             // 9b. Compute late and undertime if not a rest day and schedule exists
@@ -268,6 +351,11 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 if (actualIn.isAfter(scheduledIn)) {
                     const lateDiff = actualIn.diff(scheduledIn, 'minute') / 60;
                     record.late_hours = parseFloat(lateDiff.toFixed(2));
+                    
+                    // Update remarks if late
+                    if (record.remarks === 'Present') {
+                        record.remarks = 'Late';
+                    }
                 }
 
                 if (record.time_out && record.schedule_out) {
@@ -277,6 +365,13 @@ const generateDTRForCutoffByUser = async (req, res) => {
                     if (actualOut.isBefore(scheduledOut)) {
                         const underDiff = scheduledOut.diff(actualOut, 'minute') / 60;
                         record.undertime = parseFloat(underDiff.toFixed(2));
+                        
+                        // Update remarks if undertime
+                        if (record.remarks === 'Present') {
+                            record.remarks = 'Undertime';
+                        } else if (record.remarks === 'Late') {
+                            record.remarks = 'Late & Undertime';
+                        }
                     }
                 }
             }
@@ -289,6 +384,13 @@ const generateDTRForCutoffByUser = async (req, res) => {
             if (idx >= 0) {
                 const otHours = dayjs(ot.end_time).diff(dayjs(ot.start_time), 'hour', true);
                 allRecords[idx].overtime += parseFloat(otHours.toFixed(2));
+                
+                // Update remarks to show overtime
+                if (allRecords[idx].remarks.includes('Rest Day')) {
+                    allRecords[idx].remarks = 'Rest Day with OT';
+                } else if (!allRecords[idx].remarks.includes('OT')) {
+                    allRecords[idx].remarks += ' with OT';
+                }
             }
         });
 
@@ -304,6 +406,8 @@ const generateDTRForCutoffByUser = async (req, res) => {
         const finalRecords = allRecords.map(r => ({
             date: r.date,
             work_shift: r.work_shift,
+            // Set default site to 'Onsite' if still null
+            site: r.site || 'Onsite',
             time_in: r.time_in,
             time_out: r.time_out,
             regular_hours: r.regular_hours,

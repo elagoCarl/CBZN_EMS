@@ -259,11 +259,11 @@ const getSchedUsersByUserCutoff = async (req, res) => {
     const { cutoff_start, cutoff_end } = req.body;
 
     if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
-                return res.status(400).json({
-                    successful: false,
-                    message: "A mandatory field is missing."
-                });
-            }
+      return res.status(400).json({
+        successful: false,
+        message: "A mandatory field is missing."
+      });
+    }
 
     // 1. Find schedule records for the user within the cutoff period.
     let schedulesInCutoff = await SchedUser.findAll({
@@ -283,7 +283,7 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       order: [['effectivity_date', 'ASC']]
     });
 
-    // Use a Map to avoid duplicates.
+    // Use a Map to avoid duplicates with a unique key based on multiple fields
     const combinedMap = new Map();
 
     if (schedulesInCutoff.length === 0) {
@@ -307,38 +307,79 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       });
 
       if (latestBeforeCutoff) {
-        combinedMap.set(latestBeforeCutoff.id, latestBeforeCutoff);
+        // Use a unique key combining user_id, schedule_id, and effectivity_date
+        const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
+        combinedMap.set(uniqueKey, latestBeforeCutoff);
       }
     } else {
-      // Add all schedules found within the cutoff.
+      // Add all schedules found within the cutoff using unique keys
       schedulesInCutoff.forEach(sched => {
-        combinedMap.set(sched.id, sched);
+        const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+        combinedMap.set(uniqueKey, sched);
       });
 
-      // For each schedule effective after the cutoffStart,
-      // fetch the most recent schedule record before its effectivity date.
-      for (const sched of schedulesInCutoff) {
-        if (new Date(sched.effectivity_date) > new Date(cutoff_start)) {
-          const previousSchedule = await SchedUser.findOne({
-            where: {
-              user_id: userId,
-              effectivity_date: {
-                [Op.lt]: sched.effectivity_date
-              }
-            },
-            include: [
-              {
-                model: Schedule,
-                attributes: ['title', 'schedule', 'isActive']
-              }
-            ],
-            order: [['effectivity_date', 'DESC']]
-          });
-
-          if (previousSchedule) {
-            combinedMap.set(previousSchedule.id, previousSchedule);
+      // Get the most recent schedule before cutoff_start, if any
+      const latestBeforeCutoff = await SchedUser.findOne({
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        where: {
+          user_id: userId,
+          effectivity_date: {
+            [Op.lt]: cutoff_start
           }
-        }
+        },
+        include: [
+          {
+            model: Schedule,
+            attributes: ['title', 'schedule', 'isActive']
+          }
+        ],
+        order: [['effectivity_date', 'DESC']]
+      });
+
+      if (latestBeforeCutoff) {
+        const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
+        combinedMap.set(uniqueKey, latestBeforeCutoff);
+      }
+
+      // Also check for intermediate schedules between schedules within the cutoff
+      const scheduleDates = schedulesInCutoff.map(sched => sched.effectivity_date);
+      scheduleDates.sort((a, b) => new Date(a) - new Date(b));
+
+      // Include cutoff_start at the beginning of dates to check
+      const datesToCheck = [cutoff_start, ...scheduleDates];
+      
+      // For each pair of consecutive dates, find schedules that fall in between
+      for (let i = 0; i < datesToCheck.length - 1; i++) {
+        const currentDate = datesToCheck[i];
+        const nextDate = datesToCheck[i + 1];
+        
+        // Skip if the dates are the same
+        if (currentDate === nextDate) continue;
+        
+        // Find schedules effective between these dates
+        const intermediateSchedules = await SchedUser.findAll({
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+          where: {
+            user_id: userId,
+            effectivity_date: {
+              [Op.gt]: currentDate,
+              [Op.lt]: nextDate
+            }
+          },
+          include: [
+            {
+              model: Schedule,
+              attributes: ['title', 'schedule', 'isActive']
+            }
+          ],
+          order: [['effectivity_date', 'ASC']]
+        });
+        
+        // Add any intermediate schedules found
+        intermediateSchedules.forEach(sched => {
+          const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+          combinedMap.set(uniqueKey, sched);
+        });
       }
     }
 
