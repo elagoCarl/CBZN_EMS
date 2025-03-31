@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, User, Mail, Lock, Camera } from 'lucide-react';
 import logo from '../Components/Img/CBZN-Logo.png';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from "./callComponents/sidebar.jsx"; // Import the Sidebar component as used in MyAttendance
@@ -34,7 +34,7 @@ const AccountSettings = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        const response = await axios.get(`/users/getUser/${userId}`);
         if (response.data.successful) {
           setEmail(response.data.data.email);
         } else {
@@ -54,7 +54,7 @@ const AccountSettings = () => {
   useEffect(() => {
     const fetchProfilePic = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/users/getProfilePic/${userId}`, {
+        const response = await axios.get(`/users/getProfilePic/${userId}`, {
           responseType: 'arraybuffer'
         });
         const base64Image = btoa(
@@ -123,13 +123,13 @@ const AccountSettings = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8080/users/uploadProfilePicture/${userId}`,
+        `/users/uploadProfilePicture/${userId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (response.data.profilePicture) {
-        setProfilePic(`http://localhost:8080/${response.data.profilePicture}`);
+        setProfilePic(`/${response.data.profilePicture}`);
         toast.success('Profile picture updated successfully!');
       } else {
         // If there's no profilePicture in the response, still show a success or fallback message
@@ -144,7 +144,7 @@ const AccountSettings = () => {
   // Handle email change
   const handleEmailChange = async () => {
     try {
-      const response = await axios.put(`http://localhost:8080/users/updateUserEmail/${userId}`, { email });
+      const response = await axios.put(`/users/updateUserEmail/${userId}`, { email });
       if (response.data.successful) {
         toast.success('Email updated successfully!');
       } else {
@@ -164,7 +164,7 @@ const AccountSettings = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:8080/users/updateUserPassword/${userId}`, {
+      const response = await axios.put(`/users/updateUserPassword/${userId}`, {
         password: oldPassword,
         new_password: newPassword,
         confirm_password: confirmPassword,

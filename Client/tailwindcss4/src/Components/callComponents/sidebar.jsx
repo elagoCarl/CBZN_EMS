@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 import logo from '../Img/CBZN-Logo.png';
 import {
     Calendar,
@@ -131,7 +131,7 @@ const Sidebar = () => {
 
     const handleLogout = async () => {
         try {
-            await axios.post("http://localhost:8080/users/logoutUser", {}, { withCredentials: true });
+            await axios.post("/users/logoutUser", {}, { withCredentials: true });
             setUser(null);
             navigate('/');
         } catch (error) {

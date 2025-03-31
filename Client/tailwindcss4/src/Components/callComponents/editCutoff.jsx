@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 import PropTypes from 'prop-types';
 
 const EditCutoffModal = ({ isOpen, onClose, onCutoffUpdated, cutoff }) => {
@@ -38,7 +38,7 @@ const EditCutoffModal = ({ isOpen, onClose, onCutoffUpdated, cutoff }) => {
         setSuccessMessage('');
 
         try {
-            await axios.put(`http://localhost:8080/cutoff/updateCutoff/${cutoff.id}`, {
+            await axios.put(`/cutoff/updateCutoff/${cutoff.id}`, {
                 start_date: formData.startDate,
                 cutoff_date: formData.cutoffDate,
                 remarks: formData.remarks
@@ -65,7 +65,7 @@ const EditCutoffModal = ({ isOpen, onClose, onCutoffUpdated, cutoff }) => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-      };
+    };
 
     return (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-50">

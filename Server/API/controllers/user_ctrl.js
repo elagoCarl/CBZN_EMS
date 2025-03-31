@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require("sequelize");
 const nodemailer = require('nodemailer');
+const { refreshTokens } = require('./authMiddleware');
 const fs = require('fs');
 const path = require('path');
 const { get } = require('http');
@@ -480,8 +481,18 @@ const loginUser = async (req, res, next) => {
         console.log("UserRRRRRRRRRRRRRRRRRRR: ", user);
 
         // Set cookies with the JWT tokens
-        res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 60 * 60 * 1000 });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: (60 * 60 * 24 * 30) * 1000 });
+        res.cookie('jwt', accessToken, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 1000,
+            secure: true,
+            sameSite: 'Strict'
+        });
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: (60 * 60 * 24 * 30) * 1000,
+            secure: true,
+            sameSite: 'Strict'
+        });
 
         if (user.profilePicture) {
             const base64Image = Buffer.from(user.profilePicture).toString('base64');
@@ -657,46 +668,114 @@ const getCurrentUser = async (req, res, next) => {
     // Set header to prevent caching
     res.set('Cache-Control', 'no-store');
 
-    // Retrieve the access token from cookies
-    const token = req.cookies.jwt;
-    if (!token) {
+    const AToken = req.cookies.jwt;
+    const RToken = req.cookies.refreshToken;
+
+    if (!AToken && !RToken) {
         return res.status(401).json({
             successful: false,
             message: 'Not authenticated'
         });
     }
 
-    try {
-        // Verify token
-        const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
-        // Query the user by primary key and return non-sensitive fields
-        const user = await User.findByPk(decoded.id, {
-            attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
-        });
-        if (!user) {
-            return res.status(404).json({
+    if (AToken) {
+        try {
+            // Try verifying the access token
+            const decoded = jwt.verify(AToken, ACCESS_TOKEN_SECRET);
+            const user = await User.findByPk(decoded.id, {
+                attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
+            });
+
+            if (!user) {
+                return res.status(404).json({
+                    successful: false,
+                    message: 'User not found haha'
+                });
+            }
+
+            if (user.profilePicture) {
+                const base64Image = Buffer.from(user.profilePicture).toString('base64');
+                user.profilePicture = `data:image/png;base64,${base64Image}`;
+            }
+
+            return res.status(200).json({
+                successful: true,
+                user
+            });
+        } catch (error) {
+            console.error("Error verifying access token:", error.message);
+            // If the access token is invalid/expired and a refresh token exists,
+            // attempt to refresh tokens.
+            if (RToken) {
+                try {
+                    const newDecoded = await refreshTokens(req, res);
+                    const user = await User.findByPk(newDecoded.id, {
+                        attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
+                    });
+
+                    if (!user) {
+                        return res.status(404).json({
+                            successful: false,
+                            message: 'User not found'
+                        });
+                    }
+
+                    if (user.profilePicture) {
+                        const base64Image = Buffer.from(user.profilePicture).toString('base64');
+                        user.profilePicture = `data:image/png;base64,${base64Image}`;
+                    }
+
+                    return res.status(200).json({
+                        successful: true,
+                        user
+                    });
+                } catch (refreshError) {
+                    console.error("Error refreshing tokens:", refreshError.message);
+                    return res.status(401).json({
+                        successful: false,
+                        message: refreshError.message
+                    });
+                }
+            } else {
+                return res.status(401).json({
+                    successful: false,
+                    message: 'Invalid or expired token'
+                });
+            }
+        }
+    }
+
+    // If there's no access token but a refresh token exists
+    if (RToken && !AToken) {
+        try {
+            const newDecoded = await refreshTokens(req, res);
+            const user = await User.findByPk(newDecoded.id, {
+                attributes: ['id', 'employeeId', 'email', 'name', 'isAdmin', 'employment_status', 'profilePicture']
+            });
+
+            if (!user) {
+                return res.status(404).json({
+                    successful: false,
+                    message: 'User not found'
+                });
+            }
+
+            if (user.profilePicture) {
+                const base64Image = Buffer.from(user.profilePicture).toString('base64');
+                user.profilePicture = `data:image/png;base64,${base64Image}`;
+            }
+
+            return res.status(200).json({
+                successful: true,
+                user
+            });
+        } catch (refreshError) {
+            console.error("Error refreshing tokens:", refreshError.message);
+            return res.status(401).json({
                 successful: false,
-                message: 'User not found'
+                message: refreshError.message
             });
         }
-        if (user.profilePicture) {
-            const base64Image = Buffer.from(user.profilePicture).toString('base64');
-            // Decide on the image type (e.g., png or jpeg). If you know it's PNG, do:
-            user.profilePicture = `data:image/png;base64,${base64Image}`;
-        }
-
-        return res.status(200).json({
-            successful: true,
-            user
-        });
-        console.log("User: ", user);
-        console.log("decoded: ", decoded);
-    } catch (error) {
-        console.error("Error in getCurrentUser:", error);
-        return res.status(401).json({
-            successful: false,
-            message: 'Invalid or expired token'
-        });
     }
 };
 

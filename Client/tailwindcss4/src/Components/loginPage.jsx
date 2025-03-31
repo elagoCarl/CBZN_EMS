@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../Components/Img/CBZN-Logo.png';
@@ -19,7 +19,7 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8080/users/loginUser',
+        '/users/loginUser',
         { email, password },
         { withCredentials: true }
       );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, ChevronDown, ChevronUp, Check, XCircle, Search, CalendarClock } from 'lucide-react';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import Sidebar from "./callComponents/sidebar.jsx";
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
@@ -28,10 +28,10 @@ const TimeAdjustmentPage = () => {
       try {
         setLoading(true);
         const userId = user.id
-        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        const userData = await axios.get(`/users/getUser/${userId}`);
         setCurrentUser(userData.data.data);
 
-        const { data } = await axios.get('http://localhost:8080/timeAdjustment/getAllTimeAdjustment');
+        const { data } = await axios.get('/timeAdjustment/getAllTimeAdjustment');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setLoading(false);
         setError(null);
@@ -74,7 +74,7 @@ const TimeAdjustmentPage = () => {
   const updateRequest = status => async () => {
     try {
       await axios.put(
-        `http://localhost:8080/timeAdjustment/updateTimeAdjustment/${selectedRequestId}`,
+        `/timeAdjustment/updateTimeAdjustment/${selectedRequestId}`,
         {
           status,
           reviewer_id: currentUser.id,

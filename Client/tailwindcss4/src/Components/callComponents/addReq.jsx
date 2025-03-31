@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, Clock, UserCheck, X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from '../authContext';
@@ -86,7 +86,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       }
 
       try {
-        const response = await axios.post('http://localhost:8080/schedAdjustment/addSchedAdjustment', {
+        const response = await axios.post('/schedAdjustment/addSchedAdjustment', {
           user_id: user.id, // Replace with actual user id
           date: scheduleDate,
           time_in: scheduleTimeIn,
@@ -124,7 +124,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
 
       // Replace the existing time adjustment submission code with this:
       try {
-        const response = await axios.post('http://localhost:8080/timeAdjustment/addTimeAdjustment', {
+        const response = await axios.post('/timeAdjustment/addTimeAdjustment', {
           user_id: user.id,               // Replace with actual user id
           date: timeAdjustDate,     // e.g., "2025-03-03"
           from_datetime: timeAdjustFrom, // Send the full datetime string e.g., "2025-03-03T08:00"
@@ -144,7 +144,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       // Leave Request
       const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
       try {
-        const response = await axios.post('http://localhost:8080/leaveRequest/addLeaveRequest', {
+        const response = await axios.post('/leaveRequest/addLeaveRequest', {
           user_id: user.id, // Replace with actual user id
           type: leaveType,
           start_date: leaveStartDate,
@@ -174,7 +174,7 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
         return;
       }
       try {
-        const response = await axios.post('http://localhost:8080/OTrequests/addOvertimeReq', {
+        const response = await axios.post('/OTrequests/addOvertimeReq', {
           user_id: user.id, // Replace with actual user id
           date: overtimeDate,    // 'YYYY-MM-DD'
           start_time: startTime,   // 'HH:mm'
