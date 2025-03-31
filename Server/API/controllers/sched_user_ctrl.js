@@ -123,7 +123,7 @@ const getSchedUser = async (req, res) => {
 const updateSchedUserByUser = async (req, res) => {
   try {
     const { schedule_id, effectivity_date } = req.body;
-    const userId = req.params.userId; // Endpoint: /schedUser/updateSchedUserByUser/:userId
+    const userId = req.params.userId; // Endpoint: /schedUser/addSchedUserByUser/:userId
 
     // Validate mandatory fields
     if (!util.improvedCheckMandatoryFields({ schedule_id, effectivity_date })) {
@@ -133,13 +133,14 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Validate effectivity_date format and that it's at least the next day
+    // Validate effectivity_date format and ensure it's at least the next day
     if (!dayjs(effectivity_date, "YYYY-MM-DD", true).isValid()) {
       return res.status(400).json({
         successful: false,
         message: "Invalid effectivity date format. Must be YYYY-MM-DD."
       });
     }
+
     const tomorrow = dayjs().add(1, 'day').startOf('day');
     const effectivityDay = dayjs(effectivity_date, "YYYY-MM-DD");
     if (!effectivityDay.isSameOrAfter(tomorrow)) {
@@ -149,7 +150,7 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Validate that the provided schedule exists
+    // Ensure the schedule exists before inserting
     const schedule = await Schedule.findByPk(schedule_id);
     if (!schedule) {
       return res.status(404).json({
@@ -158,7 +159,7 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Validate that the user exists
+    // Ensure the user exists
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -167,53 +168,87 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Find the existing association record using the user_id.
-    const existingAssociation = await SchedUser.findOne({ where: { user_id: userId } });
-    if (!existingAssociation) {
-      return res.status(404).json({
-        successful: false,
-        message: 'SchedUser not found for the given user.'
-      });
-    }
-
-    // Check if another association already exists with the new combination
-    const duplicate = await SchedUser.findOne({
+    // 🚀 **Check if the user already has a schedule with the same effectivity_date**
+    const existingSchedUser = await SchedUser.findOne({
       where: {
         user_id: userId,
-        schedule_id,
         effectivity_date
       }
     });
-    // if (duplicate) {
-    //   return res.status(400).json({
-    //     successful: false,
-    //     message: "This schedule is already associated with the user at the same effectivity date."
-    //   });
-    // }
 
-    // Remove the current association
-    await existingAssociation.destroy();
+    if (existingSchedUser) {
+      return res.status(400).json({
+        successful: false,
+        message: 'User already has a schedule on this effectivity date.'
+      });
+    }
 
-    // Create a new association with the updated schedule_id and effectivity_date
+    // ✅ Insert a new record (Only if effectivity_date is unique for the user)
     const newSchedUser = await SchedUser.create({
       user_id: userId,
       schedule_id,
       effectivity_date
     });
 
-    return res.status(200).json({
+    return res.status(201).json({ // Use 201 for resource creation
       successful: true,
-      message: 'SchedUser updated.',
+      message: 'New schedule added for the user.',
       data: newSchedUser
     });
+
   } catch (err) {
-    console.error("Error updating schedUser by user:", err);
+    console.error("Error adding schedUser by user:", err);
     return res.status(500).json({
       successful: false,
       message: err.message || "An unexpected error occurred."
     });
   }
 };
+
+
+
+const getAllSchedsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // assuming URL is /schedUser/getSchedUserByUser/:userId
+
+    // Find one schedule association for the user, ordered by the most recent effectivity_date,
+    // and include the associated Schedule model
+    const schedUser = await SchedUser.findAll({
+      where: { user_id: userId }, 
+      order: [['effectivity_date', 'DESC']],
+      include: [
+        {
+          model: Schedule,
+          attributes: ['title', 'schedule', 'isActive'] // adjust attributes as needed
+        },
+
+        {
+          model: User,
+          attributes: ['name'] // Fetch the user's name
+        }
+      ]
+    });
+
+    if (!schedUser) {
+      return res.status(200).json({
+        successful: false,
+        message: 'Schedule association not found for the user.'
+      });
+    }
+
+    return res.status(200).json({
+      successful: true,
+      schedUser
+    });
+  } catch (error) {
+    console.error('Error in getSchedUserByUser:', error);
+    return res.status(500).json({
+      successful: false,
+      message: error.message
+    });
+  }
+};
+
 
 
 const getSchedUserByUser = async (req, res) => {
@@ -259,11 +294,11 @@ const getSchedUsersByUserCutoff = async (req, res) => {
     const { cutoff_start, cutoff_end } = req.body;
 
     if (!util.checkMandatoryFields([cutoff_start, cutoff_end])) {
-                return res.status(400).json({
-                    successful: false,
-                    message: "A mandatory field is missing."
-                });
-            }
+      return res.status(400).json({
+        successful: false,
+        message: "A mandatory field is missing."
+      });
+    }
 
     // 1. Find schedule records for the user within the cutoff period.
     let schedulesInCutoff = await SchedUser.findAll({
@@ -283,7 +318,7 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       order: [['effectivity_date', 'ASC']]
     });
 
-    // Use a Map to avoid duplicates.
+    // Use a Map to avoid duplicates with a unique key based on multiple fields
     const combinedMap = new Map();
 
     if (schedulesInCutoff.length === 0) {
@@ -307,38 +342,79 @@ const getSchedUsersByUserCutoff = async (req, res) => {
       });
 
       if (latestBeforeCutoff) {
-        combinedMap.set(latestBeforeCutoff.id, latestBeforeCutoff);
+        // Use a unique key combining user_id, schedule_id, and effectivity_date
+        const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
+        combinedMap.set(uniqueKey, latestBeforeCutoff);
       }
     } else {
-      // Add all schedules found within the cutoff.
+      // Add all schedules found within the cutoff using unique keys
       schedulesInCutoff.forEach(sched => {
-        combinedMap.set(sched.id, sched);
+        const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+        combinedMap.set(uniqueKey, sched);
       });
 
-      // For each schedule effective after the cutoffStart,
-      // fetch the most recent schedule record before its effectivity date.
-      for (const sched of schedulesInCutoff) {
-        if (new Date(sched.effectivity_date) > new Date(cutoff_start)) {
-          const previousSchedule = await SchedUser.findOne({
-            where: {
-              user_id: userId,
-              effectivity_date: {
-                [Op.lt]: sched.effectivity_date
-              }
-            },
-            include: [
-              {
-                model: Schedule,
-                attributes: ['title', 'schedule', 'isActive']
-              }
-            ],
-            order: [['effectivity_date', 'DESC']]
-          });
-
-          if (previousSchedule) {
-            combinedMap.set(previousSchedule.id, previousSchedule);
+      // Get the most recent schedule before cutoff_start, if any
+      const latestBeforeCutoff = await SchedUser.findOne({
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        where: {
+          user_id: userId,
+          effectivity_date: {
+            [Op.lt]: cutoff_start
           }
-        }
+        },
+        include: [
+          {
+            model: Schedule,
+            attributes: ['title', 'schedule', 'isActive']
+          }
+        ],
+        order: [['effectivity_date', 'DESC']]
+      });
+
+      if (latestBeforeCutoff) {
+        const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
+        combinedMap.set(uniqueKey, latestBeforeCutoff);
+      }
+
+      // Also check for intermediate schedules between schedules within the cutoff
+      const scheduleDates = schedulesInCutoff.map(sched => sched.effectivity_date);
+      scheduleDates.sort((a, b) => new Date(a) - new Date(b));
+
+      // Include cutoff_start at the beginning of dates to check
+      const datesToCheck = [cutoff_start, ...scheduleDates];
+      
+      // For each pair of consecutive dates, find schedules that fall in between
+      for (let i = 0; i < datesToCheck.length - 1; i++) {
+        const currentDate = datesToCheck[i];
+        const nextDate = datesToCheck[i + 1];
+        
+        // Skip if the dates are the same
+        if (currentDate === nextDate) continue;
+        
+        // Find schedules effective between these dates
+        const intermediateSchedules = await SchedUser.findAll({
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+          where: {
+            user_id: userId,
+            effectivity_date: {
+              [Op.gt]: currentDate,
+              [Op.lt]: nextDate
+            }
+          },
+          include: [
+            {
+              model: Schedule,
+              attributes: ['title', 'schedule', 'isActive']
+            }
+          ],
+          order: [['effectivity_date', 'ASC']]
+        });
+        
+        // Add any intermediate schedules found
+        intermediateSchedules.forEach(sched => {
+          const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
+          combinedMap.set(uniqueKey, sched);
+        });
       }
     }
 
@@ -368,5 +444,6 @@ module.exports = {
   getSchedUser,
   updateSchedUserByUser,
   getSchedUserByUser,
+  getAllSchedsByUser,
   getSchedUsersByUserCutoff
 };

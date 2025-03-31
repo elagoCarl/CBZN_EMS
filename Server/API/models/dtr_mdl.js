@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        site: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         time_in: {
             type: DataTypes.DATE,
             allowNull: true
