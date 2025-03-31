@@ -200,7 +200,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // 4. Update schedule-user association
-      await axios.put(`http://localhost:8080/schedUser/updateSchedUserByUser/${userId}`, {
+      await axios.post(`http://localhost:8080/schedUser/updateSchedUserByUser/${userId}`, {
         schedule_id: parseInt(formData.schedule) || null,
         effectivity_date: formData.effectivity_date
       });
