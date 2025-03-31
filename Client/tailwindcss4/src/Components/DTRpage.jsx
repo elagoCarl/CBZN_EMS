@@ -264,15 +264,34 @@ const DTR = () => {
         }
 
         const allRecords = [];
-        if (currentCutoff && userScheduleObj) {
+        // Update this part in the fetchAllData function where you create allRecords:
+        if (currentCutoff) {
           let d = dayjs(currentCutoff.start_date);
           const end = dayjs(currentCutoff.end_date);
-          const schedData = typeof userScheduleObj.schedule.schedule === 'string'
-            ? JSON.parse(userScheduleObj.schedule.schedule)
-            : userScheduleObj.schedule.schedule;
+
           while (d.isSameOrBefore(end)) {
             const dateStr = d.format('YYYY-MM-DD');
-            const daySched = schedData[d.format('dddd')];
+            const dayName = d.format('dddd');
+
+            // Get the effective schedule for this date
+            const effectiveSched = getEffectiveScheduleForDate(dateStr, schedRes.data.successful ? schedRes.data.schedUsers : []);
+            let daySched = null;
+            let workShiftStr = 'No Schedule';
+
+            if (effectiveSched) {
+              const schedData = typeof effectiveSched.Schedule.schedule === 'string'
+                ? JSON.parse(effectiveSched.Schedule.schedule)
+                : effectiveSched.Schedule.schedule;
+
+              daySched = schedData[dayName];
+
+              if (daySched) {
+                workShiftStr = `${dayjs(`2025-01-01T${daySched.In}`).format('h:mm A')} - ${dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A')}`;
+              } else {
+                workShiftStr = 'REST DAY';
+              }
+            }
+
             allRecords.push({
               id: `date-${dateStr}`,
               user_id: selectedUser.id,
@@ -287,10 +306,10 @@ const DTR = () => {
               isTimeAdjustment: false,
               isLeave: false,
               isAbsent: !!daySched,
-              workShift: daySched
-                ? `${dayjs(`2025-01-01T${daySched.In}`).format('h:mm A')} - ${dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A')}`
-                : 'REST DAY'
+              workShift: workShiftStr,
+              scheduleTitle: effectiveSched ? effectiveSched.Schedule.title : 'No Schedule'
             });
+
             d = d.add(1, 'day');
           }
         }
@@ -345,13 +364,25 @@ const DTR = () => {
   }, [selectedUser, currentCutoff]);
 
   // Helper functions for UI
+  const getEffectiveScheduleForDate = (date, schedUsers) => {
+    if (!schedUsers || !schedUsers.length) return null;
+
+    const dateObj = dayjs(date);
+    const applicableSchedules = schedUsers
+      .filter(su => dayjs(su.effectivity_date).isSameOrBefore(dateObj))
+      .sort((a, b) => dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date)));
+
+    return applicableSchedules.length ? applicableSchedules[0] : null;
+  };
   const getJobTitle = u =>
     (u.JobTitle?.name) || (jobTitles.find(j => j.id === u.job_title_id)?.name || 'Unknown Position');
+
   const getDepartment = u => {
     if (u.JobTitle?.Department) return u.JobTitle.Department.name;
     const job = jobTitles.find(j => j.id === u.job_title_id);
     return job ? (departments.find(d => d.id === job.dept_id)?.name || 'Unknown Department') : 'Unknown Department';
   };
+
   const getUserSchedule = u => {
     const su = scheduleUsers.find(s => s.user_id === u.id);
     return su ? (su.schedule?.title || schedules.find(s => s.id === su.sched_id)?.title || 'Unknown Schedule') : 'No schedule assigned';
@@ -596,34 +627,55 @@ const DTR = () => {
                   <tbody>
                     {filteredData.map((r, i) => {
                       const dateOT = getOvertimeForDate(r.date);
-                      const workShift = r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
-                        const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                        return adj ? `${adj.time_in} - ${adj.time_out}` : r.workShift;
-                      })();
 
-                      // Extract schedule in and out times
-                      const schedIn = workShift && workShift !== 'LEAVE' && workShift !== 'REST DAY'
-                        ? workShift.split(' - ')[0]
-                        : null;
-                      const schedOut = workShift && workShift !== 'LEAVE' && workShift !== 'REST DAY'
-                        ? workShift.split(' - ')[1]
-                        : null;
+                      // Get the effective schedule for this date
+                      const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                      let scheduleIn = null;
+                      let scheduleOut = null;
 
-                      // Calculate late and undertime
-                      const lateMinutes = r.time_in && schedIn
-                        ? calculateLateMinutes(schedIn, r.time_in)
+                      // First check if there's an approved schedule adjustment
+                      const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                      if (adj) {
+                        scheduleIn = adj.time_in;
+                        scheduleOut = adj.time_out;
+                      }
+                      // Otherwise use the effective schedule for that date
+                      else if (effectiveSched) {
+                        
+                        const schedData = typeof effectiveSched.schedule.schedule === 'string'
+                          ? JSON.parse(effectiveSched.schedule.schedule)
+                          : effectiveSched.schedule.schedule;
+
+                        const dayName = dayjs(r.date).format('dddd');
+                        const daySched = schedData[dayName];
+
+                        if (daySched) {
+                          scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
+                          scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
+                        }
+                      }
+
+                      // Calculate late and undertime using the correct schedule
+                      const lateMinutes = r.time_in && scheduleIn && !r.isLeave && !r.isRestDay
+                        ? calculateLateMinutes(scheduleIn, r.time_in)
                         : 0;
-                      const undertimeMinutes = r.time_out && schedOut
-                        ? calculateUndertimeMinutes(schedOut, r.time_out)
+
+                      const undertimeMinutes = r.time_out && scheduleOut && !r.isLeave && !r.isRestDay
+                        ? calculateUndertimeMinutes(scheduleOut, r.time_out)
                         : 0;
 
                       return (
                         <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
                           <td className="px-4 py-3  text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
-                          <td className="px-4 py-3  text-gray-300">
+                          <td className="px-4 py-3 text-gray-300">
                             {r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
                               const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                              return adj ? `${adj.time_in} - ${adj.time_out}` : getUserSchedule(selectedUser);
+                              if (adj) return `${adj.time_in} - ${adj.time_out}`;
+
+                              const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                              if (!effectiveSched) return 'No Schedule';
+
+                              return effectiveSched.schedule.title;
                             })()}
                           </td>
                           <td className="px-4 py-3  text-gray-300">{r.site || 'Office'}</td>
@@ -693,18 +745,58 @@ const DTR = () => {
                       </td>
                       <td className="px-4 py-3 border-t border-white/10 text-orange-400">
                         {filteredData.reduce((sum, r) => {
-                          const schedIn = r.workShift && r.workShift !== 'LEAVE' && r.workShift !== 'REST DAY'
-                            ? r.workShift.split(' - ')[0]
-                            : null;
-                          return sum + (r.time_in && schedIn ? calculateLateMinutes(schedIn, r.time_in) / 60 : 0);
+                          // Get the effective schedule for this date
+                          const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                          let scheduleIn = null;
+
+                          // First check if there's an approved schedule adjustment
+                          const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                          if (adj) {
+                            scheduleIn = adj.time_in;
+                          }
+                          // Otherwise use the effective schedule for that date
+                          else if (effectiveSched) {
+                            const schedData = typeof effectiveSched.schedule.schedule === 'string'
+                              ? JSON.parse(effectiveSched.schedule.schedule)
+                              : effectiveSched.schedule.schedule;
+
+                            const dayName = dayjs(r.date).format('dddd');
+                            const daySched = schedData[dayName];
+
+                            if (daySched) {
+                              scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
+                            }
+                          }
+
+                          return sum + (r.time_in && scheduleIn && !r.isLeave && !r.isRestDay ? calculateLateMinutes(scheduleIn, r.time_in) / 60 : 0);
                         }, 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 border-t border-white/10 text-orange-400">
                         {filteredData.reduce((sum, r) => {
-                          const schedOut = r.workShift && r.workShift !== 'LEAVE' && r.workShift !== 'REST DAY'
-                            ? r.workShift.split(' - ')[1]
-                            : null;
-                          return sum + (r.time_out && schedOut ? calculateUndertimeMinutes(schedOut, r.time_out) / 60 : 0);
+                          // Get the effective schedule for this date
+                          const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                          let scheduleOut = null;
+
+                          // First check if there's an approved schedule adjustment
+                          const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                          if (adj) {
+                            scheduleOut = adj.time_out;
+                          }
+                          // Otherwise use the effective schedule for that date
+                          else if (effectiveSched) {
+                            const schedData = typeof effectiveSched.schedule.schedule === 'string'
+                              ? JSON.parse(effectiveSched.schedule.schedule)
+                              : effectiveSched.schedule.schedule;
+
+                            const dayName = dayjs(r.date).format('dddd');
+                            const daySched = schedData[dayName];
+
+                            if (daySched) {
+                              scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
+                            }
+                          }
+
+                          return sum + (r.time_out && scheduleOut && !r.isLeave && !r.isRestDay ? calculateUndertimeMinutes(scheduleOut, r.time_out) / 60 : 0);
                         }, 0).toFixed(2)}
                       </td>
 
