@@ -37,6 +37,7 @@ const leave_request_rtr = require('./API/routers/leave_request_rtr');
 const cutoff_rtr = require('./API/routers/cutoff_rtr');
 const sched_user_rtr = require('./API/routers/sched_user_rtr');
 const dtr_rtr = require('./API/routers/dtr_rtr.js');
+const authMiddleware_rtr = require('./API/routers/authMiddleware_rtr.js');
 
 // para lang makita kung anong request sa console
 app.use((req, res, next) => {
@@ -132,6 +133,7 @@ app.use('/timeAdjustment', time_adjustment_rtr);
 app.use('/leaveRequest', leave_request_rtr)
 app.use('/cutoff', cutoff_rtr)
 app.use('/dtr', dtr_rtr)
+app.use('/auth', authMiddleware_rtr)
 
 
 

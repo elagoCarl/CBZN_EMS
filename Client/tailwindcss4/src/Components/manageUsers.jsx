@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import { Search, Plus } from 'lucide-react';
 import Sidebar from './callComponents/sidebar';
 import AddUserModal from './callComponents/addUser';
@@ -20,7 +20,7 @@ const ManageUsers = () => {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('http://localhost:8080/users/getAllUsers');
+      const { data } = await axios.get('/users/getAllUsers');
       setUsers(Array.isArray(data?.data) ? data.data : []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -274,9 +274,9 @@ const ManageUsers = () => {
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                   className={`px-3 py-1 rounded-md text-sm font-medium transition-colors
-            ${currentPage === 1 
-              ? 'bg-[#363636] text-gray-600 cursor-not-allowed' 
-              : 'bg-[#404040] text-white hover:bg-green-600'}`}
+            ${currentPage === 1
+                      ? 'bg-[#363636] text-gray-600 cursor-not-allowed'
+                      : 'bg-[#404040] text-white hover:bg-green-600'}`}
                 >
                   Previous
                 </button>
@@ -358,9 +358,9 @@ const ManageUsers = () => {
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                   className={`px-3 py-1 rounded-md text-sm font-medium transition-colors
-            ${currentPage === totalPages 
-              ? 'bg-[#363636] text-gray-600 cursor-not-allowed' 
-              : 'bg-[#404040] text-white hover:bg-green-600'}`}
+            ${currentPage === totalPages
+                      ? 'bg-[#363636] text-gray-600 cursor-not-allowed'
+                      : 'bg-[#404040] text-white hover:bg-green-600'}`}
                 >
                   Next
                 </button>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LogOut, X, ChevronDown, ChevronUp, Check, XCircle, Search } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 
 const LeaveReqPage = () => {
     const reviewer_id = 3;
@@ -21,7 +21,7 @@ const LeaveReqPage = () => {
     useEffect(() => {
         const fetchReviewers = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/users/getAllUsers'); // Adjust endpoint if necessary
+                const response = await axios.get('/users/getAllUsers'); // Adjust endpoint if necessary
                 setReviewers(response.data.data);
             } catch (error) {
                 console.error("Error fetching reviewers:", error);
@@ -51,7 +51,7 @@ const LeaveReqPage = () => {
     // Fetch leave requests
     const fetchLeaveRequests = useCallback(async () => {
         try {
-            const response = await axios.get('http://localhost:8080/leaveRequest/getAllLeaveRequests');
+            const response = await axios.get('/leaveRequest/getAllLeaveRequests');
             setRequestData(response.data.data);
         } catch (error) {
             console.error("Error fetching leave requests:", error);
@@ -95,7 +95,7 @@ const LeaveReqPage = () => {
                 return;
             }
 
-            await axios.put(`http://localhost:8080/leaveRequest/updateLeaveRequest/${selectedRequestId}`, {
+            await axios.put(`/leaveRequest/updateLeaveRequest/${selectedRequestId}`, {
                 status,
                 reviewer_id,
                 user_id: selectedRequest.user_id

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, ChevronDown, ChevronUp, Check, XCircle, Search } from 'lucide-react';
 import dayjs from 'dayjs';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import Sidebar from "./callComponents/sidebar.jsx";
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
@@ -28,9 +28,9 @@ const ScheduleChangePage = () => {
       try {
         setLoading(true);
         const userId = user.id;
-        const userData = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+        const userData = await axios.get(`/users/getUser/${userId}`);
         setCurrentUser(userData.data.data);
-        const { data } = await axios.get('http://localhost:8080/schedAdjustment/getAllSchedAdjustments');
+        const { data } = await axios.get('/schedAdjustment/getAllSchedAdjustments');
         setRequestData(Array.isArray(data.data) ? data.data : []);
         setError(null);
       } catch (err) {
@@ -73,7 +73,7 @@ const ScheduleChangePage = () => {
     try {
       // Send the update request to the backend endpoint.
       await axios.put(
-        `http://localhost:8080/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
+        `/schedAdjustment/updateSchedAdjustment/${selectedRequestId}`,
         {
           status,
           reviewer_id: currentUser.id,
@@ -204,8 +204,8 @@ const ScheduleChangePage = () => {
                 key={status.display}
                 onClick={() => setActiveFilter(status.value)}
                 className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === status.value
-                    ? 'bg-green-600 text-white'
-                    : 'bg-[#363636] text-white hover:bg-[#404040]'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-[#363636] text-white hover:bg-[#404040]'
                   }`}
               >
                 {status.display}

@@ -4,7 +4,7 @@ import Sidebar from './callComponents/sidebar';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isBetween from 'dayjs/plugin/isBetween';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import EditCutoffModal from "./callComponents/editCutoff.jsx";
 import { useAuth } from '../Components/authContext.jsx';
 
@@ -49,7 +49,7 @@ const DTR = () => {
   // Function to fetch cutoff periods
   const fetchCutoffs = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff');
+      const res = await axios.get('/cutoff/getAllCutoff');
       if (res.data.successful) {
         const periods = res.data.data.map(c => ({
           id: c.id,
@@ -78,7 +78,7 @@ const DTR = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:8080/users/getAllUsersWithJob');
+        const res = await axios.get('/users/getAllUsersWithJob');
         if (res.data.successful) {
           const usr = res.data.data.map(u => ({
             id: u.id,
@@ -144,12 +144,12 @@ const DTR = () => {
           otRes,
           schedRes
         ] = await Promise.all([
-          axios.post(`http://localhost:8080/attendance/getAllAttendanceCutoffbyuser/${selectedUser.id}`, requestBody),
-          axios.post(`http://localhost:8080/timeadjustment/getAllTimeAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`http://localhost:8080/leaveRequest/getAllLeaveRequestCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`http://localhost:8080/schedAdjustment/getAllSchedAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`http://localhost:8080/OTrequests/getAllOvertimeCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`http://localhost:8080/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`, requestBody)
+          axios.post(`/attendance/getAllAttendanceCutoffbyuser/${selectedUser.id}`, requestBody),
+          axios.post(`/timeadjustment/getAllTimeAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
+          axios.post(`/leaveRequest/getAllLeaveRequestCutoffByUser/${selectedUser.id}`, requestBody),
+          axios.post(`/schedAdjustment/getAllSchedAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
+          axios.post(`/OTrequests/getAllOvertimeCutoffByUser/${selectedUser.id}`, requestBody),
+          axios.post(`/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`, requestBody)
         ]);
 
         if (schedAdjRes.data.successful) {
@@ -375,7 +375,7 @@ const DTR = () => {
 
     setIsSaving(true);
     try {
-      const response = await axios.post('http://localhost:8080/dtr/generateDTR', {
+      const response = await axios.post('/dtr/generateDTR', {
         user_id: selectedUser.id,
         cutoff_id: currentCutoff.id
       });

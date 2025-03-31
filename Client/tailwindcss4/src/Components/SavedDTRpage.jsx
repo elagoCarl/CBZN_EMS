@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import { Filter, User, ChevronDown } from 'lucide-react';
 import Sidebar from './callComponents/sidebar.jsx';
 import dayjs from 'dayjs';
@@ -65,7 +65,7 @@ const SavedDTR = () => {
     const fetchDTRRecords = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:8080/dtr/getAllDTR');
+        const res = await axios.get('/dtr/getAllDTR');
         const data = res.data.data;
 
         setRecords(data);
@@ -79,7 +79,7 @@ const SavedDTR = () => {
 
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/users/getAllUsersWithJob'); // example
+        const res = await axios.get('/users/getAllUsersWithJob'); // example
         setUsers(res.data.data || []);
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -88,7 +88,7 @@ const SavedDTR = () => {
 
     const fetchCutoffs = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff'); // example
+        const res = await axios.get('/cutoff/getAllCutoff'); // example
         setCutoffs(res.data.data || []);
       } catch (error) {
         console.error('Failed to fetch cutoffs:', error);
@@ -111,7 +111,7 @@ const SavedDTR = () => {
   }, [cutoffs, selectedCutoffId]);
 
   const formatCutoffLabel = (c) => {
-    return `${ dayjs(c.start_date).format('MMM D, YYYY') } - ${ dayjs(c.cutoff_date).format('MMM D, YYYY') }`;
+    return `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.cutoff_date).format('MMM D, YYYY')}`;
   };
 
   const filteredCutoffs = useMemo(() => {
@@ -196,7 +196,7 @@ const SavedDTR = () => {
                           .map((u) => (
                             <div
                               key={u.id}
-                              className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${ u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'
+                              className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'
                                 }`}
                               onClick={() => {
                                 setSelectedUser(u);
@@ -240,7 +240,7 @@ const SavedDTR = () => {
                       {filteredCutoffs.map((c) => (
                         <div
                           key={c.id}
-                          className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${ c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white'
+                          className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white'
                             }`}
                           onClick={() => {
                             setSelectedCutoffId(c.id);
@@ -341,7 +341,7 @@ const SavedDTR = () => {
                                 ''
                               ) : r.remarks ? (
                                 <span
-                                  className={`inline-block px-2 py-0.5 text-xs rounded-md ${ r.isLeave
+                                  className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isLeave
                                     ? 'bg-purple-500/20 text-purple-400'
                                     : r.isTimeAdjustment
                                       ? 'bg-blue-500/20 text-blue-400'

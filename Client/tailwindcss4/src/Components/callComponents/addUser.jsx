@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 
 const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({});
@@ -14,7 +14,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+        const response = await axios.get('/schedule/getAllSchedules');
         if (response.data.successful) {
           const options = response.data.data.map(schedule => ({
             value: schedule.id,
@@ -39,7 +39,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   useEffect(() => {
     const fetchJobTitles = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
+        const response = await axios.get('/jobtitle/getAllJobTitle');
         if (response.data.successful) {
           const options = response.data.data.map(jobTitle => ({
             value: jobTitle.id,
@@ -66,7 +66,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
     e.preventDefault();
     try {
       // 1. Create the main user with JobTitleId
-      const { data: userResponse } = await axios.post('http://localhost:8080/users/addUser', {
+      const { data: userResponse } = await axios.post('/users/addUser', {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -82,7 +82,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       const userId = userResponse.user.id;
 
       // 2. Create user info (with default values if not provided)
-      await axios.post('http://localhost:8080/userInfo/addUserInfo', {
+      await axios.post('/userInfo/addUserInfo', {
         UserId: userId,
         age: formData.age ? parseInt(formData.age) : 0,
         city_add: formData.city_add || "N/A",
@@ -106,7 +106,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       });
 
       // 3. Create emergency contact (with default values if not provided)
-      await axios.post('http://localhost:8080/emgncyContact/addEmgncyContact', {
+      await axios.post('/emgncyContact/addEmgncyContact', {
         UserId: userId,
         name: formData.emergency_name || "N/A",
         relationship: formData.emergency_relationship || "N/A",
@@ -114,7 +114,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       });
 
       // 4. Create schedule-user association
-      await axios.post('http://localhost:8080/schedUser/addSchedUser', {
+      await axios.post('/schedUser/addSchedUser', {
         schedule_id: formData.schedule,
         user_id: userId,
         effectivity_date: formData.effectivity_date

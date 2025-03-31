@@ -1,5 +1,3 @@
-
-// src/App.js
 import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import LoginPage from './Components/loginPage.jsx';
 import ForgotPass from './Components/forgotPass.jsx';
@@ -25,11 +23,6 @@ import SavedDTR from "./Components/savedDTRpage.jsx"
 
 
 function App() {
-
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
-  {/* Protected Routes
-          <Route path="/protectedRoutes" element={<ProtectedRoutes isAuthenticated={isAuthenticated} />} /> */}
-
   return (
     <>
       <AuthProvider>
@@ -39,32 +32,36 @@ function App() {
               {/* Public Routes */}
               <Route path="/" element={<LoginPage />} />
               <Route path="/forgotPass" element={<ForgotPass />} />
-              {/* Protected Routes Group */}
+
+              {/* Regular Protected Routes */}
               <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/myAttendance" element={<MyAttendance />} />
-                <Route path="/manageUsers" element={<ManageUsers />} />
                 <Route path="/accSettings" element={<AccountSettings />} />
-                <Route path="/attendanceList" element={<AttendanceList />} />
                 <Route path="/addReqPage" element={<AddReqPage />} />
+                <Route path="/schedulePage" element={<SchedulePage />} />
+                <Route path="/dtr" element={<DTR />} />
+
+                {/* Error Pages */}
+                <Route path="*" element={<Page404 />} />
+                <Route path="/403" element={<Page403 />} />
+              </Route>
+
+              {/* Admin-Only Protected Routes */}
+              <Route element={<ProtectedRoute adminOnly={true}><Outlet /></ProtectedRoute>}>
+                <Route path="/manageUsers" element={<ManageUsers />} />
+                <Route path="/attendanceList" element={<AttendanceList />} />
                 <Route path="/savedDTR" element={<SavedDTR />} />
                 <Route path="/deptPage" element={<DeptPage />} />
                 <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
                 <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
                 <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
                 <Route path="/leaveReqPage" element={<LeaveReqPage />} />
-                <Route path="/schedulePage" element={<SchedulePage />} />
                 <Route path="/schedHistory" element={<ScheduleHistory />} />
-
-                {/* Catch-all 404 Route */}
-                <Route path="*" element={<Page404 />} />
-                <Route path="/403" element={<Page403 />} />
-                <Route path="/dtr" element={<DTR />} />
-
               </Route>
-            </Routes >
-          </ErrorBoundary >
-        </Router >
-      </AuthProvider >
+            </Routes>
+          </ErrorBoundary>
+        </Router>
+      </AuthProvider>
     </>
   )
 }

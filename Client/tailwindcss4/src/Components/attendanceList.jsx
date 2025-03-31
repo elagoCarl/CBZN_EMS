@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import dayjs from 'dayjs';
 import Sidebar from "./callComponents/sidebar.jsx";
 

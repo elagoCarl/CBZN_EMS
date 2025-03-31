@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import PropTypes from 'prop-types';
 
 const AuthContext = createContext();
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
         const fetchCurrentUser = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:8080/users/getCurrentUser?t=${Date.now()}`, // Cache buster
+                    `/users/getCurrentUser?t=${Date.now()}`, // Cache buster
                     { withCredentials: true }
                 );
                 if (response.data.successful && response.data.user) {
