@@ -23,7 +23,6 @@ import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
 import DTR from "./Components/DTRpage.jsx";
 import SavedDTR from "./Components/savedDTRpage.jsx"
 
-
 function App() {
 
   // const [isAuthenticated, setIsAuthenticated] = useState(false);

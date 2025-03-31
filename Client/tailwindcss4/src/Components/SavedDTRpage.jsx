@@ -413,7 +413,6 @@ const SavedDTR = () => {
           onCutoffUpdated={handleCutoffUpdated}
         />
       )}
-
     </div>
   );
 };
