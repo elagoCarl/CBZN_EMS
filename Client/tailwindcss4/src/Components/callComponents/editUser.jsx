@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 
 const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [formData, setFormData] = useState({});
@@ -42,7 +42,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+        const response = await axios.get('/schedule/getAllSchedules');
         if (response.data.successful) {
           // Convert numeric IDs to strings for consistency in the select
           const options = response.data.data.map(schedule => ({
@@ -66,7 +66,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   useEffect(() => {
     const fetchJobTitles = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/jobtitle/getAllJobTitle');
+        const response = await axios.get('/jobtitle/getAllJobTitle');
         if (response.data.successful) {
           // Convert numeric IDs to strings for consistency
           const options = response.data.data.map(jobTitle => ({
@@ -97,10 +97,10 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             emergencyContactResponse,
             scheduleResponse
           ] = await Promise.all([
-            axios.get(`http://localhost:8080/users/getUser/${userId}`),
-            axios.get(`http://localhost:8080/userInfo/getUserInfoById/${userId}`),
-            axios.get(`http://localhost:8080/emgncyContact/getEmgncyContactById/${userId}`),
-            axios.get(`http://localhost:8080/schedUser/getSchedUserByUser/${userId}`)
+            axios.get(`/users/getUser/${userId}`),
+            axios.get(`/userInfo/getUserInfoById/${userId}`),
+            axios.get(`/emgncyContact/getEmgncyContactById/${userId}`),
+            axios.get(`/schedUser/getSchedUserByUser/${userId}`)
           ]);
 
           // Log to confirm the data structure
@@ -159,7 +159,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     e.preventDefault();
     try {
       // 1. Update main user (including jobTitleId)
-      await axios.put(`http://localhost:8080/users/updateUser/${userId}`, {
+      await axios.put(`/users/updateUser/${userId}`, {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -169,7 +169,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // 2. Update user info
-      await axios.put(`http://localhost:8080/userInfo/updateUserInfo`, {
+      await axios.put(`/userInfo/updateUserInfo`, {
         UserId: userId,
         age: parseInt(formData.age),
         city_add: formData.city_add,
@@ -193,14 +193,14 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // 3. Update emergency contact
-      await axios.put(`http://localhost:8080/emgncyContact/updateEmgncyContact/${userId}`, {
+      await axios.put(`/emgncyContact/updateEmgncyContact/${userId}`, {
         name: formData.emergency_name,
         relationship: formData.emergency_relationship,
         contact_number: formData.emergency_contact
       });
 
       // 4. Update schedule-user association
-      await axios.post(`http://localhost:8080/schedUser/updateSchedUserByUser/${userId}`, {
+      await axios.put(`/schedUser/updateSchedUserByUser/${userId}`, {
         schedule_id: parseInt(formData.schedule) || null,
         effectivity_date: formData.effectivity_date
       });

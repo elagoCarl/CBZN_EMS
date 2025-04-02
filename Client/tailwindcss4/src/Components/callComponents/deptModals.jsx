@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import axios from 'axios';
+import axios from '../../axiosConfig';
 
 // Add Department Modal
 const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
@@ -11,7 +11,7 @@ const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
 
     // Add a timeout ref to clear the timeout when component unmounts
     const errorTimeoutRef = useRef(null);
-    
+
     // Clear timeout on unmount
     useEffect(() => {
         return () => {
@@ -21,18 +21,18 @@ const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
         };
     }, []);
 
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-        
+
         try {
-            await axios.post('http://localhost:8080/department/addDepartment', {
+            await axios.post('/department/addDepartment', {
                 name,
                 isActive
             });
-            
+
             setName('');
             setIsActive(true);
             if (onSuccess) onSuccess();
@@ -78,7 +78,7 @@ const AddDepartmentModal = ({ isOpen, onClose, onSuccess }) => {
                             placeholder='Enter Department Name'
                         />
                     </div>
-                    
+
                     <div className="flex justify-end space-x-3 mt-6">
                         <button
                             type="button"
@@ -124,16 +124,16 @@ const EditDepartmentModal = ({ isOpen, onClose, onSuccess, department }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!department?.id) return;
-        
+
         setLoading(true);
         setError('');
-        
+
         try {
-            await axios.put(`http://localhost:8080/department/updateDepartment/${department.id}`, {
+            await axios.put(`/department/updateDepartment/${department.id}`, {
                 name,
                 isActive
             });
-            
+
             if (onSuccess) onSuccess();
             onClose();
         } catch (error) {
@@ -220,7 +220,7 @@ const AddJobTitleModal = ({ isOpen, onClose, onSuccess, departments }) => {
     const [error, setError] = useState('');
 
     const errorTimeoutRef = useRef(null);
-    
+
     // Clear timeout on unmount
     useEffect(() => {
         return () => {
@@ -234,14 +234,14 @@ const AddJobTitleModal = ({ isOpen, onClose, onSuccess, departments }) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-        
+
         try {
-            await axios.post('http://localhost:8080/jobtitle/addJobTitle', {
+            await axios.post('/jobtitle/addJobTitle', {
                 name,
                 DepartmentId: parseInt(deptId),
                 isActive
             });
-            
+
             setName('');
             setDeptId('');
             setIsActive(true);
@@ -346,17 +346,17 @@ const EditJobTitleModal = ({ isOpen, onClose, onSuccess, jobTitle, departments }
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!jobTitle?.id) return;
-        
+
         setLoading(true);
         setError('');
-        
+
         try {
-            await axios.put(`http://localhost:8080/jobtitle/updateJobTitle/${jobTitle.id}`, {
+            await axios.put(`/jobtitle/updateJobTitle/${jobTitle.id}`, {
                 name,
                 DepartmentId: parseInt(deptId),
                 isActive
             });
-            
+
             if (onSuccess) onSuccess();
             onClose();
         } catch (error) {

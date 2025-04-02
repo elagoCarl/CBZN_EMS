@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Plus, Edit, Filter, Search } from 'lucide-react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import dayjs from 'dayjs';
 import Sidebar from './callComponents/sidebar';
 import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleModal';
@@ -19,7 +19,7 @@ const SchedulePage = () => {
   const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+      const response = await axios.get('/schedule/getAllSchedules');
       setSchedules(response.data.data);
       setError(null);
     } catch (err) {
@@ -54,7 +54,7 @@ const SchedulePage = () => {
   // Called when a new schedule is added from the modal
   const handleAddSchedule = async (newSchedule) => {
     try {
-      await axios.post('http://localhost:8080/schedule/addSchedule', newSchedule);
+      await axios.post('/schedule/addSchedule', newSchedule);
       fetchSchedules();
     } catch (error) {
       console.error('Error adding schedule:', error);
@@ -64,7 +64,7 @@ const SchedulePage = () => {
   // Called when an existing schedule is updated from the modal
   const handleUpdateSchedule = async (updatedSchedule) => {
     try {
-      await axios.put(`http://localhost:8080/schedule/updateSchedule/${updatedSchedule.id}`, updatedSchedule);
+      await axios.put(`/schedule/updateSchedule/${updatedSchedule.id}`, updatedSchedule);
       fetchSchedules();
     } catch (error) {
       console.error('Error updating schedule:', error);
@@ -116,9 +116,9 @@ const SchedulePage = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
-              Schedule <span className="text-green-500">Management</span>
-            </h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+            Schedule <span className="text-green-500">Management</span>
+          </h1>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <button
               className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-green-600 text-sm font-medium text-white hover:bg-green-700 w-full sm:w-auto"
@@ -180,9 +180,8 @@ const SchedulePage = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-medium text-white text-base">{schedule.title}</h3>
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                              schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                            }`}
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                              }`}
                           >
                             {schedule.isActive ? 'Active' : 'Inactive'}
                           </span>
@@ -204,14 +203,14 @@ const SchedulePage = () => {
       </div>
 
       {isAddScheduleOpen && (
-        <AddScheduleModal 
-          onClose={handleAddScheduleClose} 
+        <AddScheduleModal
+          onClose={handleAddScheduleClose}
           onAddSchedule={handleAddSchedule}
         />
       )}
 
       {isEditScheduleOpen && selectedSchedule && (
-        <EditScheduleModal 
+        <EditScheduleModal
           schedule={selectedSchedule}
           onClose={handleEditScheduleClose}
           onUpdateSchedule={handleUpdateSchedule}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Clock, X, ChevronDown, ChevronUp, Check, XCircle, Search } from 'lucide-react';
 import Sidebar from "./callComponents/sidebar.jsx";
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import dayjs from 'dayjs';
 import ApproveConfirmModal from "./callComponents/approve.jsx";
 import RejectConfirmModal from "./callComponents/reject.jsx";
@@ -32,10 +32,10 @@ const OvertimeReqPage = () => {
         const fetchOTRequests = async () => {
             try {
                 setLoading(true);
-                const user = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+                const user = await axios.get(`/users/getUser/${userId}`);
                 setCurrentUser(user.data.data);
 
-                const { data } = await axios.get('http://localhost:8080/OTrequests/getAllOvertimeReq');
+                const { data } = await axios.get('/OTrequests/getAllOvertimeReq');
                 setRequestData(Array.isArray(data.data) ? data.data : []);
                 setLoading(false);
                 setError(null);
@@ -117,7 +117,7 @@ const OvertimeReqPage = () => {
         try {
 
             await axios.put(
-                `http://localhost:8080/OTrequests/updateOvertimeReq/${selectedRequestId}`,
+                `/OTrequests/updateOvertimeReq/${selectedRequestId}`,
                 {
                     status,
                     reviewer_id: currentUser.id,
@@ -200,20 +200,20 @@ const OvertimeReqPage = () => {
         );
     }
 
-     const filteredRequests = useMemo(() => {
-            // First filter by status
-            const statusFiltered = activeFilter === 'all'
-                ? requestData
-                : requestData.filter(req => req.status === activeFilter);
-    
-            // Then filter by search query if present
-            if (!searchQuery.trim()) return statusFiltered;
-    
-            return statusFiltered.filter(req => {
-                const userName = req.user?.name || '';
-                return userName.toLowerCase().includes(searchQuery.toLowerCase());
-            });
-        }, [activeFilter, requestData, searchQuery]);
+    const filteredRequests = useMemo(() => {
+        // First filter by status
+        const statusFiltered = activeFilter === 'all'
+            ? requestData
+            : requestData.filter(req => req.status === activeFilter);
+
+        // Then filter by search query if present
+        if (!searchQuery.trim()) return statusFiltered;
+
+        return statusFiltered.filter(req => {
+            const userName = req.user?.name || '';
+            return userName.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+    }, [activeFilter, requestData, searchQuery]);
 
     // Responsive pagination
     const getRequestsPerPage = () => {
@@ -306,37 +306,37 @@ const OvertimeReqPage = () => {
                 </header>
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
                     <div className="flex overflow-x-auto gap-2 hide-scrollbar">
-                    {filterButtons.map(button => (
+                        {filterButtons.map(button => (
                             <button
                                 key={button.value}
                                 onClick={() => setActiveFilter(button.value)}
                                 className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-base ${activeFilter === button.value
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-[#363636] text-white hover:bg-[#404040]'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-[#363636] text-white hover:bg-[#404040]'
                                     }`}
                             >
                                 {button.label}
                             </button>
-                         ))}
+                        ))}
                     </div>
 
-                      {/* Search input - Right aligned */}
-                                        <div className="relative mt-1 md:mt-0">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <Search className="h-4 w-4 text-gray-400" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                placeholder="Search..."
-                                                value={searchQuery}
-                                                onChange={handleSearchChange}
-                                                className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
-                                            />
-                                        </div>
-                                    
+                    {/* Search input - Right aligned */}
+                    <div className="relative mt-1 md:mt-0">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="bg-[#363636] text-white pl-10 pr-4 py-2 rounded-full text-sm md:text-base w-full md:w-auto focus:outline-none focus:ring-1 focus:ring-green-500"
+                        />
+                    </div>
+
                 </div>
 
-                
+
 
                 {/* Table Container */}
                 <div className="bg-[#363636] rounded-lg overflow-hidden flex flex-col justify-center">

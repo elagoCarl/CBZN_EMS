@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import dayjs from 'dayjs';
 import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import AddReq from './callComponents/addReq';
@@ -52,10 +52,10 @@ const AddReqPage = () => {
         setError(null);
         try {
             const [leaveRes, overtimeRes, schedRes, timeAdjRes] = await Promise.all([
-                axios.get(`http://localhost:8080/leaveRequest/getAllLeaveRequestsByUser/${loggedInUserId}`),
-                axios.get(`http://localhost:8080/OTrequests/getAllOTReqsByUser/${loggedInUserId}`),
-                axios.get(`http://localhost:8080/schedAdjustment/getAllSchedAdjustmentByUser/${loggedInUserId}`),
-                axios.get(`http://localhost:8080/timeAdjustment/getAllTimeAdjustmentByUser/${loggedInUserId}`)
+                axios.get(`/leaveRequest/getAllLeaveRequestsByUser/${loggedInUserId}`),
+                axios.get(`/OTrequests/getAllOTReqsByUser/${loggedInUserId}`),
+                axios.get(`/schedAdjustment/getAllSchedAdjustmentByUser/${loggedInUserId}`),
+                axios.get(`/timeAdjustment/getAllTimeAdjustmentByUser/${loggedInUserId}`)
             ]);
 
             let combinedData = [];
@@ -86,7 +86,7 @@ const AddReqPage = () => {
             console.log("Requests fetched:", combinedData);
         } catch (error) {
             console.error("Error fetching requests:", error);
-            setError("Failed to fetch requests. Please try again.");
+            setError("Failed to fetch requests. Please try reloading the page.");
         } finally {
             setIsLoading(false);
         }
@@ -127,13 +127,13 @@ const AddReqPage = () => {
         const { id, type, leaveType } = request;
 
         if (type === 'leave') {
-            return `http://localhost:8080/leaveRequest/cancelLeaveRequest/${id}`;
+            return `/leaveRequest/cancelLeaveRequest/${id}`;
         }
 
         const endpointMap = {
-            'overtime': `http://localhost:8080/OTrequests/cancelOvertimeRequest/${id}`,
-            'timeadjustment': `http://localhost:8080/timeAdjustment/cancelTimeAdjustment/${id}`,
-            'schedule': `http://localhost:8080/schedAdjustment/cancelSchedAdjustment/${id}`
+            'overtime': `/OTrequests/cancelOvertimeRequest/${id}`,
+            'timeadjustment': `/timeAdjustment/cancelTimeAdjustment/${id}`,
+            'schedule': `/schedAdjustment/cancelSchedAdjustment/${id}`
         };
 
         return endpointMap[type] || '';
@@ -317,9 +317,9 @@ const AddReqPage = () => {
             <Sidebar />
             <main className="flex-1 p-4 md:p-6 overflow-auto w-full md:w-3/4 lg:w-4/5 pt-16 md:pt-6">
                 <header className="mb-6">
-                <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
-            Add <span className="text-white">Requests</span>
-          </h1>
+                    <h1 className="text-xl md:text-5xl font-bold mt-13 text-green-500">
+                        Add <span className="text-white">Requests</span>
+                    </h1>
                 </header>
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 font-semibold">
                     <div className="flex flex-col sm:flex-row gap-2">

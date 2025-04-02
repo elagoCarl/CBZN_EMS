@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../axiosConfig.js";
 import Sidebar from "./callComponents/sidebar.jsx";
 import dayjs from "dayjs";
 import { useAuth } from '../Components/authContext.jsx';
@@ -7,7 +7,7 @@ import { useAuth } from '../Components/authContext.jsx';
 
 const MyAttendance = () => {
   const { user } = useAuth();
-  console.log("userid: ", user.id)
+  // console.log("userid: ", user.id)
   const userId = user.id;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,7 +56,7 @@ const MyAttendance = () => {
   // Fetch user data
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+      const response = await axios.get(`/users/getUser/${userId}`);
       if (response.data && response.data.successful) {
         const user = response.data.data;
         setUserData({
@@ -78,7 +78,7 @@ const MyAttendance = () => {
   // Fetch attendance records and include remarks and unique id
   const fetchAttendanceRecords = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/attendance/getAttendanceByUser/${userId}`);
+      const response = await axios.get(`/attendance/getAttendanceByUser/${userId}`);
       if (response.data && response.data.successful && Array.isArray(response.data.data)) {
         const formattedRecords = response.data.data
           .map(record => ({
@@ -115,7 +115,7 @@ const MyAttendance = () => {
       const currentWeekday = now.format("dddd");
       const timeInFormatted = now.format("YYYY-MM-DD HH:mm");
 
-      const response = await axios.post("http://localhost:8080/attendance/addAttendance", {
+      const response = await axios.post("/attendance/addAttendance", {
         weekday: currentWeekday,
         date: currentDate,
         time_in: timeInFormatted,
@@ -155,7 +155,7 @@ const MyAttendance = () => {
         return;
       }
 
-      const response = await axios.put(`http://localhost:8080/attendance/updateAttendance`, {
+      const response = await axios.put(`/attendance/updateAttendance`, {
         attendanceId: activeRecord.id, // Pass unique record id
         time_out: timeOutFormatted,
         UserId: userId
