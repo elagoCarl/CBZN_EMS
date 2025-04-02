@@ -2,62 +2,61 @@ import bg from './img/mainbg.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios'
+import axios  from 'axios';
 
-const forgotPass = () => {
+const ResetPass = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ text: '', type: '' });
 
-    const handleSubmit = async (e) => {
+
+
+    const handleSubmit = async (e) => {  // <-- Add async here
         e.preventDefault();
+
+        
+    
         if (!email.trim()) {
             setMessage({ text: 'Please enter your email address', type: 'error' });
             return;
         }
-
+    
         setLoading(true);
-
+    
         try {
-            const response = await axios.post('http://localhost:8080/users/forgotPass', { email });
-
-            if (response.status === 201) {
-                setMessage({ text: response.data.message, type: 'success' });
-            } else {
-                setMessage({ text: response.data.message, type: 'error' });
+            // 1. Send password reset request
+            const { data: userResponse } = await axios.post('/users/forgotPass');
+    
+            if (!userResponse || !userResponse.user || !userResponse.user.id) {
+                throw new Error("Failed to retrieve user ID.");
             }
-        } catch (error) {
+    
             setMessage({
-                text: error.response?.data?.message || 'Something went wrong. Please try again.',
-                type: 'error'
+                text: 'Password reset instructions have been sent to your email',
+                type: 'success'
             });
-            console.error('Error:', error);
+    
+        } catch (error) {
+            console.error('Email provided is invalid:', error);
+            setMessage({ text: 'Failed to send password reset instructions. Please try again.', type: 'error' });
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
-
-    // Simulate API call
-    setTimeout(() => {
-        setLoading(false);
-        setMessage({
-            text: 'Password reset instructions have been sent to your email',
-            type: 'success'
-        });
-    }, 1500);
-
+    
+    
 
     return (
         <div
             className="bg-cover bg-no-repeat bg-center min-h-screen w-full flex flex-col"
-            style={{ backgroundImage: `url(${ bg })` }}
+            style={{ backgroundImage: `url(${bg})` }}
         >
             {/* Top Menu */}
             <header className="sticky top-0 left-0 w-full bg-black/90 backdrop-blur-sm text-white p-3 md:p-4 flex justify-between items-center z-50 shadow-md">
                 {/* Logo */}
                 <div className="flex items-center">
-                    <img src={logo} onClick={() => navigate('/')} alt="Logo" className="h-8 md:h-10 w-auto cursor-pointer" />
+                    <img src={logo} alt="Logo" className="h-8 md:h-10 w-auto" />
                 </div>
             </header>
 
@@ -69,7 +68,7 @@ const forgotPass = () => {
                     </h2>
 
                     {message.text && (
-                        <div className={`mb-4 p-3 rounded text-sm text-center ${ message.type === 'error' ? 'bg-red-900/70 text-red-200' : 'bg-green-900/70 text-green-200'
+                        <div className={`mb-4 p-3 rounded text-sm text-center ${message.type === 'error' ? 'bg-red-900/70 text-red-200' : 'bg-green-900/70 text-green-200'
                             }`}>
                             {message.text}
                         </div>
@@ -94,8 +93,9 @@ const forgotPass = () => {
                         <div className='flex flex-col space-y-4 mt-6'>
                             <button
                                 type="submit"
+                                onClick={handleSubmit}
                                 disabled={loading}
-                                className={`font-bold text-gray-900 hover:bg-green-600 text-center text-md rounded-md bg-green-500 p-2 md:p-3 duration-300 w-full transition-all ${ loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg' }`}
+                                className={`font-bold text-gray-900 hover:bg-green-600 text-center text-md rounded-md bg-green-500 p-2 md:p-3 duration-300 w-full transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg'}`}
                             >
                                 {loading ? 'Sending...' : 'Reset Password'}
                             </button>
@@ -120,4 +120,4 @@ const forgotPass = () => {
     );
 };
 
-export default forgotPass;
+export default ResetPass;
