@@ -4,22 +4,33 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Search, Calendar, Clock } from 'lucide-react';
 import Sidebar from './callComponents/sidebar';
-import { useAuth } from '../Components/authContext.jsx';
 
 const ScheduleHistory = () => {
-  const { user } = useAuth();
-
-  const userId = user.id;
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+      if (response.data && response.data.successful) {
+        const user = response.data.data;
+        setUserData({
+          employeeId: user.employeeId,
+          name: user.name || "Employee",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
   // Fetch schedules from API
-  const fetchSchedules = async () => {
+  const fetchSchedulesOfUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8080/schedUser/getAllSchedsByUser/${userId}`);
+      const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
       setSchedules(response.data.data);
       setError(null);
     } catch (err) {
@@ -31,12 +42,13 @@ const ScheduleHistory = () => {
   };
 
   useEffect(() => {
-    fetchSchedules();
+    fetchUserData();
+    fetchSchedulesOfUsers();
   }, []);
 
   // Filter schedules based on search query
   const filteredUsers = useMemo(() => {
-    return schedules
+    return schedulesData
       .filter(schedule => 
         schedule.User?.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -45,7 +57,7 @@ const ScheduleHistory = () => {
         effectivity_date: schedule.effectivity_date,
         isActive: schedule.isActive,
       }));
-  }, [schedules, searchQuery]);
+  }, [schedulesData, searchQuery]);
 
   // Format date
   const formatDate = (dateString) => {
