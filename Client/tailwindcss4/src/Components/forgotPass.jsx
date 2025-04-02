@@ -12,40 +12,44 @@ const forgotPass = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
         if (!email.trim()) {
             setMessage({ text: 'Please enter your email address', type: 'error' });
             return;
         }
-
+    
         setLoading(true);
-
+        setMessage({ text: '' }); // Clear previous messages before request
+    
         try {
-            const response = await axios.post('http://localhost:8080/users/forgotPass', { email });
-
-            if (response.status === 201) {
-                setMessage({ text: response.data.message, type: 'success' });
-            } else {
-                setMessage({ text: response.data.message, type: 'error' });
-            }
+            const { data } = await axios.post('http://localhost:8080/users/forgotPass', { email });
+            console.log("API Response:", data); // Log the actual response structure
+    
+            setMessage({
+                text: 'Password reset instructions have been sent to your email',
+                type: 'success'
+            });
+    
+            // Keep the success message visible for 5 seconds before clearing
+            setTimeout(() => {
+                setMessage({ text: '' });
+            }, 5000);
+    
         } catch (error) {
+            console.error('Error:', error);
+    
             setMessage({
                 text: error.response?.data?.message || 'Something went wrong. Please try again.',
                 type: 'error'
             });
-            console.error('Error:', error);
+    
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
+    
+    
 
-    // Simulate API call
-    setTimeout(() => {
-        setLoading(false);
-        setMessage({
-            text: 'Password reset instructions have been sent to your email',
-            type: 'success'
-        });
-    }, 1500);
 
 
     return (
