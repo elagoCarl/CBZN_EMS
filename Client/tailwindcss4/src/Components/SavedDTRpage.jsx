@@ -119,7 +119,7 @@ const SavedDTR = () => {
   // Fetch saved DTR data when user or cutoff changes
   useEffect(() => {
     if (!selectedUser || !currentCutoff) return;
-    
+
     const fetchSavedDTR = async () => {
       setLoading(true);
       try {
@@ -153,19 +153,19 @@ const SavedDTR = () => {
   // Fetch schedule info for user display
   useEffect(() => {
     if (!selectedUser || !currentCutoff) return;
-    
+
     const fetchScheduleInfo = async () => {
       try {
         const requestBody = {
           cutoff_start: currentCutoff.start_date,
           cutoff_end: currentCutoff.end_date
         };
-        
+
         const schedRes = await axios.post(
           `http://localhost:8080/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`,
           requestBody
         );
-        
+
         if (schedRes.data.successful) {
           const userScheds = schedRes.data.schedUsers.map(item => ({
             user_id: item.user_id,
@@ -174,7 +174,7 @@ const SavedDTR = () => {
             schedule: item.Schedule
           }));
           setScheduleUsers(userScheds);
-          
+
           const uniqSchedules = [];
           schedRes.data.schedUsers.forEach(item => {
             if (!uniqSchedules.find(s => s.id === item.schedule_id)) {
@@ -191,7 +191,7 @@ const SavedDTR = () => {
         console.error('Schedule info error:', error);
       }
     };
-    
+
     fetchScheduleInfo();
   }, [selectedUser, currentCutoff]);
 
@@ -204,9 +204,26 @@ const SavedDTR = () => {
     return job ? (departments.find(d => d.id === job.dept_id)?.name || 'Unknown Department') : 'Unknown Department';
   };
   const getUserSchedule = u => {
-    const su = scheduleUsers.find(s => s.user_id === u.id);
-    return su ? (su.schedule?.title || schedules.find(s => s.id === su.sched_id)?.title || 'Unknown Schedule') : 'No schedule assigned';
-  };
+  if (!scheduleUsers.length) return 'No schedule assigned';
+  
+  // Find all schedules for this user
+  const userSchedules = scheduleUsers.filter(s => s.user_id === u.id);
+  
+  if (!userSchedules.length) return 'No schedule assigned';
+  
+  // Sort by effectivity date (most recent first)
+  const sortedSchedules = userSchedules.sort((a, b) => 
+    dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date))
+  );
+  
+  // Get the most recent schedule
+  const latestSchedule = sortedSchedules[0];
+  
+  // Find the schedule details
+  const scheduleDetails = schedules.find(s => s.id === latestSchedule.sched_id);
+  
+  return scheduleDetails ? scheduleDetails.title : 'Unknown Schedule';
+};
 
   const formatCutoffLabel = c => `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.end_date).format('MMM D, YYYY')}`;
   const filteredCutoffs = cutoffs.filter(c => formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase()));
@@ -348,7 +365,13 @@ const SavedDTR = () => {
                         <td className="px-4 py-3 text-gray-300">{r.time_in}</td>
                         <td className="px-4 py-3 text-gray-300">{r.time_out}</td>
                         <td className="px-4 py-3 text-gray-300">{r.regular_hours.toFixed(2)}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.overtime.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-gray-300">{r.overtime > 0 ? (
+                          <div className="text-xs">
+                            <span className="font-medium text-green-400">{r.overtime.toFixed(2)} hrs</span>
+                          </div>
+                        ) : (
+                          '0.00'
+                        )}</td>
                         <td className="px-4 py-3 text-gray-300">
                           {r.late_hours > 0 ? (
                             <div className="text-xs">
@@ -369,13 +392,13 @@ const SavedDTR = () => {
                         </td>
                         <td className="px-4 py-3 text-gray-300">
                           {r.remarks && r.remarks.toLowerCase() !== 'rest day' && (
-                            <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${
-                              r.remarks.toLowerCase().includes('late') ? 'bg-orange-500/20 text-orange-400' :
+                            <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${(r.remarks.toLowerCase().includes('late') || r.remarks.toLowerCase().includes('under')) ? 'bg-orange-500/20 text-orange-400' :
                               r.remarks.toLowerCase().includes('leave') ? 'bg-purple-500/20 text-purple-400' :
-                              r.remarks.toLowerCase().includes('time') ? 'bg-blue-500/20 text-blue-400' :
-                              r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>
+                                r.remarks.toLowerCase().includes('ontime') ? 'bg-green-500/20 text-green-400' :
+                                  r.remarks.toLowerCase().includes('adjust') ? 'bg-blue-500/20 text-blue-400' :
+                                    r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
+                                      'bg-gray-500/20 text-gray-400'
+                              }`}>
                               {r.remarks}
                             </span>
                           )}

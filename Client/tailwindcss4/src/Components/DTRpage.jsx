@@ -173,16 +173,36 @@ const DTR = () => {
               let d = dayjs(leave.start_date);
               const end = dayjs(leave.end_date);
               while (d.isSameOrBefore(end)) {
-                leaveData.push({
-                  id: `leave-${leave.id}-${d.format('YYYY-MM-DD')}`,
-                  user_id: selectedUser.id,
-                  date: d.format('YYYY-MM-DD'),
-                  weekday: d.format('ddd'),
-                  remarks: `${leave.type[0].toUpperCase() + leave.type.slice(1)} Leave`,
-                  isLeave: true,
-                  leaveType: leave.type,
-                  leaveId: leave.id
-                });
+                const dateStr = d.format('YYYY-MM-DD');
+                const dayName = d.format('dddd');
+
+                // Check if this is a rest day by looking at the effective schedule
+                const effectiveSched = getEffectiveScheduleForDate(dateStr, schedRes.data.successful ? schedRes.data.schedUsers : []);
+                let isRestDay = true;
+
+                if (effectiveSched) {
+                  const schedData = typeof effectiveSched.Schedule.schedule === 'string'
+                    ? JSON.parse(effectiveSched.Schedule.schedule)
+                    : effectiveSched.Schedule.schedule;
+
+                  const daySched = schedData[dayName];
+                  isRestDay = !daySched; // It's a rest day if there's no schedule for this day
+                }
+
+                // Only add leave data if it's not a rest day
+                if (!isRestDay) {
+                  leaveData.push({
+                    id: `leave-${leave.id}-${dateStr}`,
+                    user_id: selectedUser.id,
+                    date: dateStr,
+                    weekday: d.format('ddd'),
+                    remarks: `${leave.type[0].toUpperCase() + leave.type.slice(1)} Leave`,
+                    isLeave: true,
+                    leaveType: leave.type,
+                    leaveId: leave.id
+                  });
+                }
+
                 d = d.add(1, 'day');
               }
             }
@@ -641,7 +661,7 @@ const DTR = () => {
                       }
                       // Otherwise use the effective schedule for that date
                       else if (effectiveSched) {
-                        
+
                         const schedData = typeof effectiveSched.schedule.schedule === 'string'
                           ? JSON.parse(effectiveSched.schedule.schedule)
                           : effectiveSched.schedule.schedule;
