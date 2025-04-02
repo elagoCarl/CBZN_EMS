@@ -311,15 +311,15 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
     }
   ];
 
-  // Render each field with a label and optional name-pattern restrictions
-  const renderField = (field) => {
+  // Render each field with a label and optional name-pattern restrictions.
+  // The `isRequired` flag will only be true for fields in the required sections.
+  const renderField = (field, isRequired) => {
     const baseClass =
       "w-full p-3 rounded-md bg-black/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
-    // Restrict name fields to letters, spaces, periods, apostrophes, and hyphens
     let extraProps = {};
     if (field.type !== 'select' && field.name.toLowerCase().includes('name')) {
-      extraProps.pattern = "^[A-Za-z\\s.'-]+$";
+      extraProps.pattern = "^[A-Za-z\\s.'\\-\\/]+$";
       extraProps.title = "Only letters, spaces, periods, apostrophes, and hyphens allowed";
     }
 
@@ -334,7 +334,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             name={field.name}
             onChange={handleChange}
             className={baseClass}
-            required
+            required={isRequired}
           >
             <option value="" className="bg-black/70 text-white">{field.placeholder}</option>
             {field.options.map(opt => {
@@ -360,7 +360,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             placeholder={field.placeholder}
             onChange={handleChange}
             className={baseClass}
-            required
+            required={isRequired}
             {...extraProps}
           />
         )}
@@ -384,7 +384,6 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-          {/* Error or success message */}
           {errorMessage && (
             <div className="sticky top-0 z-10 mb-4 p-3 bg-red-500 text-white rounded-md text-center">
               {errorMessage}
@@ -397,16 +396,21 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {formSections.map((section, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-green-500 border-b border-white/10 pb-2">
-                  {section.title}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {section.fields.map(renderField)}
+            {formSections.map((section, index) => {
+              // Only "User Account" and "Schedule Information" sections are required
+              const isSectionRequired =
+                section.title === 'User Account' || section.title === 'Schedule Information';
+              return (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-green-500 border-b border-white/10 pb-2">
+                    {section.title}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {section.fields.map(field => renderField(field, isSectionRequired))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <div className="flex gap-4 pt-4 border-t border-white/10">
               <button
