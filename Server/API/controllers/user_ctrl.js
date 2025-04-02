@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
 
 // Create access token
 // const maxAge = 60; // 1 minute in seconds
-const maxAge = 1200; // 20 minutes in seconds
+const maxAge = 15 * 60; // 15 minutes 
 const createAccessToken = (id) => {
     return jwt.sign({ id }, ACCESS_TOKEN_SECRET, {
         expiresIn: maxAge,
@@ -568,6 +568,17 @@ const logoutUser = async (req, res, next) => {
         });
     }
 };
+
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log("Server connection failed:", error);
+        console.log("Username being used:", USER);
+        console.log("Password length:", APP_PASSWORD ? APP_PASSWORD.length : 0);
+        console.log("Password:", APP_PASSWORD);
+    } else {
+        console.log("Server is ready to take our messages");
+    }
+});
 
 const forgotPass = async (req, res) => {
     try {

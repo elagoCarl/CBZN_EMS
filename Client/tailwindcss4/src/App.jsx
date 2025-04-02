@@ -13,57 +13,54 @@ import OvertimeReqPage from "./Components/overtimeReqPage.jsx";
 import LeaveReqPage from "./Components/leaveReqPage.jsx";
 import ScheduleHistory from "./Components/schedHistory.jsx";
 import Page404 from "./Components/page404.jsx";
-import Page403 from "./Components/page403.jsx"
+import Page403 from "./Components/page403.jsx";
 import SchedulePage from "./Components/schedPage.jsx";
 import ProtectedRoute from './Components/protectedRoute.jsx';
 import { AuthProvider } from "./Components/authContext"; // adjust path as needed
-import ErrorBoundary from "./Components/pageErrorBoundary.jsx"
+import ErrorBoundary from "./Components/pageErrorBoundary.jsx";
 import DTR from "./Components/DTRpage.jsx";
-import SavedDTR from "./Components/savedDTRpage.jsx"
-
+import SavedDTR from "./Components/savedDTRpage.jsx";
 
 function App() {
   return (
-    <>
+    <Router>
       <AuthProvider>
-        <Router>
-          <ErrorBoundary>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<LoginPage />} />
-              <Route path="/forgotPass" element={<ForgotPass />} />
+        <ErrorBoundary>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/forgotPass" element={<ForgotPass />} />
 
-              {/* Regular Protected Routes */}
-              <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-                <Route path="/myAttendance" element={<MyAttendance />} />
-                <Route path="/accSettings" element={<AccountSettings />} />
-                <Route path="/addReqPage" element={<AddReqPage />} />
-                <Route path="/schedulePage" element={<SchedulePage />} />
-                <Route path="/dtr" element={<DTR />} />
+            {/* Regular Protected Routes */}
+            <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+              <Route path="/myAttendance" element={<MyAttendance />} />
+              <Route path="/accSettings" element={<AccountSettings />} />
+              <Route path="/addReqPage" element={<AddReqPage />} />
+              <Route path="/schedulePage" element={<SchedulePage />} />
+              <Route path="/dtr" element={<DTR />} />
 
-                {/* Error Pages */}
-                <Route path="*" element={<Page404 />} />
-                <Route path="/403" element={<Page403 />} />
-              </Route>
+              {/* Error Pages */}
+              <Route path="*" element={<Page404 />} />
+              <Route path="/403" element={<Page403 />} />
+            </Route>
 
-              {/* Admin-Only Protected Routes */}
-              <Route element={<ProtectedRoute adminOnly={true}><Outlet /></ProtectedRoute>}>
-                <Route path="/manageUsers" element={<ManageUsers />} />
-                <Route path="/attendanceList" element={<AttendanceList />} />
-                <Route path="/savedDTR" element={<SavedDTR />} />
-                <Route path="/deptPage" element={<DeptPage />} />
-                <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
-                <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
-                <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
-                <Route path="/leaveReqPage" element={<LeaveReqPage />} />
-                <Route path="/schedHistory" element={<ScheduleHistory />} />
-              </Route>
-            </Routes>
-          </ErrorBoundary>
-        </Router>
+            {/* Admin-Only Protected Routes */}
+            <Route element={<ProtectedRoute adminOnly={true}><Outlet /></ProtectedRoute>}>
+              <Route path="/manageUsers" element={<ManageUsers />} />
+              <Route path="/attendanceList" element={<AttendanceList />} />
+              <Route path="/savedDTR" element={<SavedDTR />} />
+              <Route path="/deptPage" element={<DeptPage />} />
+              <Route path="/scheduleChangePage" element={<ScheduleChangePage />} />
+              <Route path="/timeAdjustmentPage" element={<TimeAdjustmentPage />} />
+              <Route path="/overtimeReqPage" element={<OvertimeReqPage />} />
+              <Route path="/leaveReqPage" element={<LeaveReqPage />} />
+              <Route path="/schedHistory" element={<ScheduleHistory />} />
+            </Route>
+          </Routes>
+        </ErrorBoundary>
       </AuthProvider>
-    </>
-  )
+    </Router>
+  );
 }
 
 export default App;

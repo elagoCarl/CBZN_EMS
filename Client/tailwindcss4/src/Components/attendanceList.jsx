@@ -112,14 +112,14 @@ const AdminAttendance = () => {
       <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
-            Attendance
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
+              Attendance
 
-          </h1>
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500">
-         List
-          </h1>
-        </div>
+            </h1>
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-500">
+              List
+            </h1>
+          </div>
         </div>
 
         {/* Filters */}
@@ -162,7 +162,7 @@ const AdminAttendance = () => {
         {/* Empty state */}
         {!loading && filteredAttendances.length === 0 && (
           <div className="bg-[#363636] rounded-lg p-8 text-center">
-            <p className="text-white text-lg">No attendance records found for the selected filters.</p>
+            <p className="text-white text-lg">No attendance records found for the selected date.</p>
           </div>
         )}
 
@@ -238,8 +238,8 @@ const AdminAttendance = () => {
                     key={index}
                     onClick={() => paginate(index + 1)}
                     className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm md:text-base ${currentPage === index + 1
-                        ? "bg-green-600 text-white"
-                        : "bg-[#363636] text-white hover:bg-[#404040]"
+                      ? "bg-green-600 text-white"
+                      : "bg-[#363636] text-white hover:bg-[#404040]"
                       }`}
                   >
                     {index + 1}
@@ -271,8 +271,8 @@ const AdminAttendance = () => {
                         key={pageNum}
                         onClick={() => paginate(pageNum)}
                         className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm md:text-base ${currentPage === pageNum
-                            ? "bg-green-600 text-white"
-                            : "bg-[#363636] text-white hover:bg-[#404040]"
+                          ? "bg-green-600 text-white"
+                          : "bg-[#363636] text-white hover:bg-[#404040]"
                           }`}
                       >
                         {pageNum}
