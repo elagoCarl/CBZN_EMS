@@ -57,7 +57,7 @@ const forgotPass = () => {
             <header className="sticky top-0 left-0 w-full bg-black/90 backdrop-blur-sm text-white p-3 md:p-4 flex justify-between items-center z-50 shadow-md">
                 {/* Logo */}
                 <div className="flex items-center">
-                    <img src={logo} alt="Logo" className="h-8 md:h-10 w-auto" />
+                    <img src={logo} onClick={() => navigate('/')} alt="Logo" className="h-8 md:h-10 w-auto cursor-pointer" />
                 </div>
             </header>
 
