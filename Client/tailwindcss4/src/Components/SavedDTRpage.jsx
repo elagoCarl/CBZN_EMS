@@ -204,26 +204,26 @@ const SavedDTR = () => {
     return job ? (departments.find(d => d.id === job.dept_id)?.name || 'Unknown Department') : 'Unknown Department';
   };
   const getUserSchedule = u => {
-  if (!scheduleUsers.length) return 'No schedule assigned';
-  
-  // Find all schedules for this user
-  const userSchedules = scheduleUsers.filter(s => s.user_id === u.id);
-  
-  if (!userSchedules.length) return 'No schedule assigned';
-  
-  // Sort by effectivity date (most recent first)
-  const sortedSchedules = userSchedules.sort((a, b) => 
-    dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date))
-  );
-  
-  // Get the most recent schedule
-  const latestSchedule = sortedSchedules[0];
-  
-  // Find the schedule details
-  const scheduleDetails = schedules.find(s => s.id === latestSchedule.sched_id);
-  
-  return scheduleDetails ? scheduleDetails.title : 'Unknown Schedule';
-};
+    if (!scheduleUsers.length) return 'No schedule assigned';
+
+    // Find all schedules for this user
+    const userSchedules = scheduleUsers.filter(s => s.user_id === u.id);
+
+    if (!userSchedules.length) return 'No schedule assigned';
+
+    // Sort by effectivity date (most recent first)
+    const sortedSchedules = userSchedules.sort((a, b) =>
+      dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date))
+    );
+
+    // Get the most recent schedule
+    const latestSchedule = sortedSchedules[0];
+
+    // Find the schedule details
+    const scheduleDetails = schedules.find(s => s.id === latestSchedule.sched_id);
+
+    return scheduleDetails ? scheduleDetails.title : 'Unknown Schedule';
+  };
 
   const formatCutoffLabel = c => `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.end_date).format('MMM D, YYYY')}`;
   const filteredCutoffs = cutoffs.filter(c => formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase()));
