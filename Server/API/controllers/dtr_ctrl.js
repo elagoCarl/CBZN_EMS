@@ -19,6 +19,7 @@ const {
 } = require('../models');
 const util = require('../../utils'); // if you have utility methods
 
+// ABSENT WHILE THERE IS NOT TIME OUT
 const generateDTRForCutoffByUser = async (req, res) => {
     const { user_id, cutoff_id } = req.body;
 
@@ -38,6 +39,8 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 message: 'Cutoff period not found'
             });
         }
+
+        console.log(`CUTOFF: ${cutoff}`)
 
         // Get the user details
         const user = await User.findByPk(user_id);
@@ -59,6 +62,7 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 cutoff_id
             }
         });
+        console.log(`Existing Entries: ${existingEntries}`)
 
         // Delete existing entries if any (to update with fresh data)
         if (existingEntries.length > 0) {
@@ -285,8 +289,12 @@ const generateDTRForCutoffByUser = async (req, res) => {
                 timeOut = attendance.time_out;
                 site = attendance.site || 'Onsite';
 
-                if (timeIn && timeOut) {
+                if ( timeIn && timeOut ) {
                     totalHours = dayjs(timeOut).diff(dayjs(timeIn), 'hour', true);
+                    remarks = attendance.remarks || '';
+                }
+
+                else if ( timeIn ){
                     remarks = attendance.remarks || '';
                 }
             }

@@ -7,7 +7,7 @@ import { useAuth } from './authContext';
 
 const ScheduleHistory = () => {
     const { user } = useAuth();
-    
+
     // State for user dropdown
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -15,7 +15,7 @@ const ScheduleHistory = () => {
     const [users, setUsers] = useState([]);
     const [jobTitles, setJobTitles] = useState([]);
     const [departments, setDepartments] = useState([]);
-    
+
     const [expandedRow, setExpandedRow] = useState(null);
     const [scheduleData, setScheduleData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -39,10 +39,10 @@ const ScheduleHistory = () => {
                         isAdmin: u.isAdmin,
                         JobTitle: u.JobTitle
                     }));
-                    
+
                     const jobs = [];
                     const depts = [];
-                    
+
                     res.data.data.forEach(u => {
                         if (u.JobTitle) {
                             if (!jobs.find(j => j.id === u.JobTitle.id))
@@ -51,7 +51,7 @@ const ScheduleHistory = () => {
                                 depts.push({ id: u.JobTitle.Department.id, name: u.JobTitle.Department.name });
                         }
                     });
-                    
+
                     setUsers(usr);
                     setJobTitles(jobs);
                     setDepartments(depts);
@@ -70,7 +70,7 @@ const ScheduleHistory = () => {
                 setIsLoading(false);
             }
         };
-        
+
         fetchUsers();
     }, [user]);
 
@@ -84,18 +84,18 @@ const ScheduleHistory = () => {
     // Fetch schedule history when selected user changes
     useEffect(() => {
         if (!selectedUser) return;
-        
+
         fetchScheduleHistory();
     }, [selectedUser]);
 
     const fetchScheduleHistory = async () => {
         if (!selectedUser) return;
-        
+
         setIsLoading(true);
         setError(null);
         try {
             const response = await axios.get(`/scheduser/getAllSchedUserByUser/${selectedUser.id}`);
-            
+
             if (response.data?.successful) {
                 // Check if response is an array or single object
                 let schedules = [];
@@ -104,7 +104,7 @@ const ScheduleHistory = () => {
                 } else if (response.data.schedUser) {
                     schedules = [response.data.schedUser];
                 }
-                
+
                 setScheduleData(schedules);
                 console.log("Schedule history fetched:", schedules);
             } else {
@@ -123,7 +123,7 @@ const ScheduleHistory = () => {
     // Helper functions for UI
     const getJobTitle = u =>
         (u.JobTitle?.name) || (jobTitles.find(j => j.id === u.job_title_id)?.name || 'Unknown Position');
-        
+
     const getDepartment = u => {
         if (u.JobTitle?.Department) return u.JobTitle.Department.name;
         const job = jobTitles.find(j => j.id === u.job_title_id);
@@ -207,7 +207,7 @@ const ScheduleHistory = () => {
                                 {selectedUser?.name || 'Loading...'}
                             </div>
                         )}
-                        
+
                         {/* Employee information display */}
                         {selectedUser && (
                             <div className="flex flex-wrap gap-3 items-center text-sm">
@@ -232,12 +232,6 @@ const ScheduleHistory = () => {
 
                 <div className="bg-[#363636] rounded-md overflow-hidden flex flex-col flex-grow">
                     <div className="overflow-x-auto">
-                        {isLoading && (
-                            <div className="flex justify-center items-center p-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                            </div>
-                        )}
-
                         <div className="overflow-y-auto max-h-[calc(100vh-340px)]">
                             <table className="min-w-full">
                                 <thead className="sticky top-0 bg-[#2b2b2b] z-10">
@@ -248,10 +242,18 @@ const ScheduleHistory = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {scheduleData.length === 0 ? (
+                                    {isLoading ? (
+                                        <tr>
+                                            <td colSpan="4" className="px-4 py-8">
+                                                <div className="flex justify-center items-center">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : scheduleData.length === 0 ? (
                                         <tr>
                                             <td colSpan="4" className="px-4 py-6 text-center text-gray-400 text-sm">
-                                                {isLoading ? 'Loading schedules...' : 'No schedule history found'}
+                                                No schedule history found
                                             </td>
                                         </tr>
                                     ) : (
