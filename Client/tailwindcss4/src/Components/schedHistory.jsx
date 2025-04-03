@@ -13,7 +13,7 @@ const ScheduleHistory = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/users/getUser/${userId}`);
+      const response = await axios.get(`/users/getUser/${userId}`);
       if (response.data && response.data.successful) {
         const user = response.data.data;
         setUserData({
@@ -30,7 +30,7 @@ const ScheduleHistory = () => {
   const fetchSchedulesOfUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/schedule/getAllSchedules');
+      const response = await axios.get('/schedule/getAllSchedules');
       setSchedules(response.data.data);
       setError(null);
     } catch (err) {

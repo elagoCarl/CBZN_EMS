@@ -18,7 +18,7 @@ const AdminAttendance = () => {
   const fetchAttendance = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('http://localhost:8080/attendance/getAllAttendances');
+      const { data } = await axios.get('/attendance/getAllAttendances');
 
       // Ensure data is an array, then format time_in and time_out
       const formattedData = (Array.isArray(data?.data) ? data.data : []).map((item) => ({

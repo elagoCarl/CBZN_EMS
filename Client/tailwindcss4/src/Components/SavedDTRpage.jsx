@@ -4,7 +4,7 @@ import Sidebar from './callComponents/sidebar';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isBetween from 'dayjs/plugin/isBetween';
-import axios from 'axios';
+import axios from '../axiosConfig.js';
 import { useAuth } from '../Components/authContext.jsx';
 
 dayjs.extend(isSameOrBefore);
@@ -43,7 +43,7 @@ const SavedDTR = () => {
   // Function to fetch cutoff periods
   const fetchCutoffs = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:8080/cutoff/getAllCutoff');
+      const res = await axios.get('/cutoff/getAllCutoff');
       if (res.data.successful) {
         const periods = res.data.data.map(c => ({
           id: c.id,
@@ -72,7 +72,7 @@ const SavedDTR = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:8080/users/getAllUsersWithJob');
+        const res = await axios.get('/users/getAllUsersWithJob');
         if (res.data.successful) {
           const usr = res.data.data.map(u => ({
             id: u.id,
@@ -123,7 +123,7 @@ const SavedDTR = () => {
     const fetchSavedDTR = async () => {
       setLoading(true);
       try {
-        const response = await axios.post('http://localhost:8080/dtr/getAllDTRCutoffByUser', {
+        const response = await axios.post('/dtr/getAllDTRCutoffByUser', {
           user_id: selectedUser.id,
           cutoff_id: currentCutoff.id
         });
@@ -162,7 +162,7 @@ const SavedDTR = () => {
         };
 
         const schedRes = await axios.post(
-          `http://localhost:8080/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`,
+          `/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`,
           requestBody
         );
 
