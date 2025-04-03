@@ -253,6 +253,42 @@ const getSchedUserByUser = async (req, res) => {
   }
 };
 
+const getAllSchedUserByUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // assuming URL is /schedUser/getSchedUserByUser/:userId
+
+    // Find one schedule association for the user, ordered by the most recent effectivity_date,
+    // and include the associated Schedule model
+    const schedUser = await SchedUser.findAll({
+      where: { user_id: userId },
+      order: [['effectivity_date', 'DESC']],
+      include: [
+        {
+          model: Schedule,
+          attributes: ['title', 'schedule', 'isActive'] // adjust attributes as needed
+        }
+      ]
+    });
+
+    if (!schedUser) {
+      return res.status(200).json({
+        successful: false,
+        message: 'Schedule association not found for the user.'
+      });
+    }
+
+    return res.status(200).json({
+      successful: true,
+      schedUser
+    });
+  } catch (error) {
+    console.error('Error in getSchedUserByUser:', error);
+    return res.status(500).json({
+      successful: false,
+      message: error.message
+    });
+  }
+};
 const getSchedUsersByUserCutoff = async (req, res) => {
   try {
     const { userId } = req.params; // e.g., /schedUser/getSchedUsersByUserCutoff/:userId
@@ -409,5 +445,6 @@ module.exports = {
   getSchedUser,
   updateSchedUserByUser,
   getSchedUserByUser,
-  getSchedUsersByUserCutoff
+  getSchedUsersByUserCutoff,
+  getAllSchedUserByUser
 };
