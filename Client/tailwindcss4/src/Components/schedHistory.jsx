@@ -167,11 +167,11 @@ const ScheduleHistory = () => {
                 </header>
 
                 {/* User Dropdown */}
-                <div className="mb-6 bg-[#363636] rounded-md p-4">
+                <div className="mb-6 bg-[#2b2b2b] rounded-md p-4">
                     <div className="flex flex-col sm:flex-row gap-3">
                         {user?.isAdmin ? (
                             <div className="relative w-full sm:w-64">
-                                <div className="flex items-center gap-2 bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer border border-gray-700"
+                                <div className="flex items-center gap-2 bg-[#363636] text-white text-sm rounded-md py-1.5 pl-3 pr-2 cursor-pointer"
                                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}>
                                     <User className="w-4 h-4 text-gray-400" />
                                     <div className="flex-1 truncate">{selectedUser?.name || 'Select employee'}</div>
