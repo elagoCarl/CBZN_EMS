@@ -144,12 +144,12 @@ const DTR = () => {
           otRes,
           schedRes
         ] = await Promise.all([
-          axios.post(`/attendance/getAllAttendanceCutoffbyuser/${selectedUser.id}`, requestBody),
-          axios.post(`/timeadjustment/getAllTimeAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`/leaveRequest/getAllLeaveRequestCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`/schedAdjustment/getAllSchedAdjustmentCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`/OTrequests/getAllOvertimeCutoffByUser/${selectedUser.id}`, requestBody),
-          axios.post(`/schedUser/getSchedUsersByUserCutoff/${selectedUser.id}`, requestBody)
+          axios.post(`/attendance/getAllAttendanceCutoffbyuser/${ selectedUser.id }`, requestBody),
+          axios.post(`/timeadjustment/getAllTimeAdjustmentCutoffByUser/${ selectedUser.id }`, requestBody),
+          axios.post(`/leaveRequest/getAllLeaveRequestCutoffByUser/${ selectedUser.id }`, requestBody),
+          axios.post(`/schedAdjustment/getAllSchedAdjustmentCutoffByUser/${ selectedUser.id }`, requestBody),
+          axios.post(`/OTrequests/getAllOvertimeCutoffByUser/${ selectedUser.id }`, requestBody),
+          axios.post(`/schedUser/getSchedUsersByUserCutoff/${ selectedUser.id }`, requestBody)
         ]);
 
         if (schedAdjRes.data.successful) {
@@ -158,8 +158,8 @@ const DTR = () => {
               id: adj.id,
               user_id: adj.user_id,
               date: adj.date,
-              time_in: dayjs(`2025-01-01T${adj.time_in}`).format('h:mm A'),
-              time_out: dayjs(`2025-01-01T${adj.time_out}`).format('h:mm A'),
+              time_in: dayjs(`2025-01-01T${ adj.time_in }`).format('h:mm A'),
+              time_out: dayjs(`2025-01-01T${ adj.time_out }`).format('h:mm A'),
               status: adj.status.toLowerCase()
             }))
           );
@@ -192,11 +192,11 @@ const DTR = () => {
                 // Only add leave data if it's not a rest day
                 if (!isRestDay) {
                   leaveData.push({
-                    id: `leave-${leave.id}-${dateStr}`,
+                    id: `leave-${ leave.id }-${ dateStr }`,
                     user_id: selectedUser.id,
                     date: dateStr,
                     weekday: d.format('ddd'),
-                    remarks: `${leave.type[0].toUpperCase() + leave.type.slice(1)} Leave`,
+                    remarks: `${ leave.type[0].toUpperCase() + leave.type.slice(1) } Leave`,
                     isLeave: true,
                     leaveType: leave.type,
                     leaveId: leave.id
@@ -306,14 +306,14 @@ const DTR = () => {
               daySched = schedData[dayName];
 
               if (daySched) {
-                workShiftStr = `${dayjs(`2025-01-01T${daySched.In}`).format('h:mm A')} - ${dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A')}`;
+                workShiftStr = `${ dayjs(`2025-01-01T${ daySched.In }`).format('h:mm A') } - ${ dayjs(`2025-01-01T${ daySched.Out }`).format('h:mm A') }`;
               } else {
                 workShiftStr = 'REST DAY';
               }
             }
 
             allRecords.push({
-              id: `date-${dateStr}`,
+              id: `date-${ dateStr }`,
               user_id: selectedUser.id,
               date: dateStr,
               weekday: d.format('ddd'),
@@ -347,10 +347,10 @@ const DTR = () => {
           if (adj.status === 'approved') {
             const idx = allRecords.findIndex(r => r.date === adj.date);
             if (idx >= 0) {
-              allRecords[idx].workShift = `${adj.time_in} - ${adj.time_out}`;
+              allRecords[idx].workShift = `${ adj.time_in } - ${ adj.time_out }`;
               allRecords[idx].remarks = allRecords[idx].isAbsent
                 ? 'Absent (Schedule Adjusted)'
-                : `${allRecords[idx].remarks} (Schedule Adjusted)`;
+                : `${ allRecords[idx].remarks } (Schedule Adjusted)`;
             }
           }
         });
@@ -410,7 +410,7 @@ const DTR = () => {
   const getOvertimeForDate = date =>
     overtimeRequests.filter(r => r.date === date && r.status === 'Approved' && r.user_id === selectedUser?.id);
 
-  const formatCutoffLabel = c => `${dayjs(c.start_date).format('MMM D, YYYY')} - ${dayjs(c.end_date).format('MMM D, YYYY')}`;
+  const formatCutoffLabel = c => `${ dayjs(c.start_date).format('MMM D, YYYY') } - ${ dayjs(c.end_date).format('MMM D, YYYY') }`;
   const filteredCutoffs = cutoffs.filter(c => formatCutoffLabel(c).toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Edit cutoff handler uses the selected cutoff id
@@ -454,8 +454,8 @@ const DTR = () => {
     const normalizedScheduleIn = normalizeTime(scheduleIn);
     const normalizedActualTimeIn = normalizeTime(actualTimeIn);
 
-    const schedTime = dayjs(`2025-01-01 ${normalizedScheduleIn}`, 'YYYY-MM-DD h:mm A');
-    const actualTime = dayjs(`2025-01-01 ${normalizedActualTimeIn}`, 'YYYY-MM-DD h:mm A');
+    const schedTime = dayjs(`2025-01-01 ${ normalizedScheduleIn }`, 'YYYY-MM-DD h:mm A');
+    const actualTime = dayjs(`2025-01-01 ${ normalizedActualTimeIn }`, 'YYYY-MM-DD h:mm A');
 
     const lateDiff = actualTime.diff(schedTime, 'minute');
 
@@ -474,8 +474,8 @@ const DTR = () => {
     const normalizedScheduleOut = normalizeTime(scheduleOut);
     const normalizedActualTimeOut = normalizeTime(actualTimeOut);
 
-    const schedTime = dayjs(`2025-01-01 ${normalizedScheduleOut}`, 'YYYY-MM-DD h:mm A');
-    const actualTime = dayjs(`2025-01-01 ${normalizedActualTimeOut}`, 'YYYY-MM-DD h:mm A');
+    const schedTime = dayjs(`2025-01-01 ${ normalizedScheduleOut }`, 'YYYY-MM-DD h:mm A');
+    const actualTime = dayjs(`2025-01-01 ${ normalizedActualTimeOut }`, 'YYYY-MM-DD h:mm A');
 
     const undertimeDiff = schedTime.diff(actualTime, 'minute');
 
@@ -545,7 +545,7 @@ const DTR = () => {
                           getJobTitle(u).toLowerCase().includes(userSearchTerm.toLowerCase()) ||
                           getDepartment(u).toLowerCase().includes(userSearchTerm.toLowerCase())
                         ).map(u => (
-                          <div key={u.id} className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white'}`}
+                          <div key={u.id} className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${ u.id === selectedUser?.id ? 'bg-green-500/20 text-green-400' : 'text-white' }`}
                             onClick={() => { setSelectedUser(u); setIsUserDropdownOpen(false); }}>
                             <div className="font-medium">{u.name}</div>
                             <div className="text-xs text-gray-400">{getJobTitle(u)} • {getDepartment(u)}</div>
@@ -577,7 +577,7 @@ const DTR = () => {
                     />
                     <div className="max-h-60 overflow-y-auto">
                       {filteredCutoffs.map(c => (
-                        <div key={c.id} className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white'}`}
+                        <div key={c.id} className={`px-3 py-2 cursor-pointer hover:bg-[#444444] ${ c.id === selectedCutoffId ? 'bg-green-500/20 text-green-400' : 'text-white' }`}
                           onClick={() => { setSelectedCutoffId(c.id); setIsDropdownOpen(false); }}>
                           {formatCutoffLabel(c)}
                         </div>
@@ -604,7 +604,7 @@ const DTR = () => {
               )}
             </div>
           </div>
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-10">
             {loading ? (
               <div className="flex justify-center py-8 text-green-500 text-xl">Loading records...</div>
             ) : !selectedUser ? (
@@ -613,7 +613,7 @@ const DTR = () => {
                 <div className="text-gray-400 text-sm">No records to display</div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-300px)] relative">
                 <div className="mb-4 px-4 py-3 bg-[#363636] rounded-md flex flex-wrap gap-4">
                   <div className="flex items-center">
                     <span className="text-gray-400 text-sm">Employee ID:</span>
@@ -637,7 +637,7 @@ const DTR = () => {
                   </div>
                 </div>
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-[#363636] text-white">
+                  <thead className="sticky top-0 bg-[#363636] text-green-400">
                     <tr>
                       {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
                         <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
@@ -670,8 +670,8 @@ const DTR = () => {
                         const daySched = schedData[dayName];
 
                         if (daySched) {
-                          scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
-                          scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
+                          scheduleIn = dayjs(`2025-01-01T${ daySched.In }`).format('h:mm A');
+                          scheduleOut = dayjs(`2025-01-01T${ daySched.Out }`).format('h:mm A');
                         }
                       }
 
@@ -690,7 +690,7 @@ const DTR = () => {
                           <td className="px-4 py-3 text-gray-300">
                             {r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
                               const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                              if (adj) return `${adj.time_in} - ${adj.time_out}`;
+                              if (adj) return `${ adj.time_in } - ${ adj.time_out }`;
 
                               const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
                               if (!effectiveSched) return 'No Schedule';
@@ -730,7 +730,7 @@ const DTR = () => {
                           </td>
                           <td className="px-4 py-3  text-gray-300">
                             {r.remarks && r.remarks !== 'Rest Day' && (
-                              <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isLeave ? 'bg-purple-500/20 text-purple-400' :
+                              <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${ r.isLeave ? 'bg-purple-500/20 text-purple-400' :
                                 r.isTimeAdjustment ? 'bg-blue-500/20 text-blue-400' :
                                   r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
                                     r.remarks.toLowerCase().includes('late') ? 'bg-orange-500/20 text-orange-400' :
@@ -751,9 +751,10 @@ const DTR = () => {
                       </tr>
                     )}
                   </tbody>
-                  <tfoot>
-                    <tr className="font-bold bg-[#363636] text-white">
-                      <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
+                  <tfoot className='sticky size-30 bottom-0 bg-[#2b2b2b] z-20'>
+                    <tr className="font-bold text-white">
+                      <td className="py-3 border-t border-white/10 ">Total Attendance</td>
+                      <td colSpan="4" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
                       <td className="px-4 py-3 border-t border-white/10 text-green-400">
                         {filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}
                       </td>
@@ -784,7 +785,7 @@ const DTR = () => {
                             const daySched = schedData[dayName];
 
                             if (daySched) {
-                              scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
+                              scheduleIn = dayjs(`2025-01-01T${ daySched.In }`).format('h:mm A');
                             }
                           }
 
@@ -812,13 +813,14 @@ const DTR = () => {
                             const daySched = schedData[dayName];
 
                             if (daySched) {
-                              scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
+                              scheduleOut = dayjs(`2025-01-01T${ daySched.Out }`).format('h:mm A');
                             }
                           }
 
                           return sum + (r.time_out && scheduleOut && !r.isLeave && !r.isRestDay ? calculateUndertimeMinutes(scheduleOut, r.time_out) / 60 : 0);
                         }, 0).toFixed(2)}
                       </td>
+
 
                       <td className="px-4 py-3 border-t border-white/10"></td>
                     </tr>
