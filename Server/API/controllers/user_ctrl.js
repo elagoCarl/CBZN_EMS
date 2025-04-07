@@ -479,19 +479,21 @@ const loginUser = async (req, res, next) => {
 
         console.log("LOGGED IN, Tokens saved successfully");
         console.log("UserRRRRRRRRRRRRRRRRRRR: ", user);
-
+        // secure: true,
+        // sameSite: 'Strict'
         // Set cookies with the JWT tokens
         res.cookie('jwt', accessToken, {
             httpOnly: true,
             maxAge: 60 * 60 * 1000,
-            secure: true,
-            sameSite: 'Strict'
+            sameSite: 'lax',
+            secure: false
+
         });
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             maxAge: (60 * 60 * 24 * 30) * 1000,
-            secure: true,
-            sameSite: 'Strict'
+            sameSite: 'lax',
+            secure: false
         });
 
         if (user.profilePicture) {

@@ -71,14 +71,14 @@ const refresh = async (req, res) => {
       res.cookie('jwt', newAccessToken, {
         httpOnly: true,
         maxAge: ACCESS_TOKEN_EXPIRY * 1000,
-        secure: true,
-        sameSite: 'Strict'
+        sameSite: 'lax',
+        secure: false
       });
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         maxAge: REFRESH_TOKEN_EXPIRY * 1000,
-        secure: true,
-        sameSite: 'Strict'
+        sameSite: 'lax',
+        secure: false
       });
 
       return res.json({ successful: true, message: "Tokens refreshed" });
@@ -114,18 +114,20 @@ const refreshTokens = async (req, res) => {
   // Update session with new refresh token
   await Session.update({ Token: newRefreshToken }, { where: { UserId: decodedUser.id } });
 
+  // secure: true,
+  //   sameSite: 'Strict'
   // Set new tokens in cookies
   res.cookie('jwt', newAccessToken, {
     httpOnly: true,
     maxAge: ACCESS_TOKEN_EXPIRY * 1000,
-    secure: true,
-    sameSite: 'Strict'
+    sameSite: 'lax',
+    secure: false
   });
   res.cookie('refreshToken', newRefreshToken, {
     httpOnly: true,
     maxAge: REFRESH_TOKEN_EXPIRY * 1000,
-    secure: true,
-    sameSite: 'Strict'
+    sameSite: 'lax',
+    secure: false
   });
 
   // Return the decoded token of the new access token
