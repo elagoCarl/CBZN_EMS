@@ -221,7 +221,7 @@
 //   );
 // };
 
-{/** Don't DELETE COMMENTS ABOVE, FOR TESTING PURPOSES ONLY WHEN UI FAILS FOR FALLBACK*/}
+{/** Don't DELETE COMMENTS ABOVE, FOR TESTING PURPOSES ONLY WHEN UI FAILS FOR FALLBACK*/ }
 
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
@@ -366,7 +366,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
             return (
               <div
                 key={index}
-                className={`border border-black/50 min-h-24 p-2 relative ${ !day.isCurrentMonth ? 'bg-[#1a1a1a] text-gray-600' :
+                className={`border border-black/50 min-h-24 p-1 relative ${ !day.isCurrentMonth ? 'bg-[#1a1a1a] text-gray-600' :
                   isToday ? 'bg-green-900/10' : 'bg-[#2b2b2b]'
                   }`}
               >
