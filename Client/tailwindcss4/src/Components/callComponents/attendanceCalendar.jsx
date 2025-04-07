@@ -345,6 +345,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
       </div>
 
       {/* Calendar grid */}
+
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-7 bg-[#2b2b2b] sticky top-0 z-10">
           {weekdays.map((day, index) => (
