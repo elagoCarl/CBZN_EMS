@@ -3,7 +3,7 @@ import axios from "../axiosConfig.js";
 import Sidebar from "./callComponents/sidebar.jsx";
 import dayjs from "dayjs";
 import { useAuth } from '../Components/authContext.jsx';
-import AttendanceCalendar from "../Components/callComponents/attendanceCalendar.jsx"; // New component import
+import AttendanceCalendar from "../Components/callComponents/attendanceCalendar.jsx";
 
 const MyAttendance = () => {
   const { user } = useAuth();

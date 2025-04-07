@@ -350,7 +350,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
           {weekdays.map((day, index) => (
             <div
               key={index}
-              className={`text-center p-2 font-semibold text-white border-b border-gray-700 ${ index === 0 || index === 6 ? 'text-green-500' : ''
+              className={`text-center p-2 font-semibold text-white border-b border-black/90 ${ index === 0 || index === 6 ? 'text-green-500' : ''
                 }`}
             >
               {day}
@@ -420,7 +420,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
 
       {/* User summary section */}
       {userData && (
-        <div className="bg-[#2b2b2b] p-4 border-t border-gray-700">
+        <div className="bg-[#2b2b2b] p-4 border-t border-black/90">
           <h3 className="text-white font-semibold mb-2">Monthly Summary</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-[#1a1a1a] p-3 rounded-md">
