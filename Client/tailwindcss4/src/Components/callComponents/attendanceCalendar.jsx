@@ -221,8 +221,6 @@
 //   );
 // };
 
-// export default AttendanceCalendar;
-
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 
