@@ -221,6 +221,8 @@
 //   );
 // };
 
+{/** Don't DELETE COMMENTS ABOVE, FOR TESTING PURPOSES ONLY WHEN UI FAILS FOR FALLBACK*/}
+
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 
