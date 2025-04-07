@@ -204,6 +204,10 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
         schedule_id: parseInt(formData.schedule) || null,
         effectivity_date: formData.effectivity_date
       });
+      console.log({
+        schedule_id: parseInt(formData.schedule) || null,
+        effectivity_date: formData.effectivity_date,
+      });
 
       // 5. Show success message, then close after a short delay
       setSuccessMessage("User updated successfully.");
@@ -222,7 +226,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     }
   };
 
-  // Build form sections using your arrays of objects for select fields
+  // Build form sections using arrays of objects for select fields
   const formSections = [
     {
       title: 'User Account',
@@ -396,17 +400,15 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     }
   ];
 
-  // Render each field, adding pattern restrictions for name fields
-  const renderField = (field) => {
+  // Render each field with conditional required attribute based on section.
+  // Only the "User Account" and "Schedule Information" sections are required.
+  const renderField = (field, isRequired) => {
     const baseClass =
       "w-full p-3 rounded-md bg-black/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all";
 
     let extraProps = {};
-    if (
-      field.type === 'text' &&
-      field.name.toLowerCase().includes('name')
-    ) {
-      extraProps.pattern = "^[A-Za-z\\s.'-]+$";
+    if (field.type === 'text' && field.name.toLowerCase().includes('name')) {
+      extraProps.pattern = "^[A-Za-z\\s.'\\-\\/]+$";
       extraProps.title = "Only letters, spaces, periods, apostrophes, and hyphens allowed";
     }
 
@@ -422,7 +424,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             onChange={handleChange}
             value={formData[field.name] || ''}
             className={baseClass}
-            required
+            required={isRequired}
           >
             <option value="" className="bg-black/70 text-white">{field.placeholder}</option>
             {field.options.map(opt => (
@@ -441,7 +443,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             value={formData[field.name] || ''}
             className={baseClass}
             disabled={field.disabled}
-            required
+            required={isRequired}
             {...extraProps}
           />
         )}
@@ -475,16 +477,21 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {formSections.map((section, index) => (
-              <div key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-green-500 border-b border-white/10 pb-2">
-                  {section.title}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {section.fields.map(renderField)}
+            {formSections.map((section, index) => {
+              // Only "User Account" and "Schedule Information" sections are required
+              const isSectionRequired =
+                section.title === 'User Account' || section.title === 'Schedule Information';
+              return (
+                <div key={index} className="space-y-4">
+                  <h3 className="text-lg font-semibold text-green-500 border-b border-white/10 pb-2">
+                    {section.title}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {section.fields.map(field => renderField(field, isSectionRequired))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <div className="flex gap-4 pt-4 border-t border-white/10">
               <button

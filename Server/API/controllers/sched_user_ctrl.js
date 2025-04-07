@@ -123,7 +123,7 @@ const getSchedUser = async (req, res) => {
 const updateSchedUserByUser = async (req, res) => {
   try {
     const { schedule_id, effectivity_date } = req.body;
-    const userId = req.params.userId; // Endpoint: /schedUser/addSchedUserByUser/:userId
+    const userId = req.params.userId; // Endpoint: /schedUser/updateSchedUserByUser/:userId
 
     // Validate mandatory fields
     if (!util.improvedCheckMandatoryFields({ schedule_id, effectivity_date })) {
@@ -133,14 +133,13 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Validate effectivity_date format and ensure it's at least the next day
+    // Validate effectivity_date format and that it's at least the next day
     if (!dayjs(effectivity_date, "YYYY-MM-DD", true).isValid()) {
       return res.status(400).json({
         successful: false,
         message: "Invalid effectivity date format. Must be YYYY-MM-DD."
       });
     }
-
     const tomorrow = dayjs().add(1, 'day').startOf('day');
     const effectivityDay = dayjs(effectivity_date, "YYYY-MM-DD");
     if (!effectivityDay.isSameOrAfter(tomorrow)) {
@@ -150,7 +149,7 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Ensure the schedule exists before inserting
+    // Validate that the provided schedule exists
     const schedule = await Schedule.findByPk(schedule_id);
     if (!schedule) {
       return res.status(404).json({
@@ -159,7 +158,7 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // Ensure the user exists
+    // Validate that the user exists
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -168,87 +167,53 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
 
-    // 🚀 **Check if the user already has a schedule with the same effectivity_date**
-    const existingSchedUser = await SchedUser.findOne({
-      where: {
-        user_id: userId,
-        effectivity_date
-      }
-    });
-
-    if (existingSchedUser) {
-      return res.status(400).json({
+    // Find the existing association record using the user_id.
+    const existingAssociation = await SchedUser.findOne({ where: { user_id: userId } });
+    if (!existingAssociation) {
+      return res.status(404).json({
         successful: false,
-        message: 'User already has a schedule on this effectivity date.'
+        message: 'SchedUser not found for the given user.'
       });
     }
 
-    // ✅ Insert a new record (Only if effectivity_date is unique for the user)
+    // Check if another association already exists with the new combination
+    const duplicate = await SchedUser.findOne({
+      where: {
+        user_id: userId,
+        schedule_id,
+        effectivity_date
+      }
+    });
+    // if (duplicate) {
+    //   return res.status(400).json({
+    //     successful: false,
+    //     message: "This schedule is already associated with the user at the same effectivity date."
+    //   });
+    // }
+
+    // Remove the current association
+    await existingAssociation.destroy();
+
+    // Create a new association with the updated schedule_id and effectivity_date
     const newSchedUser = await SchedUser.create({
       user_id: userId,
       schedule_id,
       effectivity_date
     });
 
-    return res.status(201).json({ // Use 201 for resource creation
+    return res.status(200).json({
       successful: true,
-      message: 'New schedule added for the user.',
+      message: 'SchedUser updated.',
       data: newSchedUser
     });
-
   } catch (err) {
-    console.error("Error adding schedUser by user:", err);
+    console.error("Error updating schedUser by user:", err);
     return res.status(500).json({
       successful: false,
       message: err.message || "An unexpected error occurred."
     });
   }
 };
-
-
-
-const getAllSchedsByUser = async (req, res) => {
-  try {
-    const { userId } = req.params; // assuming URL is /schedUser/getSchedUserByUser/:userId
-
-    // Find one schedule association for the user, ordered by the most recent effectivity_date,
-    // and include the associated Schedule model
-    const schedUser = await SchedUser.findAll({
-      where: { user_id: userId }, 
-      order: [['effectivity_date', 'DESC']],
-      include: [
-        {
-          model: Schedule,
-          attributes: ['title', 'schedule', 'isActive'] // adjust attributes as needed
-        },
-
-        {
-          model: User,
-          attributes: ['name'] // Fetch the user's name
-        }
-      ]
-    });
-
-    if (!schedUser) {
-      return res.status(200).json({
-        successful: false,
-        message: 'Schedule association not found for the user.'
-      });
-    }
-
-    return res.status(200).json({
-      successful: true,
-      schedUser
-    });
-  } catch (error) {
-    console.error('Error in getSchedUserByUser:', error);
-    return res.status(500).json({
-      successful: false,
-      message: error.message
-    });
-  }
-};
-
 
 
 const getSchedUserByUser = async (req, res) => {
@@ -288,6 +253,42 @@ const getSchedUserByUser = async (req, res) => {
   }
 };
 
+const getAllSchedUserByUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // assuming URL is /schedUser/getSchedUserByUser/:userId
+
+    // Find one schedule association for the user, ordered by the most recent effectivity_date,
+    // and include the associated Schedule model
+    const schedUser = await SchedUser.findAll({
+      where: { user_id: userId },
+      order: [['effectivity_date', 'DESC']],
+      include: [
+        {
+          model: Schedule,
+          attributes: ['title', 'schedule', 'isActive'] // adjust attributes as needed
+        }
+      ]
+    });
+
+    if (!schedUser) {
+      return res.status(200).json({
+        successful: false,
+        message: 'Schedule association not found for the user.'
+      });
+    }
+
+    return res.status(200).json({
+      successful: true,
+      schedUser
+    });
+  } catch (error) {
+    console.error('Error in getSchedUserByUser:', error);
+    return res.status(500).json({
+      successful: false,
+      message: error.message
+    });
+  }
+};
 const getSchedUsersByUserCutoff = async (req, res) => {
   try {
     const { userId } = req.params; // e.g., /schedUser/getSchedUsersByUserCutoff/:userId
@@ -382,15 +383,15 @@ const getSchedUsersByUserCutoff = async (req, res) => {
 
       // Include cutoff_start at the beginning of dates to check
       const datesToCheck = [cutoff_start, ...scheduleDates];
-      
+
       // For each pair of consecutive dates, find schedules that fall in between
       for (let i = 0; i < datesToCheck.length - 1; i++) {
         const currentDate = datesToCheck[i];
         const nextDate = datesToCheck[i + 1];
-        
+
         // Skip if the dates are the same
         if (currentDate === nextDate) continue;
-        
+
         // Find schedules effective between these dates
         const intermediateSchedules = await SchedUser.findAll({
           attributes: { exclude: ['createdAt', 'updatedAt'] },
@@ -409,7 +410,7 @@ const getSchedUsersByUserCutoff = async (req, res) => {
           ],
           order: [['effectivity_date', 'ASC']]
         });
-        
+
         // Add any intermediate schedules found
         intermediateSchedules.forEach(sched => {
           const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
@@ -444,6 +445,6 @@ module.exports = {
   getSchedUser,
   updateSchedUserByUser,
   getSchedUserByUser,
-  getAllSchedsByUser,
-  getSchedUsersByUserCutoff
+  getSchedUsersByUserCutoff,
+  getAllSchedUserByUser
 };

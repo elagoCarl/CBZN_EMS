@@ -1,6 +1,9 @@
 const dayjs = require('dayjs');
 const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
+const isBetween = require('dayjs/plugin/isBetween');
+
 dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
 const { Op } = require('sequelize');
 const {
     DTR,
@@ -16,425 +19,379 @@ const {
 } = require('../models');
 const util = require('../../utils'); // if you have utility methods
 
+// ABSENT WHILE THERE IS NOT TIME OUT
 const generateDTRForCutoffByUser = async (req, res) => {
+    const { user_id, cutoff_id } = req.body;
+
+    if (!user_id || !cutoff_id) {
+        return res.status(400).json({
+            successful: false,
+            message: 'User ID and Cutoff ID are required'
+        });
+    }
+
     try {
-        const { user_id, cutoff_id } = req.body;
-
-        // 1. Validate required fields
-        if (!util.checkMandatoryFields([user_id, cutoff_id])) {
-            return res.status(400).json({
-                successful: false,
-                message: "Missing user_id or cutoff_id."
-            });
-        }
-
-        // 2. Fetch user
-        const user = await User.findByPk(user_id);
-        if (!user) {
-            return res.status(404).json({
-                successful: false,
-                message: "User not found."
-            });
-        }
-
-        // 3. Fetch cutoff
+        // Get the cutoff period details
         const cutoff = await Cutoff.findByPk(cutoff_id);
         if (!cutoff) {
             return res.status(404).json({
                 successful: false,
-                message: "Cutoff not found."
+                message: 'Cutoff period not found'
             });
         }
 
-        // 4. Prepare date range
-        const startDate = dayjs(cutoff.start_date);
-        const endDate = dayjs(cutoff.cutoff_date);
+        console.log(`CUTOFF: ${cutoff}`)
 
-        // 5. Fetch all relevant data in parallel
+        // Get the user details
+        const user = await User.findByPk(user_id);
+        if (!user) {
+            return res.status(404).json({
+                successful: false,
+                message: 'User not found'
+            });
+        }
+
+        // Prepare cutoff dates
+        const startDate = cutoff.start_date;
+        const endDate = cutoff.cutoff_date;
+
+        // Get existing DTR entries for this user and cutoff to avoid duplicates
+        const existingEntries = await DTR.findAll({
+            where: {
+                user_id,
+                cutoff_id
+            }
+        });
+        console.log(`Existing Entries: ${existingEntries}`)
+
+        // Delete existing entries if any (to update with fresh data)
+        if (existingEntries.length > 0) {
+            await DTR.destroy({
+                where: {
+                    user_id,
+                    cutoff_id
+                }
+            });
+        }
+
+        // Get all attendance data and related information
         const [
-            attendanceRes,
-            timeAdjustmentsRes,
-            leavesRes,
-            scheduleAdjustmentsRes,
-            otRes
+            attendanceData,
+            timeAdjustments,
+            leaveRequests,
+            scheduleAdjustments,
+            overtimeRequests,
+            userSchedules
         ] = await Promise.all([
+            // Attendance records
             Attendance.findAll({
                 where: {
                     UserId: user_id,
                     date: {
-                        [Op.between]: [
-                            startDate.format('YYYY-MM-DD'),
-                            endDate.format('YYYY-MM-DD')
-                        ]
+                        [Op.between]: [startDate, endDate]
                     }
                 }
             }),
+
+            // Time adjustments
             TimeAdjustment.findAll({
                 where: {
-                    user_id: user_id,
+                    user_id,
                     date: {
-                        [Op.between]: [
-                            startDate.format('YYYY-MM-DD'),
-                            endDate.format('YYYY-MM-DD')
-                        ]
-                    }
+                        [Op.between]: [startDate, endDate]
+                    },
+                    status: 'approved'
                 }
             }),
+
+            // Leave requests
             LeaveRequest.findAll({
                 where: {
-                    user_id: user_id,
-                    status: 'approved', // only approved leaves
+                    user_id,
+                    status: 'approved',
                     [Op.or]: [
-                        { start_date: { [Op.between]: [startDate, endDate] } },
-                        { end_date: { [Op.between]: [startDate, endDate] } },
                         {
-                            start_date: { [Op.lte]: startDate },
-                            end_date: { [Op.gte]: endDate }
+                            start_date: {
+                                [Op.between]: [startDate, endDate]
+                            }
+                        },
+                        {
+                            end_date: {
+                                [Op.between]: [startDate, endDate]
+                            }
+                        },
+                        {
+                            [Op.and]: [
+                                { start_date: { [Op.lte]: startDate } },
+                                { end_date: { [Op.gte]: endDate } }
+                            ]
                         }
                     ]
                 }
             }),
+
+            // Schedule adjustments
             ScheduleAdjustment.findAll({
                 where: {
-                    user_id: user_id,
+                    user_id,
+                    status: 'approved',
                     date: {
-                        [Op.between]: [
-                            startDate.format('YYYY-MM-DD'),
-                            endDate.format('YYYY-MM-DD')
-                        ]
-                    },
-                    status: 'approved'
+                        [Op.between]: [startDate, endDate]
+                    }
                 }
             }),
+
+            // Overtime requests
             OvertimeRequest.findAll({
                 where: {
-                    user_id: user_id,
+                    user_id,
+                    status: 'approved',
                     date: {
-                        [Op.between]: [
-                            startDate.format('YYYY-MM-DD'),
-                            endDate.format('YYYY-MM-DD')
-                        ]
-                    },
-                    status: 'approved'
+                        [Op.between]: [startDate, endDate]
+                    }
                 }
+            }),
+
+            // User schedules
+            SchedUser.findAll({
+                where: {
+                    user_id,
+                    effectivity_date: {
+                        [Op.lte]: endDate
+                    }
+                },
+                include: [
+                    {
+                        model: Schedule,
+                        as: 'Schedule'
+                    }
+                ],
+                order: [['effectivity_date', 'DESC']]
             })
         ]);
 
-        // 6. Fetch schedule users with a more comprehensive approach
-        // 6a. Get schedules within the cutoff period
-        let schedulesInCutoff = await SchedUser.findAll({
-            where: {
-                user_id: user_id,
-                effectivity_date: {
-                    [Op.between]: [
-                        startDate.format('YYYY-MM-DD'),
-                        endDate.format('YYYY-MM-DD')
-                    ]
-                }
-            },
-            include: [{ model: Schedule }],
-            order: [['effectivity_date', 'ASC']]
-        });
+        // Process each day in the cutoff period
+        const dtrRecords = [];
+        let currentDate = dayjs(startDate);
+        const cutoffEndDate = dayjs(endDate);
 
-        // 6b. Get the latest schedule before the cutoff start date
-        const latestBeforeCutoff = await SchedUser.findOne({
-            where: {
-                user_id: user_id,
-                effectivity_date: {
-                    [Op.lt]: startDate.format('YYYY-MM-DD')
-                }
-            },
-            include: [{ model: Schedule }],
-            order: [['effectivity_date', 'DESC']]
-        });
+        while (currentDate.isSameOrBefore(cutoffEndDate)) {
+            const dateStr = currentDate.format('YYYY-MM-DD');
+            const dayName = currentDate.format('dddd');
 
-        // 6c. Create a map to store all schedules
-        const scheduleMap = new Map();
+            // Get effective schedule for this date
+            const effectiveSchedule = getEffectiveScheduleForDate(dateStr, userSchedules);
 
-        // Add the latest schedule before cutoff if it exists
-        if (latestBeforeCutoff) {
-            const uniqueKey = `${latestBeforeCutoff.user_id}_${latestBeforeCutoff.schedule_id}_${latestBeforeCutoff.effectivity_date}`;
-            scheduleMap.set(uniqueKey, latestBeforeCutoff);
-        }
+            // Check for schedule adjustment
+            const scheduleAdjustment = scheduleAdjustments.find(adj =>
+                dayjs(adj.date).format('YYYY-MM-DD') === dateStr
+            );
 
-        // Add all schedules within cutoff
-        schedulesInCutoff.forEach(sched => {
-            const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
-            scheduleMap.set(uniqueKey, sched);
-        });
-
-        // 6d. Look for intermediate schedules if there are schedules within cutoff
-        if (schedulesInCutoff.length > 0) {
-            const scheduleDates = schedulesInCutoff.map(sched => sched.effectivity_date);
-            scheduleDates.sort((a, b) => new Date(a) - new Date(b));
-
-            // Include cutoff_start at the beginning of dates to check
-            const datesToCheck = [startDate.format('YYYY-MM-DD'), ...scheduleDates];
-            
-            // For each pair of consecutive dates, find schedules that fall in between
-            for (let i = 0; i < datesToCheck.length - 1; i++) {
-                const currentDate = datesToCheck[i];
-                const nextDate = datesToCheck[i + 1];
-                
-                // Skip if the dates are the same
-                if (currentDate === nextDate) continue;
-                
-                // Find schedules effective between these dates
-                const intermediateSchedules = await SchedUser.findAll({
-                    where: {
-                        user_id: user_id,
-                        effectivity_date: {
-                            [Op.gt]: currentDate,
-                            [Op.lt]: nextDate
-                        }
-                    },
-                    include: [{ model: Schedule }],
-                    order: [['effectivity_date', 'ASC']]
-                });
-                
-                // Add any intermediate schedules found
-                intermediateSchedules.forEach(sched => {
-                    const uniqueKey = `${sched.user_id}_${sched.schedule_id}_${sched.effectivity_date}`;
-                    scheduleMap.set(uniqueKey, sched);
-                });
-            }
-        }
-
-        // 6e. Convert the Map to an array and sort by effectivity_date ascending
-        const allSchedules = Array.from(scheduleMap.values()).sort(
-            (a, b) => new Date(a.effectivity_date) - new Date(b.effectivity_date)
-        );
-
-        // 7. Build a day-by-day array for the entire cutoff range
-        let allRecords = [];
-        let d = startDate.clone();
-
-        while (d.isSameOrBefore(endDate)) {
-            const dateStr = d.format('YYYY-MM-DD');
-            const weekdayName = d.format('dddd');
-
-            // 7a. Find the applicable schedule for this date
-            const applicableSchedule = allSchedules
-                .filter(sched => dayjs(sched.effectivity_date).isSameOrBefore(d))
-                .pop();
-
-            let scheduleForDay = null;
-            let shiftLabel = 'REST DAY';
+            // Determine schedule details
+            let scheduleIn = null;
+            let scheduleOut = null;
+            let workShift = 'No Schedule';
             let isRestDay = true;
-            let schedIn = null;
-            let schedOut = null;
 
-            // 7b. If there's an applicable schedule, parse it
-            if (applicableSchedule && applicableSchedule.Schedule && applicableSchedule.Schedule.schedule) {
-                const schedData =
-                    typeof applicableSchedule.Schedule.schedule === 'string'
-                        ? JSON.parse(applicableSchedule.Schedule.schedule)
-                        : applicableSchedule.Schedule.schedule;
+            // If there's a schedule adjustment, use it
+            if (scheduleAdjustment) {
 
-                scheduleForDay = schedData[weekdayName];
-                if (scheduleForDay && scheduleForDay.In && scheduleForDay.Out) {
+                scheduleIn = dayjs(`2025-01-01T${scheduleAdjustment.time_in}`).format('h:mm A');
+                scheduleOut = dayjs(`2025-01-01T${scheduleAdjustment.time_out}`).format('h:mm A');
+                workShift = `${scheduleIn} - ${scheduleOut}`;  // Changed to use a name instead of time range
+                isRestDay = false;
+            }
+            // Otherwise use the effective schedule
+            else if (effectiveSchedule && effectiveSchedule.Schedule) {
+                const scheduleData = typeof effectiveSchedule.Schedule.schedule === 'string'
+                    ? JSON.parse(effectiveSchedule.Schedule.schedule)
+                    : effectiveSchedule.Schedule.schedule;
+
+                const daySchedule = scheduleData[dayName];
+
+                if (daySchedule) {
+                    scheduleIn = dayjs(`2025-01-01T${daySchedule.In}`).format('h:mm A');
+                    scheduleOut = dayjs(`2025-01-01T${daySchedule.Out}`).format('h:mm A');
+
+                    // Use the schedule name instead of time range
+                    workShift = effectiveSchedule.Schedule.title || 'Regular Schedule';
                     isRestDay = false;
-                    schedIn = scheduleForDay.In;
-                    schedOut = scheduleForDay.Out;
-                    shiftLabel = `${applicableSchedule.Schedule.title} (${schedIn} - ${schedOut})`;
-                }
-            }
-
-            allRecords.push({
-                date: dateStr,
-                weekday: weekdayName,
-                work_shift: shiftLabel,
-                isRestDay,
-                schedule_in: schedIn,
-                schedule_out: schedOut,
-                time_in: null,
-                time_out: null,
-                site: null,
-                remarks: isRestDay ? 'Rest Day' : 'Absent',
-                regular_hours: 0,
-                late_hours: 0,
-                undertime: 0,
-                overtime: 0
-            });
-            d = d.add(1, 'day');
-        }
-
-        // 8a. Merge Attendance
-        attendanceRes.forEach(att => {
-            const idx = allRecords.findIndex(r => r.date === att.date);
-            if (idx >= 0) {
-                allRecords[idx].time_in = att.time_in;
-                allRecords[idx].time_out = att.time_out;
-                allRecords[idx].remarks = att.remarks || allRecords[idx].remarks;
-                // Add site from attendance
-                allRecords[idx].site = att.site || 'Onsite'; // Default to 'Onsite' if site is null
-            }
-        });
-
-        // 8b. Merge Time Adjustments (only if attendance is missing or partial)
-        timeAdjustmentsRes.forEach(adj => {
-            const idx = allRecords.findIndex(r => r.date === adj.date);
-            if (idx >= 0) {
-                if (!allRecords[idx].time_in) {
-                    allRecords[idx].time_in = adj.time_in;
-                }
-                if (!allRecords[idx].time_out) {
-                    allRecords[idx].time_out = adj.time_out;
-                }
-                // Mark remarks if attendance is absent or empty
-                if (!allRecords[idx].remarks || allRecords[idx].remarks === 'Absent') {
-                    allRecords[idx].remarks = 'Time Adjusted';
-                }
-            }
-        });
-
-        // 8c. Merge Leaves
-        leavesRes.forEach(leave => {
-            let start = dayjs(leave.start_date);
-            const end = dayjs(leave.end_date);
-
-            while (start.isSameOrBefore(end)) {
-                const dateStr = start.format('YYYY-MM-DD');
-                const idx = allRecords.findIndex(r => r.date === dateStr);
-                if (idx >= 0) {
-                    allRecords[idx].remarks = `${leave.type.charAt(0).toUpperCase() + leave.type.slice(1)} Leave`;
-                    allRecords[idx].time_in = null;
-                    allRecords[idx].time_out = null;
-                    // Set site to 'Remote' for leaves as a default
-                    if (!allRecords[idx].site) {
-                        allRecords[idx].site = 'Remote';
-                    }
-                }
-                start = start.add(1, 'day');
-            }
-        });
-
-        // 8d. Merge Schedule Adjustments and update remarks accordingly
-        scheduleAdjustmentsRes.forEach(sa => {
-            const idx = allRecords.findIndex(r => r.date === sa.date);
-            if (idx >= 0) {
-                // Update work_shift to show the adjusted times
-                allRecords[idx].work_shift = `${sa.time_in} - ${sa.time_out} (Sched Adjusted)`;
-                // Update schedule_in and schedule_out with the adjusted values
-                allRecords[idx].schedule_in = sa.time_in;
-                allRecords[idx].schedule_out = sa.time_out;
-                allRecords[idx].isRestDay = false; // If there's a schedule adjustment, it's not a rest day
-                // Update remarks
-                if (allRecords[idx].remarks === 'Absent') {
-                    allRecords[idx].remarks = 'Absent (Sched Adjusted)';
-                } else if (allRecords[idx].remarks === 'Rest Day') {
-                    allRecords[idx].remarks = 'Rest Day (Sched Adjusted)';
                 } else {
-                    allRecords[idx].remarks = `${allRecords[idx].remarks} (Sched Adjusted)`;
-                }
-            }
-        });
-
-        // 9. Compute regular hours, late hours, undertime, etc.
-        allRecords = allRecords.map(record => {
-            // 9a. Compute total hours if time_in and time_out exist
-            if (record.time_in && record.time_out) {
-                const diffHours = dayjs(record.time_out).diff(dayjs(record.time_in), 'hour', true);
-                record.regular_hours = parseFloat(diffHours.toFixed(2));
-                
-                // If the remarks is still 'Absent', update it to 'Present'
-                if (record.remarks === 'Absent') {
-                    record.remarks = 'Present';
+                    workShift = 'REST DAY';
+                    isRestDay = true;
                 }
             }
 
-            // 9b. Compute late and undertime if not a rest day and schedule exists
-            if (!record.isRestDay && record.schedule_in && record.time_in) {
-                const scheduledIn = dayjs(`${record.date}T${record.schedule_in}`);
-                const actualIn = dayjs(record.time_in);
+            // Check for leave on this date
+            const activeLeave = leaveRequests.find(leave => {
+                const leaveStart = dayjs(leave.start_date);
+                const leaveEnd = dayjs(leave.end_date);
+                return currentDate.isBetween(leaveStart, leaveEnd, null, '[]');
+            });
 
-                if (actualIn.isAfter(scheduledIn)) {
-                    const lateDiff = actualIn.diff(scheduledIn, 'minute') / 60;
-                    record.late_hours = parseFloat(lateDiff.toFixed(2));
-                    
-                    // Update remarks if late
-                    if (record.remarks === 'Present') {
-                        record.remarks = 'Late';
+            // Don't mark REST DAYS as leaves
+            const isOnLeave = activeLeave && !isRestDay;
+
+            // Get attendance record for this date
+            const attendance = attendanceData.find(att =>
+                dayjs(att.date).format('YYYY-MM-DD') === dateStr
+            );
+
+            // Get time adjustment for this date
+            const timeAdjustment = timeAdjustments.find(adj =>
+                dayjs(adj.date).format('YYYY-MM-DD') === dateStr
+            );
+
+            // Get overtime for this date
+            const overtime = overtimeRequests.filter(ot =>
+                dayjs(ot.date).format('YYYY-MM-DD') === dateStr
+            );
+
+            // Set time in and time out
+            // Set time in and time out
+            let timeIn = null;
+            let timeOut = null;
+            let totalHours = 0;
+            let remarks = isRestDay ? 'Rest Day' : 'Absent';
+            let site = 'Onsite';
+
+            if (isOnLeave) {
+                remarks = `${activeLeave.type[0].toUpperCase() + activeLeave.type.slice(1)} Leave`;
+                workShift = 'LEAVE';
+
+                // Add this section to keep time in/out when on leave
+                if (attendance) {
+                    timeIn = attendance.time_in;
+                    timeOut = attendance.time_out;
+                    site = attendance.site || 'Onsite';
+
+                    if (timeIn && timeOut) {
+                        totalHours = dayjs(timeOut).diff(dayjs(timeIn), 'hour', true);
+                    }
+                } else if (timeAdjustment) {
+                    timeIn = timeAdjustment.time_in;
+                    timeOut = timeAdjustment.time_out;
+
+                    if (timeIn && timeOut) {
+                        totalHours = dayjs(timeOut).diff(dayjs(timeIn), 'hour', true);
                     }
                 }
+            } else if (timeAdjustment) {
+                timeIn = timeAdjustment.time_in;
+                timeOut = timeAdjustment.time_out;
 
-                if (record.time_out && record.schedule_out) {
-                    const scheduledOut = dayjs(`${record.date}T${record.schedule_out}`);
-                    const actualOut = dayjs(record.time_out);
+                if (timeIn && timeOut) {
+                    totalHours = dayjs(timeOut).diff(dayjs(timeIn), 'hour', true);
+                    remarks = 'Time Adjusted';
+                }
+            } else if (attendance) {
+                timeIn = attendance.time_in;
+                timeOut = attendance.time_out;
+                site = attendance.site || 'Onsite';
 
-                    if (actualOut.isBefore(scheduledOut)) {
-                        const underDiff = scheduledOut.diff(actualOut, 'minute') / 60;
-                        record.undertime = parseFloat(underDiff.toFixed(2));
-                        
-                        // Update remarks if undertime
-                        if (record.remarks === 'Present') {
-                            record.remarks = 'Undertime';
-                        } else if (record.remarks === 'Late') {
-                            record.remarks = 'Late & Undertime';
-                        }
-                    }
+                if ( timeIn && timeOut ) {
+                    totalHours = dayjs(timeOut).diff(dayjs(timeIn), 'hour', true);
+                    remarks = attendance.remarks || '';
+                }
+
+                else if ( timeIn ){
+                    remarks = attendance.remarks || '';
                 }
             }
-            return record;
-        });
+            // Calculate late minutes
+            let lateMinutes = 0;
+            if (timeIn && scheduleIn && !isOnLeave && !isRestDay) {
+                const normalizedScheduleIn = scheduleIn.includes('AM') || scheduleIn.includes('PM')
+                    ? scheduleIn
+                    : dayjs(scheduleIn, 'HH:mm').format('h:mm A');
 
-        // 10. Merge Overtime
-        otRes.forEach(ot => {
-            const idx = allRecords.findIndex(r => r.date === ot.date);
-            if (idx >= 0) {
-                const otHours = dayjs(ot.end_time).diff(dayjs(ot.start_time), 'hour', true);
-                allRecords[idx].overtime += parseFloat(otHours.toFixed(2));
-                
-                // Update remarks to show overtime
-                if (allRecords[idx].remarks.includes('Rest Day')) {
-                    allRecords[idx].remarks = 'Rest Day with OT';
-                } else if (!allRecords[idx].remarks.includes('OT')) {
-                    allRecords[idx].remarks += ' with OT';
-                }
+                const normalizedTimeIn = dayjs(timeIn).format('h:mm A');
+
+                const schedTime = dayjs(`2025-01-01 ${normalizedScheduleIn}`, 'YYYY-MM-DD h:mm A');
+                const actualTime = dayjs(`2025-01-01 ${normalizedTimeIn}`, 'YYYY-MM-DD h:mm A');
+
+                const diff = actualTime.diff(schedTime, 'minute');
+                lateMinutes = diff > 0 ? diff : 0;
             }
-        });
 
-        // 11. Remove existing DTR records for this user and cutoff
-        await DTR.destroy({
-            where: {
+            // Calculate undertime minutes
+            let undertimeMinutes = 0;
+            if (timeOut && scheduleOut && !isOnLeave && !isRestDay) {
+                const normalizedScheduleOut = scheduleOut.includes('AM') || scheduleOut.includes('PM')
+                    ? scheduleOut
+                    : dayjs(scheduleOut, 'HH:mm').format('h:mm A');
+
+                const normalizedTimeOut = dayjs(timeOut).format('h:mm A');
+
+                const schedTime = dayjs(`2025-01-01 ${normalizedScheduleOut}`, 'YYYY-MM-DD h:mm A');
+                const actualTime = dayjs(`2025-01-01 ${normalizedTimeOut}`, 'YYYY-MM-DD h:mm A');
+
+                const diff = schedTime.diff(actualTime, 'minute');
+                undertimeMinutes = diff > 0 ? diff : 0;
+            }
+
+            // Calculate overtime hours
+            let overtimeHours = 0;
+            if (overtime.length > 0) {
+                overtimeHours = overtime.reduce((total, ot) => {
+                    return total + dayjs(ot.end_time).diff(dayjs(ot.start_time), 'hour', true);
+                }, 0);
+            }
+
+            // Create DTR record
+            const dtrRecord = {
+                date: dateStr,
+                work_shift: workShift,
+                site: site,
+                time_in: timeIn,
+                time_out: timeOut,
+                regular_hours: parseFloat(totalHours.toFixed(2)),
+                overtime: parseFloat(overtimeHours.toFixed(2)),
+                late_hours: parseFloat((lateMinutes / 60).toFixed(2)),
+                undertime: parseFloat((undertimeMinutes / 60).toFixed(2)),
+                remarks: remarks,
                 user_id: user_id,
                 cutoff_id: cutoff_id
-            }
-        });
+            };
 
-        // 12. Prepare final records including remarks
-        const finalRecords = allRecords.map(r => ({
-            date: r.date,
-            work_shift: r.work_shift,
-            // Set default site to 'Onsite' if still null
-            site: r.site || 'Onsite',
-            time_in: r.time_in,
-            time_out: r.time_out,
-            regular_hours: r.regular_hours,
-            late_hours: r.late_hours,
-            undertime: r.undertime,
-            overtime: r.overtime,
-            user_id: user_id,
-            cutoff_id: cutoff_id,
-            remarks: r.remarks
-        }));
+            dtrRecords.push(dtrRecord);
+            currentDate = currentDate.add(1, 'day');
+        }
 
-        // 13. Bulk create DTR records
-        await DTR.bulkCreate(finalRecords);
+        // Bulk create the DTR records
+        await DTR.bulkCreate(dtrRecords);
 
         return res.status(200).json({
             successful: true,
-            message: "DTR generated and saved successfully.",
-            data: finalRecords
+            message: 'DTR records generated successfully',
+            data: {
+                user_id,
+                cutoff_id,
+                record_count: dtrRecords.length
+            }
         });
+
     } catch (error) {
-        console.error('generateDTRForCutoffByUser error:', error);
+        console.error('Error generating DTR:', error);
         return res.status(500).json({
             successful: false,
-            message: error.message || "An unexpected error occurred."
+            message: 'Failed to generate DTR records',
+            error: error.message
         });
     }
 };
+
+// Helper function to get the effective schedule for a specific date
+function getEffectiveScheduleForDate(date, schedUsers) {
+    if (!schedUsers || !schedUsers.length) return null;
+
+    const dateObj = dayjs(date);
+    const applicableSchedules = schedUsers
+        .filter(su => dayjs(su.effectivity_date).isSameOrBefore(dateObj))
+        .sort((a, b) => dayjs(b.effectivity_date).diff(dayjs(a.effectivity_date)));
+
+    return applicableSchedules.length ? applicableSchedules[0] : null;
+}
 
 
 const getAllDTR = async (req, res) => {

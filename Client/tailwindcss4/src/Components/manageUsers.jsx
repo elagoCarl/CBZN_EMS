@@ -129,7 +129,7 @@ const ManageUsers = () => {
           </button>
 
           <select
-            className="w-full sm:w-auto bg-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-md font-medium transition-all hover:bg-green-800 focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-black"
+            className="w-full sm:w-auto bg-[#363636] text-white px-4 md:px-6 py-2 md:py-3 rounded-md font-medium transition-all"
             value={employmentFilter}
             onChange={(e) => setEmploymentFilter(e.target.value)}
           >

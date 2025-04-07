@@ -22,7 +22,7 @@ const forgotPass = () => {
         setMessage({ text: '' }); // Clear previous messages before request
     
         try {
-            const { data } = await axios.post('http://localhost:8080/users/forgotPass', { email });
+            const { data } = await axios.post('/users/forgotPass', { email });
             console.log("API Response:", data); // Log the actual response structure
     
             setMessage({
