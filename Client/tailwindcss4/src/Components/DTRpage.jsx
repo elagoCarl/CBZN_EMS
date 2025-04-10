@@ -634,7 +634,7 @@ const DTR = () => {
               )}
             </div>
           </div>
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-10">
             {loading ? (
               <div className="flex justify-center py-8 text-green-500 text-xl">Loading records...</div>
             ) : !selectedUser ? (
@@ -668,9 +668,9 @@ const DTR = () => {
                 </div>
 
                 {viewMode === 'table' ? (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto  max-h-[calc(100vh-300px)] relative">
                     <table className="w-full text-sm text-left">
-                      <thead className="bg-[#363636] text-white">
+                      <thead className="sticky top-0 bg-[#363636] text-green-400">
                         <tr>
                           {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
                             <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
@@ -784,9 +784,10 @@ const DTR = () => {
                           </tr>
                         )}
                       </tbody>
-                      <tfoot>
-                        <tr className="font-bold bg-[#363636] text-white">
-                          <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
+                      <tfoot className='sticky size-15 bottom-0 bg-[#2b2b2b] z-20'>
+                    <tr className="font-bold text-white">
+                      <td className="py-3 border-t border-white/10 ">Total Attendance</td>
+                      <td colSpan="4" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
                           <td className="px-4 py-3 border-t border-white/10 text-green-400">
                             {filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}
                           </td>
