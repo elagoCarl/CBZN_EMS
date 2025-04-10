@@ -7,10 +7,13 @@ import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleMo
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
+  const [leaveInfos, setLeaveInfos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('active');
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [scheduleFilter, setScheduleFilter] = useState('active');
+  const [leaveFilter, setLeaveFilter] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
@@ -32,6 +35,24 @@ const SchedulePage = () => {
 
   useEffect(() => {
     fetchSchedules();
+  }, []);
+
+  const fetchLeaveInfos = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/leaveInfo/getAllLeaveInfos');
+      setSchedules(response.data.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching leave infos:', err);
+      setError('Failed to load leave infos. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaveInfos();
   }, []);
 
   const handleAddScheduleClick = () => {
@@ -73,11 +94,11 @@ const SchedulePage = () => {
 
   const filteredSchedules = useMemo(() => {
     return schedules.filter(schedule =>
-      (statusFilter === 'all' ||
-        (statusFilter === 'active' ? schedule.isActive : !schedule.isActive)) &&
+      (scheduleFilter === 'all' ||
+        (scheduleFilter === 'active' ? schedule.isActive : !schedule.isActive)) &&
       schedule.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [schedules, statusFilter, searchQuery]);
+  }, [schedules, scheduleFilter, searchQuery]);
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -149,8 +170,8 @@ const SchedulePage = () => {
                   <div className="flex items-center gap-2">
                     <Filter className="w-4 h-4 text-gray-400" />
                     <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      value={scheduleFilter}
+                      onChange={(e) => setScheduleFilter(e.target.value)}
                       className="bg-[#363636] text-white text-sm rounded-md border-0 py-2 pl-3 pr-8 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500"
                     >
                       <option value="all">All Status</option>

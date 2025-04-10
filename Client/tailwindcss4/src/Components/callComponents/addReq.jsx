@@ -19,7 +19,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
     // Leave fields
     leaveStartDate: '',
     leaveEndDate: '',
-    leaveType: '',
     leaveReason: '',
     // Time Adjustment fields
     timeAdjustDate: '',       // Date-only (YYYY-MM-DD)
@@ -59,7 +58,6 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       overtimeReason: '',
       leaveStartDate: '',
       leaveEndDate: '',
-      leaveType: '',
       leaveReason: '',
       timeAdjustDate: '',
       timeAdjustFrom: '',
@@ -142,11 +140,11 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
       }
     } else if (activeRequest === 'leave') {
       // Leave Request
-      const { leaveStartDate, leaveEndDate, leaveType, leaveReason } = formData;
+      const { leave_id, leaveStartDate, leaveEndDate, leaveReason } = formData;
       try {
         const response = await axios.post('/leaveRequest/addLeaveRequest', {
           user_id: user.id, // Replace with actual user id
-          type: leaveType,
+          leave_id: leave_id,
           start_date: leaveStartDate,
           end_date: leaveEndDate,
           reason: leaveReason,
@@ -275,15 +273,15 @@ export const AddReq = ({ isOpen, onClose, onRequestAdded }) => {
               />
             </div>
             <select
-              name="leaveType"
-              value={formData.leaveType}
+              name="leave_id"
+              value={formData.leave_id}
               onChange={handleInputChange}
               className="w-full bg-[#2b2b2b] text-white p-2 rounded focus:border-none focus:outline focus:outline-green-400"
             >
               <option value="">Select Leave Type</option>
-              <option value="vacation">Vacation Leave</option>
-              <option value="sick">Sick Leave</option>
-              <option value="emergency">Emergency Leave</option>
+              <option value='1'>Sick Leave</option>
+              <option value='2'>Vacation Leave</option>
+              <option value='3'>Paid Leave</option>
             </select>
             <textarea
               name="leaveReason"

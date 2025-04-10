@@ -1,17 +1,26 @@
-const { LeaveRequest, User } = require('../models');
+const { LeaveRequest, LeaveInfo , User } = require('../models');
 const util = require('../../utils');
 const { Op } = require('sequelize');
 const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
+
 const addLeaveRequest = async (req, res) => {
     try {
-        const { user_id, type, start_date, end_date, reason } = req.body;
+        const { user_id, leave_id, start_date, end_date, reason } = req.body;
 
 
         // Check mandatory fields
-        if (!util.improvedCheckMandatoryFields({ user_id, type, start_date, end_date, reason })) {
+        if (!util.improvedCheckMandatoryFields({ user_id, leave_id, start_date, end_date, reason })) {
             return res.status(400).json({ error: 'A mandatory field is missing.' });
+        }
+
+        const leave_info = await LeaveInfo.findByPk(leave_id);
+        if (!leave_info) {
+          return res.status(404).json({
+            successful: false,
+            message: 'Leave info not found.'
+          });
         }
 
         // Check if user exists
@@ -48,7 +57,7 @@ const addLeaveRequest = async (req, res) => {
         }
 
         // Create leave request
-        const newLeaveRequest = await LeaveRequest.create({ user_id, type, start_date, end_date, reason });
+        const newLeaveRequest = await LeaveRequest.create({ user_id, leave_id, start_date, end_date, reason });
         return res.status(201).json({
             successful: true,
             data: newLeaveRequest

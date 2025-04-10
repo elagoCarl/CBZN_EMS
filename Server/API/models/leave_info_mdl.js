@@ -17,12 +17,9 @@ module.exports = function (sequelize, DataTypes) {
     });
 
     LeaveInfo.associate = (models) => {
-        // A User has many leave requests (as an employee requesting leave)
         LeaveInfo.hasMany(models.LeaveRequest, {
             foreignKey: 'leave_id',
-            as: 'leave_info',  // Alias for clarity
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+            as: 'leaveInfo',  
         });
     }
 

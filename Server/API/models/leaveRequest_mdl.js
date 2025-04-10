@@ -1,12 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
     const LeaveRequest = sequelize.define('LeaveRequest', {
-        type: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: { msg: "Type is required." }
-            }
-        },
         start_date: {
             type: DataTypes.DATEONLY,
             allowNull: false,
