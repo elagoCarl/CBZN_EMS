@@ -223,8 +223,10 @@
 
 {/** Don't DELETE COMMENTS ABOVE, FOR TESTING PURPOSES ONLY WHEN UI FAILS FOR FALLBACK*/ }
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import PropTypes from 'prop-types';
+
 
 const AttendanceCalendar = ({ attendanceRecords, userData }) => {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
@@ -443,8 +445,27 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
           </div>
         </div>
       )}
+      
     </div>
   );
 };
 
 export default AttendanceCalendar;
+
+AttendanceCalendar.propTypes = {
+  attendanceRecords: PropTypes.arrayOf(
+    PropTypes.shape({
+      date: PropTypes.string.isRequired,
+      site: PropTypes.string.isRequired,
+      time_in: PropTypes.string.isRequired,
+      time_out: PropTypes.string.isRequired,
+      remarks: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  userData: PropTypes.shape({
+    presentDays: PropTypes.number.isRequired,
+    lateDays: PropTypes.number.isRequired,
+    remoteDays: PropTypes.number.isRequired,
+    averageHours: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  }),
+};
