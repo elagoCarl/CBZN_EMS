@@ -26,15 +26,19 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Automatically determine if it's a rest day
-    const isRestDay = (weekday === 'Saturday' || weekday === 'Sunday');
+    // Check if the user has a previous attendance record without time_out
+    const prevAttendance = await Attendance.findOne({
+      where: {
+        UserId,
+        time_out: null
+      },
+      order: [['createdAt', 'DESC']]
+    });
 
-    // Check for duplicate attendance for the same user and date
-    const duplicate = await Attendance.findOne({ where: { UserId, date } });
-    if (duplicate) {
+    if (prevAttendance) {
       return res.status(400).json({
         successful: false,
-        message: "Attendance for this day already exists."
+        message: "Cannot time in. You have a previous attendance that has not been timed out."
       });
     }
 
@@ -57,20 +61,14 @@ const addAttendance = async (req, res) => {
 
     // Get the shift for the given weekday
     const scheduleForDay = schedUser.Schedule.schedule[weekday];
-    const hasShift = scheduleForDay && scheduleForDay.In;
+    
+    // Determine if it's a rest day (a day is a rest day if it doesn't exist in the schedule)
+    const isRestDay = !scheduleForDay || !scheduleForDay.In;
 
     // Initialize remarks to null
     let remarks = null;
 
     if (!isRestDay) {
-      // For working days, a shift must exist
-      if (!hasShift) {
-        return res.status(400).json({
-          successful: false,
-          message: `No shift defined for ${weekday} in the effective schedule.`
-        });
-      }
-
       // Time in is required on working days
       if (!time_in) {
         return res.status(400).json({
@@ -98,13 +96,13 @@ const addAttendance = async (req, res) => {
       const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
       const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
 
-      let lowerBound, upperBound;
+      let upperBound;
 
       if (site === "Onsite") {
-        lowerBound = scheduledTime.subtract(60, "minute");
+        // No lower bound, can time in anytime
         upperBound = scheduledTime.add(15, "minute");
       } else if (site === "Remote") {
-        lowerBound = scheduledTime.subtract(15, "minute");
+        // No lower bound, can time in anytime
         upperBound = scheduledTime.add(1, "minute");
       }
 
@@ -142,8 +140,6 @@ const addAttendance = async (req, res) => {
     });
   }
 };
-
-
 
 // Get Attendance by ID
 const getAttendanceById = async (req, res) => {
