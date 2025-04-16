@@ -13,7 +13,9 @@ const { get } = require('http');
 const { USER,
     APP_PASSWORD,
     ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_SECRET } = process.env;
+    REFRESH_TOKEN_SECRET,
+    TEMP_PASS_PREFIX,
+    TEMP_PASS_SUFFIX, } = process.env;
 
 
 //nodemailer
@@ -604,7 +606,7 @@ const forgotPass = async (req, res) => {
 
         // Generate a random temporary password
         const randomNumber = Math.floor(100000 + Math.random() * 900000);
-        const tempPassword = `CBZN!${randomNumber}!uSeR`;
+        const tempPassword = `${TEMP_PASS_PREFIX}${randomNumber}${TEMP_PASS_SUFFIX}`;
 
         // Hash the generated temporary password
         const salt = await bcrypt.genSalt();
@@ -619,7 +621,17 @@ const forgotPass = async (req, res) => {
             to: email,
             subject: 'Forgot Password in CBZN Account.',
             text: 'Temporary Password:',
-            html: `<p>Your temporary password is <b>${tempPassword}</b>. Use this to log in.</p>`
+            html: `<div style="font-family: Arial, sans-serif; color: #333;">
+                    <h2>Password Reset Request</h2>
+                    <p>Hello,</p>
+                    <p>We received a request to reset your password for your CBZN account.</p>
+                    <p>Your temporary password is:</p>
+                    <p style="font-size: 18px; font-weight: bold; color: #d9534f;">${tempPassword}</p>
+                    <p>Please use this password to log in, and make sure to change it immediately after.</p>
+                    <p>If you didn’t request a password reset, you can ignore this email.</p>
+                    <br/>
+                    <p>Best regards,<br/>CBZN Support Team</p>
+                    </div>`
         };
 
         // Update password with hashed password in Sequelize

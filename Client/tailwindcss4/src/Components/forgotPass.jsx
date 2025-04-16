@@ -2,9 +2,9 @@ import bg from './img/mainbg.png';
 import logo from '../Components/Img/CBZN-Logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios'
+import axios from '../axiosConfig'
 
-const forgotPass = () => {
+const ForgotPass = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
@@ -12,50 +12,47 @@ const forgotPass = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!email.trim()) {
             setMessage({ text: 'Please enter your email address', type: 'error' });
             return;
         }
-    
+
         setLoading(true);
         setMessage({ text: '' }); // Clear previous messages before request
-    
+
         try {
             const { data } = await axios.post('/users/forgotPass', { email });
             console.log("API Response:", data); // Log the actual response structure
-    
+
             setMessage({
-                text: 'Password reset instructions have been sent to your email',
+                text: 'Password reset instructions have been sent to your email, Redirecting Back to Login Page...',
                 type: 'success'
             });
-    
-            // Keep the success message visible for 5 seconds before clearing
+
+            // After showing success message, redirect to login page after 5 seconds
             setTimeout(() => {
                 setMessage({ text: '' });
+                navigate('/');
             }, 5000);
-    
+
         } catch (error) {
             console.error('Error:', error);
-    
+
             setMessage({
                 text: error.response?.data?.message || 'Something went wrong. Please try again.',
                 type: 'error'
             });
-    
+
         } finally {
             setLoading(false);
         }
     };
-    
-    
-
-
 
     return (
         <div
             className="bg-cover bg-no-repeat bg-center min-h-screen w-full flex flex-col"
-            style={{ backgroundImage: `url(${ bg })` }}
+            style={{ backgroundImage: `url(${bg})` }}
         >
             {/* Top Menu */}
             <header className="sticky top-0 left-0 w-full bg-black/90 backdrop-blur-sm text-white p-3 md:p-4 flex justify-between items-center z-50 shadow-md">
@@ -73,7 +70,7 @@ const forgotPass = () => {
                     </h2>
 
                     {message.text && (
-                        <div className={`mb-4 p-3 rounded text-sm text-center ${ message.type === 'error' ? 'bg-red-900/70 text-red-200' : 'bg-green-900/70 text-green-200'
+                        <div className={`mb-4 p-3 rounded text-sm text-center ${message.type === 'error' ? 'bg-red-900/70 text-red-200' : 'bg-green-900/70 text-green-200'
                             }`}>
                             {message.text}
                         </div>
@@ -99,7 +96,7 @@ const forgotPass = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`font-bold text-gray-900 hover:bg-green-600 text-center text-md rounded-md bg-green-500 p-2 md:p-3 duration-300 w-full transition-all ${ loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg' }`}
+                                className={`font-bold text-gray-900 hover:bg-green-600 text-center text-md rounded-md bg-green-500 p-2 md:p-3 duration-300 w-full transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-lg'}`}
                             >
                                 {loading ? 'Sending...' : 'Reset Password'}
                             </button>
@@ -124,4 +121,4 @@ const forgotPass = () => {
     );
 };
 
-export default forgotPass;
+export default ForgotPass;
