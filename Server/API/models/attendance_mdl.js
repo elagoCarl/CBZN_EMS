@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         remarks: {
-            type: DataTypes.ENUM('OnTime', 'Late'),
+            type: DataTypes.STRING,
             allowNull: true
         }
     }, {

@@ -1,28 +1,28 @@
-const { Attendance, User, Schedule, SchedUser } = require("../models"); // Ensure models match
+const { Attendance, User, Schedule, SchedUser, ScheduleAdjustment } = require("../models"); // Ensure models match
 const util = require("../../utils"); // Utility functions if needed
 const dayjs = require('dayjs'); // Date validation
 const { Op } = require("sequelize");
 const customParseFormat = require('dayjs/plugin/customParseFormat');
+const e = require("express");
 dayjs.extend(customParseFormat);
 
 // Create Attendance === PANULL NG VALUE TIMEOUT SA REQUEST BODY ===
 const addAttendance = async (req, res) => {
   try {
-    const { weekday, date, time_in, site, UserId } = req.body;
+    const UserId = req.params.id
+    const { site } = req.body;
+
+    // Generate current timestamp using dayjs
+    const now = dayjs();
+    const time_in = now.format('YYYY-MM-DD HH:mm');
+    const weekday = now.format('dddd');
+    const date = now.format('YYYY-MM-DD');
 
     // Validate mandatory fields
-    if (!util.checkMandatoryFields([weekday, date, UserId])) {
+    if (!util.checkMandatoryFields([site, UserId])) {
       return res.status(400).json({
         successful: false,
         message: "A mandatory field is missing."
-      });
-    }
-
-    // Validate that the provided date matches the weekday
-    if (dayjs(date).format('dddd') !== weekday) {
-      return res.status(400).json({
-        successful: false,
-        message: `The provided date (${date}) does not correspond to ${weekday}.`
       });
     }
 
@@ -42,85 +42,76 @@ const addAttendance = async (req, res) => {
       });
     }
 
-    // Retrieve the effective schedule via SchedUser
-    const schedUser = await SchedUser.findOne({
+    // Check for schedule adjustments
+    const schedAdjusted = await ScheduleAdjustment.findOne({
       where: {
         user_id: UserId,
-        effectivity_date: { [Op.lte]: date }
-      },
-      order: [['effectivity_date', 'DESC']],
-      include: [{ model: Schedule, where: { isActive: true }, required: true }]
+        status: 'approved',
+        date: date
+      }
     });
 
-    if (!schedUser || !schedUser.Schedule) {
-      return res.status(404).json({
-        successful: false,
-        message: "Effective schedule not found for user."
+    let scheduleForDay = null;
+    if (!schedAdjusted) {
+      // Retrieve the effective schedule via SchedUser
+      const schedUser = await SchedUser.findOne({
+        where: {
+          user_id: UserId,
+          effectivity_date: { [Op.lte]: date }
+        },
+        order: [['effectivity_date', 'DESC']],
+        include: [{ model: Schedule, where: { isActive: true }, required: true }]
       });
+      
+      if (!schedUser || !schedUser.Schedule || !schedUser.Schedule.schedule[weekday]) {
+        // No schedule found or no schedule for this weekday - treat as rest day
+        scheduleForDay = null;
+      } else {
+        scheduleForDay = { 
+          In: dayjs(schedUser.Schedule.schedule[weekday].In, 'HH:mm').format('HH:mm:ss'), 
+          Out: dayjs(schedUser.Schedule.schedule[weekday].Out, 'HH:mm').format('HH:mm:ss') 
+        };
+      }
+    } else {
+      // Use the adjusted schedule times
+      scheduleForDay = {
+        In: schedAdjusted.time_in,
+        Out: schedAdjusted.time_out
+      };
     }
 
-    // Get the shift for the given weekday
-    const scheduleForDay = schedUser.Schedule.schedule[weekday];
-    
-    // Determine if it's a rest day (a day is a rest day if it doesn't exist in the schedule)
+    // Determine if it's a rest day (a day is a rest day if there is no defined schedule or missing In time)
     const isRestDay = !scheduleForDay || !scheduleForDay.In;
 
-    // Initialize remarks to null
-    let remarks = null;
+    // Initialize remarks. For rest days, mark as "OnTime" without additional check.
+    let remarks = "OnTime";
 
+    // Only perform lateness validation if it is not a rest day.
     if (!isRestDay) {
-      // Time in is required on working days
-      if (!time_in) {
-        return res.status(400).json({
-          successful: false,
-          message: "Time in is required for working days."
-        });
-      }
-
-      // Validate time_in format and date part
-      if (!dayjs(time_in, "YYYY-MM-DD HH:mm", true).isValid()) {
-        return res.status(400).json({
-          successful: false,
-          message: "time_in must be in 'YYYY-MM-DD HH:mm' format."
-        });
-      }
-
-      if (dayjs(time_in, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD") !== date) {
-        return res.status(400).json({
-          successful: false,
-          message: `The date part of time_in does not match the provided date (${date}).`
-        });
-      }
-
-      // Validate clock-in window and determine remarks
-      const scheduledTime = dayjs(`${date}T${scheduleForDay.In}:00`);
-      const clockInTime = dayjs(time_in, "YYYY-MM-DD HH:mm");
+      // Determine scheduled clock in time based on the shift
+      const scheduledTime = dayjs(`${date}T${scheduleForDay.In}`);
+      const clockInTime = now;
 
       let upperBound;
-
       if (site === "Onsite") {
-        // No lower bound, can time in anytime
         upperBound = scheduledTime.add(15, "minute");
       } else if (site === "Remote") {
-        // No lower bound, can time in anytime
         upperBound = scheduledTime.add(1, "minute");
       }
 
-      // Set remarks to "OnTime" or "Late"
+      // Set remarks to "Late" if clockInTime is after the allowed upper bound
       if (clockInTime.isAfter(upperBound)) {
         remarks = "Late";
-      } else {
-        remarks = "OnTime";
       }
     }
 
-    // Create the attendance record with the derived isRestDay and remarks value
+    // Create the attendance record with the derived rest day flag and remarks value
     const newAttendance = await Attendance.create({
       weekday,
       isRestDay,
-      site: site || null,
+      site,
       date,
-      time_in: time_in || null,
+      time_in,
       time_out: null,
       remarks,
       UserId
@@ -128,10 +119,11 @@ const addAttendance = async (req, res) => {
 
     return res.status(201).json({
       successful: true,
-      message: isRestDay ? "Rest day attendance recorded successfully." : "Attendance recorded successfully.",
+      message: isRestDay
+        ? "Rest day attendance recorded successfully."
+        : "Attendance recorded successfully.",
       data: newAttendance
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -205,13 +197,17 @@ const getAllAttendances = async (req, res) => {
 // Update Attendance
 const updateAttendance = async (req, res) => {
   try {
-    const { time_out, UserId } = req.body;
+    const UserId = req.params.id;
+
+    // Generate current timestamp for time_out
+    const now = dayjs();
+    const time_out = now.format('YYYY-MM-DD HH:mm');
 
     // Validate mandatory fields
-    if (!util.checkMandatoryFields([time_out, UserId])) {
+    if (!util.checkMandatoryFields([UserId])) {
       return res.status(400).json({
         successful: false,
-        message: "A mandatory field is missing."
+        message: "UserId is required."
       });
     }
 
@@ -240,40 +236,63 @@ const updateAttendance = async (req, res) => {
       });
     }
 
-    // Determine the current date
-    const currentDate = dayjs().format("YYYY-MM-DD");
-
-    // If the found attendance record's date is not the current day,
-    // check if a new attendance record for today exists.
-    // If it does, the previous attendance record should not be timed out.
-    if (attendance.date !== currentDate) {
-      const todayAttendance = await Attendance.findOne({
-        where: { UserId, date: currentDate }
-      });
-      if (todayAttendance) {
-        return res.status(400).json({
-          successful: false,
-          message: "Cannot time out previous attendance after a new time in is detected."
-        });
-      }
-    }
-
-    // Validate if time_out is a valid datetime format
-    const timeOutDate = dayjs(time_out, 'YYYY-MM-DD HH:mm', true);
-    if (!timeOutDate.isValid()) {
-      return res.status(400).json({
-        successful: false,
-        message: "Invalid time_out format. Please use YYYY-MM-DD HH:mm (e.g., 2025-02-17 17:00)."
-      });
-    }
-
     // Validate if time_out is later than time_in
-    const timeInDate = dayjs(attendance.time_in);
-    if (timeOutDate.isBefore(timeInDate) || timeOutDate.isSame(timeInDate)) {
+    const timeInDate = dayjs(attendance.time_in, "YYYY-MM-DD HH:mm");
+    if (now.isBefore(timeInDate) || now.isSame(timeInDate)) {
       return res.status(400).json({
         successful: false,
         message: "Time out cannot be earlier or the same as time in."
       });
+    }
+
+    // Only perform undertime check if attendance is not a rest day
+    if (!attendance.isRestDay) {
+      // Determine schedule for the day using ScheduleAdjustment if available
+      const schedAdjusted = await ScheduleAdjustment.findOne({
+        where: {
+          user_id: UserId,
+          status: 'approved',
+          date: attendance.date
+        }
+      });
+      
+      let scheduleForDay = null;
+      if (!schedAdjusted) {
+        // Retrieve the effective schedule via SchedUser if no adjustment exists
+        const schedUser = await SchedUser.findOne({
+          where: {
+            user_id: UserId,
+            effectivity_date: { [Op.lte]: attendance.date }
+          },
+          order: [['effectivity_date', 'DESC']],
+          include: [{ model: Schedule, where: { isActive: true }, required: true }]
+        });
+        
+        if (schedUser && schedUser.Schedule && schedUser.Schedule.schedule[attendance.weekday]) {
+          scheduleForDay = { 
+            In: dayjs(schedUser.Schedule.schedule[attendance.weekday].In, 'HH:mm').format('HH:mm:ss'), 
+            Out: dayjs(schedUser.Schedule.schedule[attendance.weekday].Out, 'HH:mm').format('HH:mm:ss') 
+          };
+        }
+      } else {
+        // Use the adjusted schedule times
+        scheduleForDay = {
+          In: schedAdjusted.time_in,
+          Out: schedAdjusted.time_out
+        };
+      }
+
+      if (scheduleForDay && scheduleForDay.Out) {
+        // Determine scheduled clock out time based on the schedule
+        const scheduledOut = dayjs(`${attendance.date}T${scheduleForDay.Out}`);
+        
+        // Append "Undertime" to remarks if clock out is before scheduled out
+        if (now.isBefore(scheduledOut)) {
+          attendance.remarks = attendance.remarks
+            ? `${attendance.remarks}, Undertime`
+            : "Undertime";
+        }
+      }
     }
 
     // Update time_out and save the attendance record
@@ -285,7 +304,6 @@ const updateAttendance = async (req, res) => {
       message: "Attendance updated successfully.",
       data: attendance
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -294,7 +312,6 @@ const updateAttendance = async (req, res) => {
     });
   }
 };
-
 
 const getAttendancesByUserId = async (req, res) => {
   try {
