@@ -9,6 +9,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   const [successMessage, setSuccessMessage] = useState(""); // For success notifications
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Define local select options as arrays of objects
   const employmentStatusOptions = [
@@ -91,6 +92,8 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
     if (isOpen && userId) {
       (async () => {
         try {
+          setSuccessMessage("Loading user data...");
+
           const [
             userDataResponse,
             userInfoResponse,
@@ -141,9 +144,10 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
           };
 
           setFormData(fetchedData);
+          setSuccessMessage(""); // Clear loading message
         } catch (error) {
           console.error('Error fetching user data:', error);
-          alert('Failed to load user data.');
+          setErrorMessage('Failed to load user data.');
         }
       })();
     }
@@ -157,8 +161,11 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       // 1. Update main user (including jobTitleId)
+      setSuccessMessage("Updating user account...");
       await axios.put(`/users/updateUser/${userId}`, {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
@@ -169,48 +176,47 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       });
 
       // 2. Update user info
+      setSuccessMessage("Updating personal information...");
       await axios.put(`/userInfo/updateUserInfo`, {
         UserId: userId,
-        age: parseInt(formData.age),
-        city_add: formData.city_add,
-        provincial_add: formData.provincial_add,
-        birthdate: formData.birthdate,
-        civil_status: formData.civil_status,
-        name_of_spouse: formData.name_of_spouse,
-        spouse_occupation: formData.spouse_occupation,
-        spouse_employed_by: formData.spouse_employed_by,
-        father_name: formData.father_name,
-        father_occupation: formData.father_occupation,
-        father_employed_by: formData.father_employed_by,
-        mother_name: formData.mother_name,
-        mother_occupation: formData.mother_occupation,
-        mother_employed_by: formData.mother_employed_by,
-        height: formData.height,
-        weight: formData.weight,
-        religion: formData.religion,
-        citizenship: formData.citizenship,
-        no_of_children: formData.no_of_children
+        age: parseInt(formData.age) || 0,
+        city_add: formData.city_add || "N/A",
+        provincial_add: formData.provincial_add || "N/A",
+        birthdate: formData.birthdate || "1900-01-01",
+        civil_status: formData.civil_status || "Single",
+        name_of_spouse: formData.name_of_spouse || "N/A",
+        spouse_occupation: formData.spouse_occupation || "N/A",
+        spouse_employed_by: formData.spouse_employed_by || "N/A",
+        father_name: formData.father_name || "N/A",
+        father_occupation: formData.father_occupation || "N/A",
+        father_employed_by: formData.father_employed_by || "N/A",
+        mother_name: formData.mother_name || "N/A",
+        mother_occupation: formData.mother_occupation || "N/A",
+        mother_employed_by: formData.mother_employed_by || "N/A",
+        height: formData.height || "0",
+        weight: formData.weight || "0",
+        religion: formData.religion || "N/A",
+        citizenship: formData.citizenship || "N/A",
+        no_of_children: parseInt(formData.no_of_children) || 0
       });
 
       // 3. Update emergency contact
+      setSuccessMessage("Updating emergency contact...");
       await axios.put(`/emgncyContact/updateEmgncyContact/${userId}`, {
-        name: formData.emergency_name,
-        relationship: formData.emergency_relationship,
-        contact_number: formData.emergency_contact
+        name: formData.emergency_name || "N/A",
+        relationship: formData.emergency_relationship || "N/A",
+        contact_number: formData.emergency_contact || "N/A"
       });
 
       // 4. Update schedule-user association
+      setSuccessMessage("Updating schedule...");
       await axios.put(`/schedUser/updateSchedUserByUser/${userId}`, {
         schedule_id: parseInt(formData.schedule) || null,
-        effectivity_date: formData.effectivity_date
-      });
-      console.log({
-        schedule_id: parseInt(formData.schedule) || null,
-        effectivity_date: formData.effectivity_date,
+        effectivity_date: formData.effectivity_date || new Date().toISOString().split('T')[0]
       });
 
       // 5. Show success message, then close after a short delay
-      setSuccessMessage("User updated successfully.");
+      setSuccessMessage("User updated successfully!");
       setTimeout(() => {
         onUserUpdated(formData);
         onClose();
@@ -221,8 +227,11 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage("Failed to update user.");
+        setErrorMessage(error.message || "Failed to update user.");
       }
+      setSuccessMessage(""); // Clear any success message if there's an error
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -425,6 +434,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             value={formData[field.name] || ''}
             className={baseClass}
             required={isRequired}
+            disabled={isSubmitting || field.disabled}
           >
             <option value="" className="bg-black/70 text-white">{field.placeholder}</option>
             {field.options.map(opt => (
@@ -442,7 +452,7 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
             onChange={handleChange}
             value={formData[field.name] || ''}
             className={baseClass}
-            disabled={field.disabled}
+            disabled={isSubmitting || field.disabled}
             required={isRequired}
             {...extraProps}
           />
@@ -458,7 +468,11 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
       <div className="bg-[#2b2b2b] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
         <div className="p-6 flex justify-between items-center border-b border-white/10">
           <h2 className="text-2xl font-bold text-white">Edit User</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+            disabled={isSubmitting}
+          >
             <X size={24} />
           </button>
         </div>
@@ -497,15 +511,17 @@ const EditUserModal = ({ isOpen, onClose, userId, onUserUpdated }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                disabled={isSubmitting}
               >
-                Update User
+                {isSubmitting ? "Processing..." : "Update User"}
               </button>
             </div>
           </form>
