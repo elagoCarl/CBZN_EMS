@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Filter, User, ChevronDown } from 'lucide-react';
 import Sidebar from './callComponents/sidebar';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isBetween from 'dayjs/plugin/isBetween';
 import axios from '../axiosConfig.js';
 import { useAuth } from '../Components/authContext.jsx';
+import { Filter, User, ChevronDown, Calendar, List } from 'lucide-react';
+import DTRCalendarView from "./callComponents/DTRCalendarView.jsx";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -27,11 +28,20 @@ const SavedDTR = () => {
   const [schedules, setSchedules] = useState([]);
   const [scheduleUsers, setScheduleUsers] = useState([]);
 
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'calendar'
+
+
+
   // Memoize the current cutoff based on selectedCutoffId
   const currentCutoff = useMemo(
     () => cutoffs.find(c => c.id === selectedCutoffId),
     [selectedCutoffId, cutoffs]
   );
+
+  // Function to toggle between table and calendar views
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'table' ? 'calendar' : 'table');
+  };
 
   // When auth user is available, set it as the default selected user
   useEffect(() => {
@@ -238,6 +248,25 @@ const SavedDTR = () => {
     );
   }, [savedDTRData, currentCutoff]);
 
+  const calendarFormatData = useMemo(() => {
+    return filteredData.map(record => ({
+      id: record.id,
+      user_id: record.user_id,
+      date: record.date,
+      weekday: record.weekday,
+      isRestDay: record.remarks && record.remarks.toLowerCase().includes('rest day'),
+      site: record.site || 'Onsite',
+      time_in: record.time_in,
+      time_out: record.time_out,
+      totalHours: record.regular_hours,
+      remarks: record.remarks,
+      isTimeAdjustment: record.remarks && record.remarks.toLowerCase().includes('adjust'),
+      isLeave: record.remarks && record.remarks.toLowerCase().includes('leave'),
+      isAbsent: record.remarks && record.remarks.toLowerCase().includes('absent'),
+      workShift: record.work_shift
+    }));
+  }, [filteredData]);
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
@@ -246,6 +275,24 @@ const SavedDTR = () => {
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
             Saved <span className="text-green-500">DTR Records</span>
           </h1>
+
+          {/* Add view toggle button */}
+          <button
+            onClick={toggleViewMode}
+            className="flex items-center gap-2 bg-[#363636] text-white rounded-md py-2 px-4 hover:bg-[#444444] transition-colors"
+          >
+            {viewMode === 'table' ? (
+              <>
+                <Calendar className="w-4 h-4" />
+                <span>Calendar View</span>
+              </>
+            ) : (
+              <>
+                <List className="w-4 h-4" />
+                <span>Table View</span>
+              </>
+            )}
+          </button>
         </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
@@ -325,7 +372,7 @@ const SavedDTR = () => {
                 <div className="text-gray-400 text-sm">No records to display</div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div>
                 <div className="mb-4 px-4 py-3 bg-[#363636] rounded-md flex flex-wrap gap-4">
                   <div className="flex items-center">
                     <span className="text-gray-400 text-sm">Employee ID:</span>
@@ -348,91 +395,106 @@ const SavedDTR = () => {
                     <span className="ml-2 text-white">{getUserSchedule(selectedUser)}</span>
                   </div>
                 </div>
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-[#363636] text-white">
-                    <tr>
-                      {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
-                        <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((r, i) => (
-                      <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
-                        <td className="px-4 py-3 text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.work_shift}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.site}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.time_in}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.time_out}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.regular_hours.toFixed(2)}</td>
-                        <td className="px-4 py-3 text-gray-300">{r.overtime > 0 ? (
-                          <div className="text-xs">
-                            <span className="font-medium text-green-400">{r.overtime.toFixed(2)} hrs</span>
-                          </div>
-                        ) : (
-                          '0.00'
-                        )}</td>
-                        <td className="px-4 py-3 text-gray-300">
-                          {r.late_hours > 0 ? (
-                            <div className="text-xs">
-                              <span className="font-medium text-orange-400">{r.late_hours.toFixed(2)} hrs</span>
-                            </div>
-                          ) : (
-                            '0.00'
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-gray-300">
-                          {r.undertime > 0 ? (
-                            <div className="text-xs">
-                              <span className="font-medium text-orange-400">{r.undertime.toFixed(2)} hrs</span>
-                            </div>
-                          ) : (
-                            '0.00'
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-gray-300">
-                          {r.remarks && r.remarks.toLowerCase() !== 'rest day' && (
-                            <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${(r.remarks.toLowerCase().includes('late') || r.remarks.toLowerCase().includes('under')) ? 'bg-orange-500/20 text-orange-400' :
-                              r.remarks.toLowerCase().includes('leave') ? 'bg-purple-500/20 text-purple-400' :
-                                r.remarks.toLowerCase().includes('ontime') ? 'bg-green-500/20 text-green-400' :
-                                  r.remarks.toLowerCase().includes('adjust') ? 'bg-blue-500/20 text-blue-400' :
-                                    r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
-                                      'bg-gray-500/20 text-gray-400'
-                              }`}>
-                              {r.remarks}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                    {!filteredData.length && (
-                      <tr>
-                        <td colSpan="10" className="px-4 py-8 text-center text-gray-400">
-                          No saved DTR records found for the selected period
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr className="font-bold bg-[#363636] text-white">
-                      <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
-                      <td className="px-4 py-3 border-t border-white/10 text-green-400">
-                        {filteredData.reduce((sum, r) => sum + (r.regular_hours || 0), 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-green-400">
-                        {filteredData.reduce((sum, r) => sum + (r.overtime || 0), 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
-                        {filteredData.reduce((sum, r) => sum + (r.late_hours || 0), 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
-                        {filteredData.reduce((sum, r) => sum + (r.undertime || 0), 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10"></td>
-                    </tr>
-                  </tfoot>
-                </table>
+
+                {viewMode === 'table' ? (
+                  <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
+                    <table className="w-full text-sm text-left relative">
+                      <thead className="bg-[#363636] text-white sticky top-0 z-10">
+                        <tr>
+                          {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
+                            <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredData.map((r, i) => (
+                          <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
+                            <td className="px-4 py-3 text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.work_shift}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.site}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.time_in}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.time_out}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.regular_hours.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-gray-300">{r.overtime > 0 ? (
+                              <div className="text-xs">
+                                <span className="font-medium text-green-400">{r.overtime.toFixed(2)} hrs</span>
+                              </div>
+                            ) : (
+                              '0.00'
+                            )}</td>
+                            <td className="px-4 py-3 text-gray-300">
+                              {r.late_hours > 0 ? (
+                                <div className="text-xs">
+                                  <span className="font-medium text-orange-400">{r.late_hours.toFixed(2)} hrs</span>
+                                </div>
+                              ) : (
+                                '0.00'
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-gray-300">
+                              {r.undertime > 0 ? (
+                                <div className="text-xs">
+                                  <span className="font-medium text-orange-400">{r.undertime.toFixed(2)} hrs</span>
+                                </div>
+                              ) : (
+                                '0.00'
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-gray-300">
+                              {r.remarks && r.remarks.toLowerCase() !== 'rest day' && (
+                                <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${(r.remarks.toLowerCase().includes('late') || r.remarks.toLowerCase().includes('under')) ? 'bg-orange-500/20 text-orange-400' :
+                                  r.remarks.toLowerCase().includes('leave') ? 'bg-purple-500/20 text-purple-400' :
+                                    r.remarks.toLowerCase().includes('ontime') ? 'bg-green-500/20 text-green-400' :
+                                      r.remarks.toLowerCase().includes('adjust') ? 'bg-blue-500/20 text-blue-400' :
+                                        r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
+                                          'bg-gray-500/20 text-gray-400'
+                                  }`}>
+                                  {r.remarks}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {!filteredData.length && (
+                          <tr>
+                            <td colSpan="10" className="px-4 py-8 text-center text-gray-400">
+                              No saved DTR records found for the selected period
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                      <tfoot className="sticky bottom-0 z-10">
+                        <tr className="font-bold bg-[#363636] text-white">
+                          <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
+                          <td className="px-4 py-3 border-t border-white/10 text-green-400">
+                            {filteredData.reduce((sum, r) => sum + (r.regular_hours || 0), 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-green-400">
+                            {filteredData.reduce((sum, r) => sum + (r.overtime || 0), 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                            {filteredData.reduce((sum, r) => sum + (r.late_hours || 0), 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                            {filteredData.reduce((sum, r) => sum + (r.undertime || 0), 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                ) : (
+                  <DTRCalendarView
+                    attendanceData={calendarFormatData}
+                    currentCutoff={currentCutoff}
+                  />
+                )}
+
+
+
+
               </div>
+
             )}
           </div>
         </div>
