@@ -9,6 +9,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [scheduleOptions, setScheduleOptions] = useState([]);
   const [jobTitleOptions, setJobTitleOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch schedules when the modal opens
   useEffect(() => {
@@ -64,9 +65,12 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       // 1. Create the main user with JobTitleId
-      const { data: userResponse } = await axios.post('/users/addUser', {
+      setSuccessMessage("Creating user account...");
+      const userResponse = await axios.post('/users/addUser', {
         employeeId: parseInt(formData.employeeId),
         email: formData.email,
         name: formData.name,
@@ -75,13 +79,14 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
         jobTitleId: parseInt(formData.JobTitleId) || null
       });
 
-      if (!userResponse || !userResponse.user || !userResponse.user.id) {
+      if (!userResponse || !userResponse.data || !userResponse.data.user || !userResponse.data.user.id) {
         throw new Error("Failed to retrieve user ID.");
       }
 
-      const userId = userResponse.user.id;
+      const userId = userResponse.data.user.id;
 
       // 2. Create user info (with default values if not provided)
+      setSuccessMessage("Creating user personal information...");
       await axios.post('/userInfo/addUserInfo', {
         UserId: userId,
         age: formData.age ? parseInt(formData.age) : 0,
@@ -106,6 +111,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       });
 
       // 3. Create emergency contact (with default values if not provided)
+      setSuccessMessage("Creating emergency contact information...");
       await axios.post('/emgncyContact/addEmgncyContact', {
         UserId: userId,
         name: formData.emergency_name || "N/A",
@@ -114,6 +120,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       });
 
       // 4. Create schedule-user association
+      setSuccessMessage("Assigning user schedule...");
       await axios.post('/schedUser/addSchedUser', {
         schedule_id: formData.schedule,
         user_id: userId,
@@ -121,9 +128,9 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       });
 
       // 5. Show success message and close
-      setSuccessMessage("User added successfully.");
+      setSuccessMessage("User added successfully!");
       setTimeout(() => {
-        onUserAdded(userResponse.user);
+        onUserAdded(userResponse.data.user);
         onClose();
       }, 1500);
 
@@ -132,8 +139,11 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.message);
       } else {
-        setErrorMessage("Failed to add user.");
+        setErrorMessage(error.message || "Failed to add user.");
       }
+      setSuccessMessage("");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -335,6 +345,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             onChange={handleChange}
             className={baseClass}
             required={isRequired}
+            disabled={isSubmitting}
           >
             <option value="" className="bg-black/70 text-white">{field.placeholder}</option>
             {field.options.map(opt => {
@@ -361,6 +372,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
             onChange={handleChange}
             className={baseClass}
             required={isRequired}
+            disabled={isSubmitting}
             {...extraProps}
           />
         )}
@@ -378,6 +390,7 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
+            disabled={isSubmitting}
           >
             <X size={24} />
           </button>
@@ -416,15 +429,17 @@ const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors"
+                className="flex-1 px-6 py-3 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                disabled={isSubmitting}
               >
-                Add User
+                {isSubmitting ? "Processing..." : "Add User"}
               </button>
             </div>
           </form>

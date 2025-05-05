@@ -3,11 +3,10 @@ import axios from "../axiosConfig.js";
 import Sidebar from "./callComponents/sidebar.jsx";
 import dayjs from "dayjs";
 import { useAuth } from '../Components/authContext.jsx';
-
+import AttendanceCalendar from "../Components/callComponents/attendanceCalendar.jsx";
 
 const MyAttendance = () => {
   const { user } = useAuth();
-  // console.log("userid: ", user.id)
   const userId = user.id;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,9 +22,10 @@ const MyAttendance = () => {
     status: "",
   });
   const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [siteSelection, setSiteSelection] = useState("Onsite"); // Default to Onsite
+  const [siteSelection, setSiteSelection] = useState("Onsite");
   const [attendanceStatus, setAttendanceStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState("table"); // "table" or "calendar"
 
   // Responsive records per page based on screen size
   const getRecordsPerPage = () => {
@@ -50,13 +50,13 @@ const MyAttendance = () => {
     if (recordDate === timeOutObj.format("YYYY-MM-DD")) {
       return timeOutObj.format("hh:mm A");
     }
-    return `${timeOutObj.format("hh:mm A")} (${timeOutObj.format("MM/DD/YYYY")})`;
+    return `${ timeOutObj.format("hh:mm A") } (${ timeOutObj.format("MM/DD/YYYY") })`;
   };
 
   // Fetch user data
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`/users/getUser/${userId}`);
+      const response = await axios.get(`/users/getUser/${ userId }`);
       if (response.data && response.data.successful) {
         const user = response.data.data;
         setUserData({
@@ -78,7 +78,7 @@ const MyAttendance = () => {
   // Fetch attendance records and include remarks and unique id
   const fetchAttendanceRecords = async () => {
     try {
-      const response = await axios.get(`/attendance/getAttendanceByUser/${userId}`);
+      const response = await axios.get(`/attendance/getAttendanceByUser/${ userId }`);
       if (response.data && response.data.successful && Array.isArray(response.data.data)) {
         const formattedRecords = response.data.data
           .map(record => ({
@@ -170,11 +170,11 @@ const MyAttendance = () => {
     } catch (error) {
       console.error("Error recording time-out:", error);
       if (error.response) {
-        setAttendanceStatus(error.response.data?.message || `Error ${error.response.status}: Failed to record time-out.`);
+        setAttendanceStatus(error.response.data?.message || `Error ${ error.response.status }: Failed to record time-out.`);
       } else if (error.request) {
         setAttendanceStatus("Server did not respond. Please try again.");
       } else {
-        setAttendanceStatus(`Error: ${error.message}`);
+        setAttendanceStatus(`Error: ${ error.message }`);
       }
     } finally {
       setIsLoading(false);
@@ -182,6 +182,11 @@ const MyAttendance = () => {
   };
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Toggle view mode between table and calendar
+  const toggleViewMode = () => {
+    setViewMode(prevMode => prevMode === "table" ? "calendar" : "table");
+  };
 
   // Formatting helpers for date and time
   const formatDate = (date) => {
@@ -262,7 +267,7 @@ const MyAttendance = () => {
                 <div className="text-white">{record.time_out}</div>
 
                 <div className="font-bold text-white">Remarks:</div>
-                <div className={`${record.remarks === "Late"
+                <div className={`${ record.remarks === "Late"
                   ? "text-red-500"
                   : record.remarks === "OnTime"
                     ? "text-green-500"
@@ -272,7 +277,7 @@ const MyAttendance = () => {
                 </div>
 
                 <div className="font-bold text-white">Status:</div>
-                <div className={`${record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"}`}>
+                <div className={`${ record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500" }`}>
                   {record.isRestDay}
                 </div>
               </div>
@@ -314,7 +319,7 @@ const MyAttendance = () => {
 
         {/* Status Message */}
         {attendanceStatus && (
-          <div className={`mt-2 p-2 rounded text-center ${attendanceStatus.includes("successfully")
+          <div className={`mt-2 p-2 rounded text-center ${ attendanceStatus.includes("successfully")
             ? "bg-green-500/20 text-green-300"
             : "bg-red-500/20 text-red-300"
             }`}>
@@ -325,6 +330,16 @@ const MyAttendance = () => {
         {/* Attendance Buttons and Site Dropdown */}
         <div className="flex flex-col sm:flex-row justify-between sm:justify-end gap-2 items-center mt-4">
           <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={toggleViewMode}
+              className={`text-white text-xs sm:text-sm cursor-pointer ${ viewMode === "calendar"
+                ? "bg-green-700 hover:bg-green-800"
+                : "bg-black/90 hover:bg-black/20"
+                } px-3 py-2 rounded-md duration-300 flex items-center gap-1`}
+              title={viewMode === "calendar" ? "Switch to Table View" : "Switch to Calendar View"}
+            >
+              📅 <span className="hidden sm:inline">{viewMode === "calendar" ? "Table" : "Calendar"}</span>
+            </button>
             <label className="text-white text-sm sm:text-base">Site:</label>
             <select
               value={siteSelection}
@@ -353,124 +368,135 @@ const MyAttendance = () => {
           </div>
         </div>
 
-        {/* Attendance Records Table (Desktop) / Cards (Mobile) */}
-        <div className="bg-[#363636] rounded-lg overflow-hidden mt-4 flex flex-col w-full">
-          {windowWidth >= 640 ? (
-            <>
-              <div className="overflow-x-auto">
-                <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)] md:max-h-[calc(100vh-400px)]">
-                  <table className="w-full text-white">
-                    <thead className="sticky top-0 bg-[#2b2b2b] z-10">
-                      <tr>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Date</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Day</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Site</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Time-in</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Time-out</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Remarks</th>
-                        <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentRecords.length > 0 ? (
-                        currentRecords.map((record, index) => (
-                          <tr key={index} className=" hover:bg-[#404040]">
-                            <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.date}</td>
-                            <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.day}</td>
-                            <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.site}</td>
-                            <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_in}</td>
-                            <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_out}</td>
-                            <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${record.remarks === "Late"
-                              ? "text-red-500"
-                              : record.remarks === "OnTime"
-                                ? "text-green-500"
-                                : "text-gray-400"
-                              }`}>
-                              {record.remarks}
-                            </td>
-                            <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"
-                              }`}>
-                              {record.isRestDay}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
+        {/* Conditional Rendering based on viewMode */}
+        {viewMode === "table" ? (
+          // Attendance Records Table (Desktop) / Cards (Mobile)
+          <div className="bg-[#363636] rounded-lg overflow-hidden mt-4 flex flex-col w-full">
+            {windowWidth >= 640 ? (
+              <>
+                <div className="overflow-x-auto">
+                  <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)] md:max-h-[calc(100vh-400px)]">
+                    <table className="w-full text-white">
+                      <thead className="sticky top-0 bg-[#2b2b2b] z-10">
                         <tr>
-                          <td colSpan="7" className="py-4 text-center text-gray-400">No attendance records found</td>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Date</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Day</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Site</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Time-in</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Time-out</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Remarks</th>
+                          <th className="text-white py-1 sm:py-2 px-2 sm:px-4 text-center text-xs sm:text-sm">Status</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {currentRecords.length > 0 ? (
+                          currentRecords.map((record, index) => (
+                            <tr key={index} className="hover:bg-[#404040]">
+                              <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.date}</td>
+                              <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.day}</td>
+                              <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.site}</td>
+                              <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_in}</td>
+                              <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_out}</td>
+                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${ record.remarks === "Late"
+                                ? "text-red-500"
+                                : record.remarks === "OnTime"
+                                  ? "text-green-500"
+                                  : "text-gray-400"
+                                }`}>
+                                {record.remarks}
+                              </td>
+                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${ record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"
+                                }`}>
+                                {record.isRestDay}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="7" className="py-4 text-center text-gray-400">No attendance records found</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              </>
+            ) : (
+              // Mobile card layout
+              <div className="p-2 overflow-y-auto max-h-[calc(100vh-280px)]">
+                {renderMobileTable()}
               </div>
-            </>
-          ) : (
-            // Mobile card layout
-            <div className="p-2 overflow-y-auto max-h-[calc(100vh-280px)]">
-              {renderMobileTable()}
-            </div>
-          )}
+            )}
 
-          {/* Pagination */}
-          {attendanceRecords.length > recordsPerPage && (
-            <div className="bg-[#2b2b2b] py-1 sm:py-2 px-1 sm:px-4 flex justify-center gap-1 flex-wrap">
-              {/* Previous Page Button */}
-              {currentPage > 1 && (
-                <button
-                  onClick={() => paginate(currentPage - 1)}
-                  className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs sm:text-sm"
-                >
-                  &lt;
-                </button>
-              )}
+            {/* Pagination */}
+            {attendanceRecords.length > recordsPerPage && (
+              <div className="bg-[#2b2b2b] py-1 sm:py-2 px-1 sm:px-4 flex justify-center gap-1 flex-wrap">
+                {/* Previous Page Button */}
+                {currentPage > 1 && (
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs sm:text-sm"
+                  >
+                    &lt;
+                  </button>
+                )}
 
-              {/* Dynamic Pagination - Show limited buttons on small screens */}
-              {Array.from({ length: totalPages }).map((_, index) => {
-                // For mobile, just show current page and immediate neighbors
-                if (windowWidth < 480) {
-                  if (index + 1 === currentPage ||
-                    index + 1 === currentPage - 1 ||
-                    index + 1 === currentPage + 1) {
+                {/* Dynamic Pagination - Show limited buttons on small screens */}
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  // For mobile, just show current page and immediate neighbors
+                  if (windowWidth < 480) {
+                    if (index + 1 === currentPage ||
+                      index + 1 === currentPage - 1 ||
+                      index + 1 === currentPage + 1) {
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => paginate(index + 1)}
+                          className={`px-2 py-1 rounded text-xs sm:text-sm ${ currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300" }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    }
+                    return null;
+                  }
+
+                  // More pagination buttons for larger screens
+                  if (windowWidth >= 480) {
                     return (
                       <button
                         key={index}
                         onClick={() => paginate(index + 1)}
-                        className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"}`}
+                        className={`px-2 py-1 rounded text-xs sm:text-sm ${ currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300" }`}
                       >
                         {index + 1}
                       </button>
                     );
                   }
                   return null;
-                }
+                })}
 
-                // More pagination buttons for larger screens
-                if (windowWidth >= 480) {
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => paginate(index + 1)}
-                      className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"}`}
-                    >
-                      {index + 1}
-                    </button>
-                  );
-                }
-                return null;
-              })}
-
-              {/* Next Page Button */}
-              {currentPage < totalPages && (
-                <button
-                  onClick={() => paginate(currentPage + 1)}
-                  className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs sm:text-sm"
-                >
-                  &gt;
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+                {/* Next Page Button */}
+                {currentPage < totalPages && (
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs sm:text-sm"
+                  >
+                    &gt;
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          // Calendar View
+          <div className="bg-[#363636] rounded-lg overflow-hidden mt-4 flex flex-col w-full h-[calc(100vh-250px)]">
+            <AttendanceCalendar
+              attendanceRecords={attendanceRecords}
+              userData={userData}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
