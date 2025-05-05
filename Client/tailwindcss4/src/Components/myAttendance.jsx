@@ -50,13 +50,13 @@ const MyAttendance = () => {
     if (recordDate === timeOutObj.format("YYYY-MM-DD")) {
       return timeOutObj.format("hh:mm A");
     }
-    return `${ timeOutObj.format("hh:mm A") } (${ timeOutObj.format("MM/DD/YYYY") })`;
+    return `${timeOutObj.format("hh:mm A")} (${timeOutObj.format("MM/DD/YYYY")})`;
   };
 
   // Fetch user data
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`/users/getUser/${ userId }`);
+      const response = await axios.get(`/users/getUser/${userId}`);
       if (response.data && response.data.successful) {
         const user = response.data.data;
         setUserData({
@@ -78,7 +78,7 @@ const MyAttendance = () => {
   // Fetch attendance records and include remarks and unique id
   const fetchAttendanceRecords = async () => {
     try {
-      const response = await axios.get(`/attendance/getAttendanceByUser/${ userId }`);
+      const response = await axios.get(`/attendance/getAttendanceByUser/${userId}`);
       if (response.data && response.data.successful && Array.isArray(response.data.data)) {
         const formattedRecords = response.data.data
           .map(record => ({
@@ -94,7 +94,6 @@ const MyAttendance = () => {
           .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf()); // Descending order
 
         setAttendanceRecords(formattedRecords);
-
       } else {
         setAttendanceRecords([]);
       }
@@ -104,27 +103,19 @@ const MyAttendance = () => {
     }
   };
 
-  // Handle Time-In
+  // Handle Time-In with updated API endpoint
   const handleTimeIn = async () => {
     setIsLoading(true);
     setAttendanceStatus("");
 
     try {
-      const now = dayjs();
-      const currentDate = now.format("YYYY-MM-DD");
-      const currentWeekday = now.format("dddd");
-      const timeInFormatted = now.format("YYYY-MM-DD HH:mm");
-
-      const response = await axios.post("/attendance/addAttendance", {
-        weekday: currentWeekday,
-        date: currentDate,
-        time_in: timeInFormatted,
-        site: siteSelection,
-        UserId: userId
+      // Updated endpoint format with userId in path and only site in body
+      const response = await axios.post(`/attendance/addAttendance/${userId}`, {
+        site: siteSelection
       });
 
       if (response.data && response.data.successful) {
-        setAttendanceStatus(response.data.message || "Attendance recorded successfully.");
+        setAttendanceStatus(response.data.message || "Time-in recorded successfully.");
         fetchAttendanceRecords();
       }
     } catch (error) {
@@ -135,31 +126,14 @@ const MyAttendance = () => {
     }
   };
 
-  // Handle Time-Out: find the latest active record (with time_in set and time_out unset)
+  // Handle Time-Out with updated API endpoint
   const handleTimeOut = async () => {
     setIsLoading(true);
     setAttendanceStatus("");
 
     try {
-      const now = dayjs();
-      const timeOutFormatted = now.format("YYYY-MM-DD HH:mm");
-
-      // Find the latest active record (time_in exists and time_out is "-")
-      const activeRecord = attendanceRecords.find(
-        record => record.time_in !== "-" && record.time_out === "-"
-      );
-
-      if (!activeRecord) {
-        setAttendanceStatus("No active attendance record found.");
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await axios.put(`/attendance/updateAttendance`, {
-        attendanceId: activeRecord.id, // Pass unique record id
-        time_out: timeOutFormatted,
-        UserId: userId
-      });
+      // Updated endpoint format with record ID in path and no request body
+      const response = await axios.put(`/attendance/updateAttendance/${user.id}`);
 
       if (response.data && response.data.successful) {
         setAttendanceStatus("Time-out recorded successfully.");
@@ -170,11 +144,11 @@ const MyAttendance = () => {
     } catch (error) {
       console.error("Error recording time-out:", error);
       if (error.response) {
-        setAttendanceStatus(error.response.data?.message || `Error ${ error.response.status }: Failed to record time-out.`);
+        setAttendanceStatus(error.response.data?.message || `Error ${error.response.status}: Failed to record time-out.`);
       } else if (error.request) {
         setAttendanceStatus("Server did not respond. Please try again.");
       } else {
-        setAttendanceStatus(`Error: ${ error.message }`);
+        setAttendanceStatus(`Error: ${error.message}`);
       }
     } finally {
       setIsLoading(false);
@@ -267,7 +241,7 @@ const MyAttendance = () => {
                 <div className="text-white">{record.time_out}</div>
 
                 <div className="font-bold text-white">Remarks:</div>
-                <div className={`${ record.remarks === "Late"
+                <div className={`${(record.remarks.includes("Under") || record.remarks.includes("Late"))
                   ? "text-red-500"
                   : record.remarks === "OnTime"
                     ? "text-green-500"
@@ -277,7 +251,7 @@ const MyAttendance = () => {
                 </div>
 
                 <div className="font-bold text-white">Status:</div>
-                <div className={`${ record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500" }`}>
+                <div className={`${record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"}`}>
                   {record.isRestDay}
                 </div>
               </div>
@@ -319,7 +293,7 @@ const MyAttendance = () => {
 
         {/* Status Message */}
         {attendanceStatus && (
-          <div className={`mt-2 p-2 rounded text-center ${ attendanceStatus.includes("successfully")
+          <div className={`mt-2 p-2 rounded text-center ${attendanceStatus.includes("successfully")
             ? "bg-green-500/20 text-green-300"
             : "bg-red-500/20 text-red-300"
             }`}>
@@ -332,7 +306,7 @@ const MyAttendance = () => {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={toggleViewMode}
-              className={`text-white text-xs sm:text-sm cursor-pointer ${ viewMode === "calendar"
+              className={`text-white text-xs sm:text-sm cursor-pointer ${viewMode === "calendar"
                 ? "bg-green-700 hover:bg-green-800"
                 : "bg-black/90 hover:bg-black/20"
                 } px-3 py-2 rounded-md duration-300 flex items-center gap-1`}
@@ -397,7 +371,7 @@ const MyAttendance = () => {
                               <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.site}</td>
                               <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_in}</td>
                               <td className="py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center">{record.time_out}</td>
-                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${ record.remarks === "Late"
+                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${(record.remarks.includes("Under") || record.remarks.includes("Late"))
                                 ? "text-red-500"
                                 : record.remarks === "OnTime"
                                   ? "text-green-500"
@@ -405,7 +379,7 @@ const MyAttendance = () => {
                                 }`}>
                                 {record.remarks}
                               </td>
-                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${ record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"
+                              <td className={`py-1 sm:py-2 px-1 sm:px-4 text-xs sm:text-sm text-center ${record.isRestDay === "Rest Day" ? "text-red-500" : "text-green-500"
                                 }`}>
                                 {record.isRestDay}
                               </td>
@@ -452,7 +426,7 @@ const MyAttendance = () => {
                         <button
                           key={index}
                           onClick={() => paginate(index + 1)}
-                          className={`px-2 py-1 rounded text-xs sm:text-sm ${ currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300" }`}
+                          className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"}`}
                         >
                           {index + 1}
                         </button>
@@ -467,7 +441,7 @@ const MyAttendance = () => {
                       <button
                         key={index}
                         onClick={() => paginate(index + 1)}
-                        className={`px-2 py-1 rounded text-xs sm:text-sm ${ currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300" }`}
+                        className={`px-2 py-1 rounded text-xs sm:text-sm ${currentPage === index + 1 ? "bg-green-500 text-white" : "bg-gray-700 text-gray-300"}`}
                       >
                         {index + 1}
                       </button>

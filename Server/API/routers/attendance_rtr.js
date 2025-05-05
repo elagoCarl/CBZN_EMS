@@ -4,10 +4,10 @@ const router = express.Router()
 const { requireAuth } = require('../controllers/authMiddleware')
 router.use(requireAuth)
 
-router.post('/addAttendance', Attendance.addAttendance)
+router.post('/addAttendance/:id', Attendance.addAttendance)
 router.get('/getAttendance/:id', Attendance.getAttendanceById)
 router.get('/getAllAttendances', Attendance.getAllAttendances)
-router.put('/updateAttendance', Attendance.updateAttendance)
+router.put('/updateAttendance/:id', Attendance.updateAttendance)
 router.get('/getAttendanceByUser/:id', Attendance.getAttendancesByUserId)
 router.post('/getAllAttendanceCutoffByUser/:id', Attendance.getAllAttendanceCutoffByUser)
 
