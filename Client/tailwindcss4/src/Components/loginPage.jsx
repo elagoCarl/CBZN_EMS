@@ -25,8 +25,6 @@ const LoginPage = () => {
       );
 
       if (response.data.successful) {
-        // Update AuthContext with user details returned from the backend.
-        // Adjust the fields according to your API response.
         setUser({
           id: response.data.user,
           email: response.data.userEmail,
@@ -43,7 +41,6 @@ const LoginPage = () => {
     }
   };
 
-  // Toggle password visibility function
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
