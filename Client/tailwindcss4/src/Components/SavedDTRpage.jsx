@@ -283,8 +283,7 @@ const SavedDTR = () => {
           >
             {viewMode === 'table' ? (
               <>
-                <Calendar className="w-4 h-4" />
-                <span>Calendar View</span>
+                📅 <span>Calendar View</span>
               </>
             ) : (
               <>
