@@ -115,13 +115,13 @@ const updateEmgncyContact = async (req, res, next) => {
             });
         }
 
-        // Less restrictive validation - just check if there are at least some digits
-        if (contact_number && !/\d/.test(contact_number)) {
-            return res.status(400).json({
-                successful: false,
-                message: "Contact number must contain digits."
-            });
-        }
+        // // Less restrictive validation - just check if there are at least some digits
+        // if (contact_number && !/\d/.test(contact_number)) {
+        //     return res.status(400).json({
+        //         successful: false,
+        //         message: "Contact number must contain digits."
+        //     });
+        // }
 
         // Update the emergency contact details
         await emgncyContact.update({ name, relationship, contact_number });

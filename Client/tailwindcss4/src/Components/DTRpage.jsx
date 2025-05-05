@@ -7,6 +7,9 @@ import isBetween from 'dayjs/plugin/isBetween';
 import axios from '../axiosConfig.js';
 import EditCutoffModal from "./callComponents/editCutoff.jsx";
 import { useAuth } from '../Components/authContext.jsx';
+import { Calendar, List } from 'lucide-react';
+import DTRCalendarView from "../Components/callComponents/DTRCalendarView.jsx";
+
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -32,6 +35,9 @@ const DTR = () => {
   const [scheduleUsers, setScheduleUsers] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  // New state to track which view is active
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'calendar'
 
   // Memoize the current cutoff based on selectedCutoffId
   const currentCutoff = useMemo(
@@ -510,6 +516,11 @@ const DTR = () => {
     );
   }, [combinedData, currentCutoff]);
 
+  // Function to toggle between table and calendar views
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'table' ? 'calendar' : 'table');
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
       <Sidebar />
@@ -518,6 +529,24 @@ const DTR = () => {
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
             Daily Time <span className="text-green-500">Record</span>
           </h1>
+
+          {/* View toggle button */}
+          <button
+            onClick={toggleViewMode}
+            className="flex items-center gap-2 bg-[#363636] text-white rounded-md py-2 px-4 hover:bg-[#444444] transition-colors"
+          >
+            {viewMode === 'table' ? (
+              <>
+                <Calendar className="w-4 h-4" />
+                <span>Calendar View</span>
+              </>
+            ) : (
+              <>
+                <List className="w-4 h-4" />
+                <span>Table View</span>
+              </>
+            )}
+          </button>
         </header>
         <div className="bg-[#2b2b2b] rounded-lg shadow">
           <div className="px-4 md:px-6 py-4 border-b border-white/10">
@@ -586,6 +615,7 @@ const DTR = () => {
                   </div>
                 )}
               </div>
+
               {user?.isAdmin && (
                 <button
                   className="bg-green-600 text-white px-4 rounded hover:bg-green-700 transition-colors"
@@ -604,7 +634,7 @@ const DTR = () => {
               )}
             </div>
           </div>
-          <div className="p-4 md:p-6">
+          <div className="p-4 md:p-10">
             {loading ? (
               <div className="flex justify-center py-8 text-green-500 text-xl">Loading records...</div>
             ) : !selectedUser ? (
@@ -613,7 +643,7 @@ const DTR = () => {
                 <div className="text-gray-400 text-sm">No records to display</div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div>
                 <div className="mb-4 px-4 py-3 bg-[#363636] rounded-md flex flex-wrap gap-4">
                   <div className="flex items-center">
                     <span className="text-gray-400 text-sm">Employee ID:</span>
@@ -636,146 +666,35 @@ const DTR = () => {
                     <span className="ml-2 text-white">{getUserSchedule(selectedUser)}</span>
                   </div>
                 </div>
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-[#363636] text-white">
-                    <tr>
-                      {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
-                        <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((r, i) => {
-                      const dateOT = getOvertimeForDate(r.date);
 
-                      // Get the effective schedule for this date
-                      const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
-                      let scheduleIn = null;
-                      let scheduleOut = null;
-
-                      // First check if there's an approved schedule adjustment
-                      const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                      if (adj) {
-                        scheduleIn = adj.time_in;
-                        scheduleOut = adj.time_out;
-                      }
-                      // Otherwise use the effective schedule for that date
-                      else if (effectiveSched) {
-
-                        const schedData = typeof effectiveSched.schedule.schedule === 'string'
-                          ? JSON.parse(effectiveSched.schedule.schedule)
-                          : effectiveSched.schedule.schedule;
-
-                        const dayName = dayjs(r.date).format('dddd');
-                        const daySched = schedData[dayName];
-
-                        if (daySched) {
-                          scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
-                          scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
-                        }
-                      }
-
-                      // Calculate late and undertime using the correct schedule
-                      const lateMinutes = r.time_in && scheduleIn && !r.isLeave && !r.isRestDay
-                        ? calculateLateMinutes(scheduleIn, r.time_in)
-                        : 0;
-
-                      const undertimeMinutes = r.time_out && scheduleOut && !r.isLeave && !r.isRestDay
-                        ? calculateUndertimeMinutes(scheduleOut, r.time_out)
-                        : 0;
-
-                      return (
-                        <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
-                          <td className="px-4 py-3  text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
-                          <td className="px-4 py-3 text-gray-300">
-                            {r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
-                              const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                              if (adj) return `${adj.time_in} - ${adj.time_out}`;
-
-                              const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
-                              if (!effectiveSched) return 'No Schedule';
-
-                              return effectiveSched.schedule.title;
-                            })()}
-                          </td>
-                          <td className="px-4 py-3  text-gray-300">{r.site || 'Office'}</td>
-                          <td className="px-4 py-3  text-gray-300">{r.time_in}</td>
-                          <td className="px-4 py-3  text-gray-300">{r.time_out}</td>
-                          <td className="px-4 py-3  text-gray-300">{(r.totalHours || 0).toFixed(2)}</td>
-                          <td className="px-4 py-3  text-gray-300">
-                            {dateOT.length ? dateOT.map((ot, j) => (
-                              <div key={j} className="text-xs">
-                                <span className="font-medium text-green-400">{ot.additionalHours.toFixed(2)} hrs</span>
-                                <span className="text-gray-500 ml-1">({ot.start_time}-{ot.end_time})</span>
-                              </div>
-                            )) : '0.00'}
-                          </td>
-                          <td className="px-4 py-3  text-gray-300">
-                            {lateMinutes > 0 ? (
-                              <div className="text-xs">
-                                <span className="font-medium text-orange-400">{(lateMinutes / 60).toFixed(2)} hrs</span>
-                              </div>
-                            ) : (
-                              '0.00'
-                            )}
-                          </td>
-                          <td className="px-4 py-3  text-gray-300">
-                            {undertimeMinutes > 0 ? (
-                              <div className="text-xs">
-                                <span className="font-medium text-orange-400">{(undertimeMinutes / 60).toFixed(2)} hrs</span>
-                              </div>
-                            ) : (
-                              '0.00'
-                            )}
-                          </td>
-                          <td className="px-4 py-3  text-gray-300">
-                            {r.remarks && r.remarks !== 'Rest Day' && (
-                              <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isLeave ? 'bg-purple-500/20 text-purple-400' :
-                                r.isTimeAdjustment ? 'bg-blue-500/20 text-blue-400' :
-                                  r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
-                                    r.remarks.toLowerCase().includes('late') ? 'bg-orange-500/20 text-orange-400' :
-                                      'bg-green-500/20 text-green-400'
-                                }`}>
-                                {r.remarks}
-                              </span>
-                            )}
-                          </td>
+                {viewMode === 'table' ? (
+                  <div className="overflow-x-auto  max-h-[calc(100vh-300px)] relative">
+                    <table className="w-full text-sm text-left">
+                      <thead className="sticky top-0 bg-[#363636] text-green-400">
+                        <tr>
+                          {['Date', 'Work Shift', 'Site', 'Time In', 'Time Out', 'Regular Hours', 'Overtime', 'Late', 'Undertime', 'Remarks'].map((h, i) => (
+                            <th key={i} className="px-4 py-3 border-b border-white/10">{h}</th>
+                          ))}
                         </tr>
-                      );
-                    })}
-                    {!filteredData.length && (
-                      <tr>
-                        <td colSpan="8" className="px-4 py-8 text-center text-gray-400">
-                          No records found for the selected period
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr className="font-bold bg-[#363636] text-white">
-                      <td colSpan="5" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
-                      <td className="px-4 py-3 border-t border-white/10 text-green-400">
-                        {filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-green-400">
-                        {filteredData.reduce((sum, r) => {
-                          const ot = getOvertimeForDate(r.date);
-                          return sum + ot.reduce((s, o) => s + (o.additionalHours || 0), 0);
-                        }, 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
-                        {filteredData.reduce((sum, r) => {
+                      </thead>
+                      <tbody>
+                        {filteredData.map((r, i) => {
+                          const dateOT = getOvertimeForDate(r.date);
+
                           // Get the effective schedule for this date
                           const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
                           let scheduleIn = null;
+                          let scheduleOut = null;
 
                           // First check if there's an approved schedule adjustment
                           const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
                           if (adj) {
                             scheduleIn = adj.time_in;
+                            scheduleOut = adj.time_out;
                           }
                           // Otherwise use the effective schedule for that date
                           else if (effectiveSched) {
+
                             const schedData = typeof effectiveSched.schedule.schedule === 'string'
                               ? JSON.parse(effectiveSched.schedule.schedule)
                               : effectiveSched.schedule.schedule;
@@ -785,46 +704,176 @@ const DTR = () => {
 
                             if (daySched) {
                               scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
-                            }
-                          }
-
-                          return sum + (r.time_in && scheduleIn && !r.isLeave && !r.isRestDay ? calculateLateMinutes(scheduleIn, r.time_in) / 60 : 0);
-                        }, 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 border-t border-white/10 text-orange-400">
-                        {filteredData.reduce((sum, r) => {
-                          // Get the effective schedule for this date
-                          const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
-                          let scheduleOut = null;
-
-                          // First check if there's an approved schedule adjustment
-                          const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
-                          if (adj) {
-                            scheduleOut = adj.time_out;
-                          }
-                          // Otherwise use the effective schedule for that date
-                          else if (effectiveSched) {
-                            const schedData = typeof effectiveSched.schedule.schedule === 'string'
-                              ? JSON.parse(effectiveSched.schedule.schedule)
-                              : effectiveSched.schedule.schedule;
-
-                            const dayName = dayjs(r.date).format('dddd');
-                            const daySched = schedData[dayName];
-
-                            if (daySched) {
                               scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
                             }
                           }
 
-                          return sum + (r.time_out && scheduleOut && !r.isLeave && !r.isRestDay ? calculateUndertimeMinutes(scheduleOut, r.time_out) / 60 : 0);
-                        }, 0).toFixed(2)}
-                      </td>
+                          // Calculate late and undertime using the correct schedule
+                          const lateMinutes = r.time_in && scheduleIn && !r.isLeave && !r.isRestDay
+                            ? calculateLateMinutes(scheduleIn, r.time_in)
+                            : 0;
 
-                      <td className="px-4 py-3 border-t border-white/10"></td>
-                    </tr>
-                  </tfoot>
-                </table>
+                          const undertimeMinutes = r.time_out && scheduleOut && !r.isLeave && !r.isRestDay
+                            ? calculateUndertimeMinutes(scheduleOut, r.time_out)
+                            : 0;
+
+                          return (
+                            <tr key={i} className={i % 2 === 0 ? 'bg-[#333333]' : 'bg-[#2f2f2f]'}>
+                              <td className="px-4 py-3  text-gray-300">{dayjs(r.date).format('ddd, MMM D')}</td>
+                              <td className="px-4 py-3 text-gray-300">
+                                {r.isLeave ? 'LEAVE' : r.isRestDay ? 'REST DAY' : (() => {
+                                  const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                                  if (adj) return `${adj.time_in} - ${adj.time_out}`;
+
+                                  const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                                  if (!effectiveSched) return 'No Schedule';
+
+                                  return effectiveSched.schedule.title;
+                                })()}
+                              </td>
+                              <td className="px-4 py-3  text-gray-300">{r.site || 'Office'}</td>
+                              <td className="px-4 py-3  text-gray-300">{r.time_in}</td>
+                              <td className="px-4 py-3  text-gray-300">{r.time_out}</td>
+                              <td className="px-4 py-3  text-gray-300">{(r.totalHours || 0).toFixed(2)}</td>
+                              <td className="px-4 py-3  text-gray-300">
+                                {dateOT.length ? dateOT.map((ot, j) => (
+                                  <div key={j} className="text-xs">
+                                    <span className="font-medium text-green-400">{ot.additionalHours.toFixed(2)} hrs</span>
+                                    <span className="text-gray-500 ml-1">({ot.start_time}-{ot.end_time})</span>
+                                  </div>
+                                )) : '0.00'}
+                              </td>
+                              <td className="px-4 py-3  text-gray-300">
+                                {lateMinutes > 0 ? (
+                                  <div className="text-xs">
+                                    <span className="font-medium text-orange-400">{(lateMinutes / 60).toFixed(2)} hrs</span>
+                                  </div>
+                                ) : (
+                                  '0.00'
+                                )}
+                              </td>
+                              <td className="px-4 py-3  text-gray-300">
+                                {undertimeMinutes > 0 ? (
+                                  <div className="text-xs">
+                                    <span className="font-medium text-orange-400">{(undertimeMinutes / 60).toFixed(2)} hrs</span>
+                                  </div>
+                                ) : (
+                                  '0.00'
+                                )}
+                              </td>
+                              <td className="px-4 py-3  text-gray-300">
+                                {r.remarks && r.remarks !== 'Rest Day' && (
+                                  <span className={`inline-block px-2 py-0.5 text-xs rounded-md ${r.isLeave ? 'bg-purple-500/20 text-purple-400' :
+                                    r.isTimeAdjustment ? 'bg-blue-500/20 text-blue-400' :
+                                      r.remarks.toLowerCase().includes('absent') ? 'bg-red-500/20 text-red-400' :
+                                        r.remarks.toLowerCase().includes('late') ? 'bg-orange-500/20 text-orange-400' :
+                                          'bg-green-500/20 text-green-400'
+                                    }`}>
+                                    {r.remarks}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {!filteredData.length && (
+                          <tr>
+                            <td colSpan="8" className="px-4 py-8 text-center text-gray-400">
+                              No records found for the selected period
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                      <tfoot className='sticky size-15 bottom-0 bg-[#2b2b2b] z-20'>
+                    <tr className="font-bold text-white">
+                      <td className="py-3 border-t border-white/10 ">Total Attendance</td>
+                      <td colSpan="4" className="px-4 py-3 border-t border-white/10 text-right">Total Hours:</td>
+                          <td className="px-4 py-3 border-t border-white/10 text-green-400">
+                            {filteredData.reduce((sum, r) => sum + (r.totalHours || 0), 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-green-400">
+                            {filteredData.reduce((sum, r) => {
+                              const ot = getOvertimeForDate(r.date);
+                              return sum + ot.reduce((s, o) => s + (o.additionalHours || 0), 0);
+                            }, 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                            {filteredData.reduce((sum, r) => {
+                              // Get the effective schedule for this date
+                              const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                              let scheduleIn = null;
+
+                              // First check if there's an approved schedule adjustment
+                              const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                              if (adj) {
+                                scheduleIn = adj.time_in;
+                              }
+                              // Otherwise use the effective schedule for that date
+                              else if (effectiveSched) {
+                                const schedData = typeof effectiveSched.schedule.schedule === 'string'
+                                  ? JSON.parse(effectiveSched.schedule.schedule)
+                                  : effectiveSched.schedule.schedule;
+
+                                const dayName = dayjs(r.date).format('dddd');
+                                const daySched = schedData[dayName];
+
+                                if (daySched) {
+                                  scheduleIn = dayjs(`2025-01-01T${daySched.In}`).format('h:mm A');
+                                }
+                              }
+
+                              return sum + (r.time_in && scheduleIn && !r.isLeave && !r.isRestDay ? calculateLateMinutes(scheduleIn, r.time_in) / 60 : 0);
+                            }, 0).toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3 border-t border-white/10 text-orange-400">
+                            {filteredData.reduce((sum, r) => {
+                              // Get the effective schedule for this date
+                              const effectiveSched = getEffectiveScheduleForDate(r.date, scheduleUsers);
+                              let scheduleOut = null;
+
+                              // First check if there's an approved schedule adjustment
+                              const adj = scheduleAdjustments.find(a => a.date === r.date && a.status === 'approved' && a.user_id === selectedUser.id);
+                              if (adj) {
+                                scheduleOut = adj.time_out;
+                              }
+                              // Otherwise use the effective schedule for that date
+                              else if (effectiveSched) {
+                                const schedData = typeof effectiveSched.schedule.schedule === 'string'
+                                  ? JSON.parse(effectiveSched.schedule.schedule)
+                                  : effectiveSched.schedule.schedule;
+
+                                const dayName = dayjs(r.date).format('dddd');
+                                const daySched = schedData[dayName];
+
+                                if (daySched) {
+                                  scheduleOut = dayjs(`2025-01-01T${daySched.Out}`).format('h:mm A');
+                                }
+                              }
+
+                              return sum + (r.time_out && scheduleOut && !r.isLeave && !r.isRestDay ? calculateUndertimeMinutes(scheduleOut, r.time_out) / 60 : 0);
+                            }, 0).toFixed(2)}
+                          </td>
+
+                          <td className="px-4 py-3 border-t border-white/10"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                ) : (
+                  <DTRCalendarView
+                    attendanceData={filteredData}
+                    currentCutoff={currentCutoff}
+                  />
+                )}
               </div>
+
+
+
+
+
+
+
+
             )}
           </div>
         </div>

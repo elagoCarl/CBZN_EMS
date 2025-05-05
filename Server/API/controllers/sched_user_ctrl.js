@@ -24,12 +24,12 @@ const addSchedUser = async (req, res) => {
     }
     const tomorrow = dayjs().add(1, 'day').startOf('day');
     const effectivityDay = dayjs(effectivity_date, "YYYY-MM-DD");
-    if (!effectivityDay.isSameOrAfter(tomorrow)) {
-      return res.status(400).json({
-        successful: false,
-        message: "Effectivity date must be at least the next day from today."
-      });
-    }
+    // if (!effectivityDay.isSameOrAfter(tomorrow)) {
+    //   return res.status(400).json({
+    //     successful: false,
+    //     message: "Effectivity date must be at least the next day from today."
+    //   });
+    // }
     const schedule = await Schedule.findByPk(schedule_id);
     if (!schedule) {
       return res.status(404).json({
@@ -141,13 +141,13 @@ const updateSchedUserByUser = async (req, res) => {
       });
     }
     const tomorrow = dayjs().add(1, 'day').startOf('day');
-    const effectivityDay = dayjs(effectivity_date, "YYYY-MM-DD");
-    if (!effectivityDay.isSameOrAfter(tomorrow)) {
-      return res.status(400).json({
-        successful: false,
-        message: "Effectivity date must be at least the next day from today."
-      });
-    }
+    // const effectivityDay = dayjs(effectivity_date, "YYYY-MM-DD");
+    // if (!effectivityDay.isSameOrAfter(tomorrow)) {
+    //   return res.status(400).json({
+    //     successful: false,
+    //     message: "Effectivity date must be at least the next day from today."
+    //   });
+    // }
 
     // Validate that the provided schedule exists
     const schedule = await Schedule.findByPk(schedule_id);
