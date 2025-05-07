@@ -227,8 +227,7 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import PropTypes from 'prop-types';
 
-
-const AttendanceCalendar = ({ attendanceRecords, userData }) => {
+const AttendanceCalendar = ({ attendanceRecords, userData, attendanceStats }) => {
   const [currentMonth, setCurrentMonth] = useState(dayjs());
   const [calendarDays, setCalendarDays] = useState([]);
 
@@ -260,7 +259,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
 
     for (let i = daysBefore - 1; i >= 0; i--) {
       days.push({
-        date: `${ prevMonth.format('YYYY-MM') }-${ (prevMonthDays - i).toString().padStart(2, '0') }`,
+        date: `${prevMonth.format('YYYY-MM')}-${(prevMonthDays - i).toString().padStart(2, '0')}`,
         day: prevMonthDays - i,
         isCurrentMonth: false,
         isPrevMonth: true
@@ -270,7 +269,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
     // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({
-        date: `${ currentMonth.format('YYYY-MM') }-${ i.toString().padStart(2, '0') }`,
+        date: `${currentMonth.format('YYYY-MM')}-${i.toString().padStart(2, '0')}`,
         day: i,
         isCurrentMonth: true
       });
@@ -282,7 +281,7 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
 
     for (let i = 1; i <= remainingDays; i++) {
       days.push({
-        date: `${ nextMonth.format('YYYY-MM') }-${ i.toString().padStart(2, '0') }`,
+        date: `${nextMonth.format('YYYY-MM')}-${i.toString().padStart(2, '0')}`,
         day: i,
         isCurrentMonth: false,
         isNextMonth: true
@@ -347,14 +346,14 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
       </div>
 
       {/* Calendar grid */}
-
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-7 bg-[#2b2b2b] sticky top-0 z-10">
           {weekdays.map((day, index) => (
             <div
               key={index}
-              className={`text-center p-2 font-semibold text-white border-b border-black/90 ${ index === 0 || index === 6 ? 'text-green-500' : ''
-                }`}
+              className={`text-center p-2 font-semibold text-white border-b border-black/90 ${
+                index === 0 || index === 6 ? 'text-green-500' : ''
+              }`}
             >
               {day}
             </div>
@@ -369,48 +368,57 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
             return (
               <div
                 key={index}
-                className={`border border-black/50 min-h-24 p-1 relative ${ !day.isCurrentMonth ? 'bg-[#1a1a1a] text-gray-600' :
+                className={`border border-black/50 min-h-24 p-1 relative ${
+                  !day.isCurrentMonth ? 'bg-[#1a1a1a] text-gray-600' :
                   isToday ? 'bg-green-900/10' : 'bg-[#2b2b2b]'
-                  }`}
+                }`}
               >
-                <div className={`flex items-center justify-center h-7 w-7 ${ isToday
-                  ? 'bg-green-500 text-white rounded-full'
-                  : attendanceRecord
-                    ? 'text-white'
-                    : day.isCurrentMonth
-                      ? 'text-gray-300'
-                      : 'text-gray-600'
-                  }`}>
+                {/* Day number with improved styling */}
+                <div className={`flex items-center justify-center h-6 w-6 text-xs ${
+                  isToday
+                    ? 'bg-green-500 text-white rounded-full'
+                    : attendanceRecord
+                      ? 'text-white'
+                      : day.isCurrentMonth
+                        ? 'text-gray-300'
+                        : 'text-gray-600'
+                }`}>
                   {day.day}
                 </div>
 
+                {/* Attendance details with more compact design */}
                 {attendanceRecord && (
-                  <div className="mt-2 text-xs">
-                    <div className={`rounded px-1 py-0.5 mb-1 ${ attendanceRecord.site === "Remote"
-                      ? "bg-blue-900/30 text-blue-400"
-                      : "bg-purple-900/30 text-purple-400"
-                      }`}>
+                  <div className="mt-1 text-sm leading-tight">
+                    {/* Location badge - more compact */}
+                    <div className={`inline-block rounded px-1 text-sm font-medium ${
+                      attendanceRecord.site === "Remote"
+                        ? "bg-blue-900/30 text-blue-400"
+                        : "bg-purple-900/30 text-purple-400"
+                    }`}>
                       {attendanceRecord.site}
                     </div>
-
-                    <div className="grid grid-cols-2 gap-1">
-                      <div className="bg-green-900/30 text-green-400 rounded px-1 py-0.5">
-                        In: {attendanceRecord.time_in}
+                    
+                    {/* Time info - horizontal layout to save space */}
+                    <div className="flex gap-1 mt-0.5 flex-wrap">
+                      <div className="bg-green-900/30 text-green-400 rounded px-1 whitespace-nowrap">
+                        {attendanceRecord.time_in}
                       </div>
 
                       {attendanceRecord.time_out !== "-" && (
-                        <div className="bg-red-900/30 text-red-400 rounded px-1 py-0.5">
-                          Out: {attendanceRecord.time_out.split(' ')[0]}
+                        <div className="bg-red-900/30 text-red-400 rounded px-1 whitespace-nowrap">
+                          {attendanceRecord.time_out}
                         </div>
                       )}
                     </div>
 
-                    <div className={`mt-1 rounded px-1 py-0.5 ${ attendanceRecord.remarks === "Late"
-                      ? "bg-red-900/30 text-red-400"
-                      : attendanceRecord.remarks === "On Time"
-                        ? "bg-green-900/30 text-green-400"
-                        : "bg-gray-700 text-gray-300"
-                      }`}>
+                    {/* Status indicator - smaller */}
+                    <div className={`mt-0.5 rounded-sm px-1 text-sm inline-block ${
+                      attendanceRecord.remarks === "Late"
+                        ? "bg-red-900/30 text-red-400"
+                        : attendanceRecord.remarks === "On Time"
+                          ? "bg-green-900/30 text-green-400"
+                          : "bg-gray-700 text-gray-300"
+                    }`}>
                       {attendanceRecord.remarks}
                     </div>
                   </div>
@@ -420,32 +428,6 @@ const AttendanceCalendar = ({ attendanceRecords, userData }) => {
           })}
         </div>
       </div>
-
-      {/* User summary section */}
-      {userData && (
-        <div className="bg-[#2b2b2b] p-4 border-t border-black/90">
-          <h3 className="text-white font-semibold mb-2">Monthly Summary</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-[#1a1a1a] p-3 rounded-md">
-              <div className="text-xs text-gray-400">Present Days</div>
-              <div className="text-xl text-green-400 font-bold">{userData.presentDays}</div>
-            </div>
-            <div className="bg-[#1a1a1a] p-3 rounded-md">
-              <div className="text-xs text-gray-400">Late Days</div>
-              <div className="text-xl text-red-400 font-bold">{userData.lateDays}</div>
-            </div>
-            <div className="bg-[#1a1a1a] p-3 rounded-md">
-              <div className="text-xs text-gray-400">Remote Days</div>
-              <div className="text-xl text-blue-400 font-bold">{userData.remoteDays}</div>
-            </div>
-            <div className="bg-[#1a1a1a] p-3 rounded-md">
-              <div className="text-xs text-gray-400">Average Hours</div>
-              <div className="text-xl text-purple-400 font-bold">{userData.averageHours}</div>
-            </div>
-          </div>
-        </div>
-      )}
-      
     </div>
   );
 };
@@ -463,9 +445,14 @@ AttendanceCalendar.propTypes = {
     })
   ).isRequired,
   userData: PropTypes.shape({
-    presentDays: PropTypes.number.isRequired,
-    lateDays: PropTypes.number.isRequired,
-    remoteDays: PropTypes.number.isRequired,
-    averageHours: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    presentDays: PropTypes.number,
+    lateDays: PropTypes.number,
+    remoteDays: PropTypes.number,
   }),
+  attendanceStats: PropTypes.shape({
+    presentDays: PropTypes.number,
+    lateDays: PropTypes.number,
+    onTimeDays: PropTypes.number,
+    absentDays: PropTypes.number,
+  })
 };
