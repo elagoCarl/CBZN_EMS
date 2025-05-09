@@ -3,17 +3,17 @@ import { Plus, Edit, Filter, Search } from 'lucide-react';
 import axios from '../axiosConfig';
 import dayjs from 'dayjs';
 import Sidebar from './callComponents/sidebar';
-import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleModal';
+import { AddScheduleModal, EditScheduleModal, AddLeaveModal } from './callComponents/scheduleModal';
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
-  const [leaveInfos, setLeaveInfos] = useState([]);
+  // const [leaveInfos, setLeaveInfos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-  const [selectedLeave, setSelectedLeave] = useState(null);
+  // const [selectedLeave, setSelectedLeave] = useState(null);
   const [scheduleFilter, setScheduleFilter] = useState('active');
-  const [leaveFilter, setLeaveFilter] = useState('active');
+  // const [leaveFilter, setLeaveFilter] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
@@ -37,23 +37,23 @@ const SchedulePage = () => {
     fetchSchedules();
   }, []);
 
-  const fetchLeaveInfos = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/leaveInfo/getAllLeaveInfos');
-      setSchedules(response.data.data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching leave infos:', err);
-      setError('Failed to load leave infos. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchLeaveInfos = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await axios.get('/leaveInfo/getAllLeaveInfos');
+  //     setSchedules(response.data.data);
+  //     setError(null);
+  //   } catch (err) {
+  //     console.error('Error fetching leave infos:', err);
+  //     setError('Failed to load leave infos. Please try again later.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchLeaveInfos();
-  }, []);
+  // useEffect(() => {
+  //   fetchLeaveInfos();
+  // }, []);
 
   const handleAddScheduleClick = () => {
     setIsAddScheduleOpen(true);
@@ -72,7 +72,7 @@ const SchedulePage = () => {
     setIsEditScheduleOpen(false);
   };
 
-  // Called when a new schedule is added from the modal
+  //Called when a new schedule is added from the modal
   const handleAddSchedule = async (newSchedule) => {
     try {
       await axios.post('/schedule/addSchedule', newSchedule);
@@ -138,90 +138,145 @@ const SchedulePage = () => {
       <div className="flex flex-col flex-1 justify-start p-4 md:p-8 mt-8 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white">
-            Schedule <span className="text-green-500">Management</span>
+            Schedule and Leave <span className="text-green-500">Management</span>
           </h1>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <button
-              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-green-600 text-sm font-medium text-white hover:bg-green-700 w-full sm:w-auto"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-200 w-full sm:w-auto"
               onClick={handleAddScheduleClick}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Schedule
             </button>
+
+            <button
+              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-green-600 text-sm font-medium text-white hover:bg-green-700 w-full sm:w-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Leave Info
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-[#2b2b2b] rounded-lg shadow">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Schedule Card */}
+  <div className="bg-[#2b2b2b] rounded-lg shadow">
+    <div className="px-4 md:px-6 py-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h2 className="text-lg md:text-xl font-semibold text-white">Schedules</h2>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <select
+            value={scheduleFilter}
+            onChange={(e) => setScheduleFilter(e.target.value)}
+            className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div className="p-4 md:p-6">
+      <div className="space-y-2">
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <div className="text-green-500 text-xl">Loading data...</div>
+          </div>
+        ) : (
+          <>
+            {filteredSchedules.map(schedule => (
+              <div key={schedule.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
+                <div>
+                  <h3 className="font-medium text-white">{schedule.title}</h3>
+                  <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                    {schedule.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                  {renderScheduleDetails(schedule.schedule)}
+                </div>
+                <div className="flex space-x-2 justify-end">
+                  <button
+                    className="p-2 text-white hover:text-gray-900 hover:bg-green-500 rounded"
+                    onClick={() => handleEditScheduleClick(schedule)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredSchedules.length === 0 && (
+              <div className="text-center py-4 text-gray-400">
+                No schedules found for the selected filters
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+
+
+
+           
+          {/* Leave Info Card */}
+          <div className="bg-[#2b2b2b] rounded-lg shadow">
             <div className="px-4 md:px-6 py-4 border-b border-white/10">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <h2 className="text-lg md:text-xl font-semibold text-white">Schedules</h2>
-                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:mr-2">
-                    <input
-                      type="text"
-                      placeholder="Search schedules..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-3 py-2 bg-[#363636] text-white text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-gray-400" />
-                    <select
-                      value={scheduleFilter}
-                      onChange={(e) => setScheduleFilter(e.target.value)}
-                      className="bg-[#363636] text-white text-sm rounded-md border-0 py-2 pl-3 pr-8 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
-                      <option value="all">All Status</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <h2 className="text-lg md:text-xl font-semibold text-white">Leave Info</h2>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <select
+                    value={scheduleFilter}
+                    onChange={(e) => setScheduleFilter(e.target.value)}
+                    className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
               </div>
             </div>
             <div className="p-4 md:p-6">
-              {loading ? (
-                <div className="text-center py-8 text-gray-400">Loading schedules...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-red-500">{error}</div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {filteredSchedules.map((schedule) => (
-                    <div key={schedule.id} className="relative flex flex-col justify-between p-3 bg-[#363636] rounded-lg">
-                      <button
-                        className="absolute top-2 right-2 p-1 text-white hover:text-gray-900 hover:bg-green-500 rounded"
-                        onClick={() => handleEditScheduleClick(schedule)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-medium text-white text-base">{schedule.title}</h3>
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-                              }`}
-                          >
+              <div className="space-y-2">
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="text-green-500 text-xl">Loading data...</div>
+                  </div>
+                ) : (
+                  <>
+                    {filteredSchedules.map(schedule => (
+                      <div key={schedule.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
+                        <div>
+                          <h3 className="font-medium text-white">{schedule.name}</h3>
+                          <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                             {schedule.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
-                        {renderScheduleDetails(schedule.schedule)}
+                        <div className="flex space-x-2 justify-end">
+                          <button className="p-2 text-white hover:text-gray-900 hover:bg-green-500 rounded"
+                            onClick={() => handleEditScheduleClick(schedule)}>
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {filteredSchedules.length === 0 && !loading && !error && (
-                    <div className="text-center py-4 text-gray-400 col-span-full">
-                      No schedules found for the selected filters
-                    </div>
-                  )}
-                </div>
-              )}
+                    ))}
+                    {filteredSchedules.length === 0 && (
+                      <div className="text-center py-4 text-gray-400">
+                        No schedules found for the selected filters
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+        
+
+      
 
       {isAddScheduleOpen && (
         <AddScheduleModal
