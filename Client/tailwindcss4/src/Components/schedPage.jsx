@@ -3,17 +3,17 @@ import { Plus, Edit, Filter, Search } from 'lucide-react';
 import axios from '../axiosConfig';
 import dayjs from 'dayjs';
 import Sidebar from './callComponents/sidebar';
-import { AddScheduleModal, EditScheduleModal, AddLeaveModal } from './callComponents/scheduleModal';
+import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleModal';
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
-  // const [leaveInfos, setLeaveInfos] = useState([]);
+  const [leaveInfos, setLeaveInfos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-  // const [selectedLeave, setSelectedLeave] = useState(null);
+  const [selectedLeave, setSelectedLeave] = useState(null);
   const [scheduleFilter, setScheduleFilter] = useState('active');
-  // const [leaveFilter, setLeaveFilter] = useState('active');
+  const [leaveFilter, setLeaveFilter] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
@@ -37,23 +37,23 @@ const SchedulePage = () => {
     fetchSchedules();
   }, []);
 
-  // const fetchLeaveInfos = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await axios.get('/leaveInfo/getAllLeaveInfos');
-  //     setSchedules(response.data.data);
-  //     setError(null);
-  //   } catch (err) {
-  //     console.error('Error fetching leave infos:', err);
-  //     setError('Failed to load leave infos. Please try again later.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const fetchLeaveInfos = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/leaveInfo/getAllLeaveInfos');
+      setLeaveInfos(response.data.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching leave infos:', err);
+      setError('Failed to load leave infos. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchLeaveInfos();
-  // }, []);
+  useEffect(() => {
+    fetchLeaveInfos();
+  }, []);
 
   const handleAddScheduleClick = () => {
     setIsAddScheduleOpen(true);
@@ -95,10 +95,16 @@ const SchedulePage = () => {
   const filteredSchedules = useMemo(() => {
     return schedules.filter(schedule =>
       (scheduleFilter === 'all' ||
-        (scheduleFilter === 'active' ? schedule.isActive : !schedule.isActive)) &&
-      schedule.title.toLowerCase().includes(searchQuery.toLowerCase())
+        (scheduleFilter === 'active' ? schedule.isActive : !schedule.isActive)) 
     );
   }, [schedules, scheduleFilter, searchQuery]);
+
+  const filteredLeaveInfos = useMemo(() => {
+    return leaveInfos.filter(leave =>
+      (leaveFilter === 'all' ||
+        (leaveFilter === 'active' ? leave.isActive : !leave.isActive)) 
+    );
+  }, [leaveInfos, leaveFilter, searchQuery]);
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -111,26 +117,23 @@ const SchedulePage = () => {
   };
 
   const renderScheduleDetails = (scheduleObj) => {
-    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const activeDaysEntries = Object.entries(scheduleObj).filter(([_, timeSlots]) => timeSlots.In && timeSlots.Out);
-    const sortedDays = activeDaysEntries.sort((a, b) => dayOrder.indexOf(a[0]) - dayOrder.indexOf(b[0]));
+  const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const activeDaysEntries = Object.entries(scheduleObj).filter(([_, timeSlots]) => timeSlots.In && timeSlots.Out);
+  const sortedDays = activeDaysEntries.sort((a, b) => dayOrder.indexOf(a[0]) - dayOrder.indexOf(b[0]));
 
-    return (
-      <div className="text-sm text-gray-300 space-y-1">
-        {sortedDays.map(([day, timeSlots]) => (
-          <div key={day} className="flex">
-            <div className="flex-1">
-              <span className="font-medium">{day}</span>
-            </div>
-            <div className="flex flex-2 justify-around">
-              <span>In: {formatTime(timeSlots.In)}</span>
-              <span>Out: {formatTime(timeSlots.Out)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  return (
+    <div className="text-sm text-gray-300 space-y-2">
+      {sortedDays.map(([day, timeSlots]) => (
+        <div key={day} className="flex items-center space-x-8">
+          <span className="font-medium w-24">{day}</span>
+          <span className="w-24">In: {formatTime(timeSlots.In)}</span>
+          <span className="w-24">Out: {formatTime(timeSlots.Out)}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-black/90 overflow-hidden">
@@ -190,7 +193,7 @@ const SchedulePage = () => {
               <div key={schedule.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
                 <div>
                   <h3 className="font-medium text-white">{schedule.title}</h3>
-                  <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium  ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
                     {schedule.isActive ? 'Active' : 'Inactive'}
                   </span>
                   {renderScheduleDetails(schedule.schedule)}
@@ -216,8 +219,6 @@ const SchedulePage = () => {
     </div>
   </div>
 
-
-
            
           {/* Leave Info Card */}
           <div className="bg-[#2b2b2b] rounded-lg shadow">
@@ -227,8 +228,8 @@ const SchedulePage = () => {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Filter className="w-4 h-4 text-gray-400" />
                   <select
-                    value={scheduleFilter}
-                    onChange={(e) => setScheduleFilter(e.target.value)}
+                    value={leaveFilter}
+                    onChange={(e) => setLeaveFilter(e.target.value)}
                     className="bg-[#363636] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 w-full sm:w-auto focus:border-none focus:outline focus:outline-green-400"
                   >
                     <option value="all">All Status</option>
@@ -246,12 +247,12 @@ const SchedulePage = () => {
                   </div>
                 ) : (
                   <>
-                    {filteredSchedules.map(schedule => (
-                      <div key={schedule.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
+                    {filteredLeaveInfos.map(leave => (
+                      <div key={leave.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-[#363636] rounded-lg gap-3">
                         <div>
-                          <h3 className="font-medium text-white">{schedule.name}</h3>
-                          <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${schedule.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                            {schedule.isActive ? 'Active' : 'Inactive'}
+                          <h3 className="font-medium text-white">{leave.title}</h3>
+                          <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-medium ${leave.isActive ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                            {leave.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                         <div className="flex space-x-2 justify-end">
@@ -262,9 +263,9 @@ const SchedulePage = () => {
                         </div>
                       </div>
                     ))}
-                    {filteredSchedules.length === 0 && (
+                    {filteredLeaveInfos.length === 0 && (
                       <div className="text-center py-4 text-gray-400">
-                        No schedules found for the selected filters
+                        No leave infos found for the selected filters
                       </div>
                     )}
                   </>

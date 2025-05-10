@@ -485,8 +485,7 @@ const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
         </div>
     );
-}
-
+  }
 // Edit Leave Modal
 const EditLeaveModal = ({ isOpen, onClose, onSuccess, leave }) => {
     const [title, setTitle] = useState(leave.title || '');
