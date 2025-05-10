@@ -418,7 +418,7 @@ const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
                 isActive
             });
 
-            setName('');
+            setTitle('');
             setIsActive(true);
             if (onSuccess) onSuccess();
             onClose();
@@ -457,7 +457,7 @@ const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
                         <input
                             type="text"
                             value={title}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => setTitle(e.target.value)}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
                             placeholder='Enter Leave Title'
@@ -555,7 +555,7 @@ const EditLeaveModal = ({ isOpen, onClose, onSuccess, leave }) => {
                         <input
                             type="text"
                             value={title}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => setTitle(e.target.value)}
                             className="w-full bg-[#363636] text-white rounded-md border-0 py-2 px-3 focus:border-none focus:outline focus:outline-green-400"
                             required
                         />
