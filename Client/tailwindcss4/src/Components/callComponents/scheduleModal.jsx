@@ -388,7 +388,7 @@ export const EditScheduleModal = ({ schedule, onClose, onUpdateSchedule }) => {
   );
 };
 
-const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
+export const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
     const [title, setTitle] = useState('');
     const [isActive, setIsActive] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -487,7 +487,7 @@ const AddLeaveModal = ({ isOpen, onClose, onSuccess }) => {
     );
   }
 // Edit Leave Modal
-const EditLeaveModal = ({ isOpen, onClose, onSuccess, leave }) => {
+export const EditLeaveModal = ({ isOpen, onClose, onSuccess, leave }) => {
     const [title, setTitle] = useState(leave.title || '');
     const [isActive, setIsActive] = useState(leave.isActive ?? true);
     const [loading, setLoading] = useState(false);

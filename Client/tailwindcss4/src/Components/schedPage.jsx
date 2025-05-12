@@ -3,7 +3,7 @@ import { Plus, Edit, Filter, Search } from 'lucide-react';
 import axios from '../axiosConfig';
 import dayjs from 'dayjs';
 import Sidebar from './callComponents/sidebar';
-import { AddScheduleModal, EditScheduleModal } from './callComponents/scheduleModal';
+import { AddScheduleModal, EditScheduleModal, AddLeaveModal, EditLeaveModal } from './callComponents/scheduleModal';
 
 const SchedulePage = () => {
   const [schedules, setSchedules] = useState([]);
@@ -17,6 +17,8 @@ const SchedulePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
   const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
+  const [isAddLeaveOpen, setIsAddLeaveOpen] = useState(false);
+  const [isEditLeaveOpen, setIsEditLeaveOpen] = useState(false);
 
   // Fetch all schedules from the API
   const fetchSchedules = async () => {
@@ -50,10 +52,19 @@ const SchedulePage = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchLeaveInfos();
   }, []);
+
+  // const refreshData = useCallback(() => {
+  //     fetchLeaveInfos();
+  //   }, [fetchLeaveInfos]);
+  
+  //   useEffect(() => {
+  //     refreshData();
+  //   }, [refreshData]);
 
   const handleAddScheduleClick = () => {
     setIsAddScheduleOpen(true);
@@ -69,6 +80,23 @@ const SchedulePage = () => {
   };
 
   const handleEditScheduleClose = () => {
+    setIsEditScheduleOpen(false);
+  };
+
+  const handleAddLeaveClick = () => {
+    setIsAddLeaveOpen(true);
+  };
+
+  const handleAddLeaveClose = () => {
+    setIsAddLeaveOpen(false);
+  };
+
+  const handleEditLeaveClick = (leave) => {
+    setSelectedLeave(leave);
+    setIsEditScheduleOpen(true);
+  };
+
+  const handleEditLeaveClose = () => {
     setIsEditScheduleOpen(false);
   };
 
@@ -277,8 +305,6 @@ const SchedulePage = () => {
           </div>
         
 
-      
-
       {isAddScheduleOpen && (
         <AddScheduleModal
           onClose={handleAddScheduleClose}
@@ -293,6 +319,27 @@ const SchedulePage = () => {
           onUpdateSchedule={handleUpdateSchedule}
         />
       )}
+
+      {/* {isAddLeaveOpen && (
+        <AddLeaveModal
+        isOpen={isAddLeaveOpen}
+        onClose={handleAddLeaveClose}
+        onSuccess={refreshData}
+        />
+      )}
+
+      {isEditLeaveOpen && selectedLeave && (
+        <EditLeaveModal
+          isOpen={isEditJobOpen}
+          onClose={handleEditLeaveClose}
+          leave={selectedLeave}
+          onSuccess={refreshData}
+        />
+      )} */}
+
+     
+      
+
     </div>
   );
 };
