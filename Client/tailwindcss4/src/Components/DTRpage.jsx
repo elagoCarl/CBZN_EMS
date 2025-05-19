@@ -361,7 +361,7 @@ const DTR = () => {
           }
         });
 
-        allRecords.sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+        allRecords.sort((a, b) => dayjs(b.date).diff(dayjs(a.date)));
         setAttendanceData(allRecords);
 
         if (otRes.data.successful) {
@@ -503,7 +503,7 @@ const DTR = () => {
     if (!selectedUser) return [];
     return attendanceData
       .filter(r => r.user_id === selectedUser.id)
-      .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)));
+      .sort((a, b) => dayjs(b.date).diff(dayjs(a.date)));
   }, [selectedUser, attendanceData]);
 
   const filteredData = useMemo(() => {
